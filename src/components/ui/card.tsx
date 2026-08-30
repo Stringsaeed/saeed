@@ -1,28 +1,29 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import {
   Children,
   cloneElement,
   createContext,
+  type CSSProperties,
   forwardRef,
+  type HTMLAttributes,
   isValidElement,
+  type ReactElement,
+  type ReactNode,
   useContext,
   useEffect,
   useMemo,
   useRef,
-  type HTMLAttributes,
-  type ReactElement,
-  type ReactNode,
 } from "react";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { spring } from "@/lib/springs";
-import { fontWeights } from "@/lib/font-weight";
-import { useShape } from "@/lib/shape-context";
-import { SizeProvider, useSize, type SizeVariant } from "@/lib/size-context";
-import { useIcon, type IconComponent } from "@/lib/icon-context";
 import { useProximityHover } from "@/hooks/use-proximity-hover";
+import { fontWeights } from "@/lib/font-weight";
+import { type IconComponent, useIcon } from "@/lib/icon-context";
+import { useShape } from "@/lib/shape-context";
+import { SizeProvider, type SizeVariant, useSize } from "@/lib/size-context";
+import { spring } from "@/lib/springs";
+import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // Card is shadcn/ui's compositional card — the same parts and `data-slot`
@@ -86,7 +87,8 @@ const CardContext = createContext<CardContextValue>({
 
 // ── CardGroup ────────────────────────────────────────────
 
-interface CardGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, "onDrag"> {
+interface CardGroupProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, "onDrag"> {
   /** How each card lays its own content out.
    *  "card" — stacked vertically (media/header on top). "inline" — a
    *  horizontal row (leading media, trailing footer), like a Table row.
@@ -118,7 +120,7 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const shape = useShape();
@@ -133,24 +135,33 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
       handlers,
       registerItem,
       measureItems,
-    } = useProximityHover(containerRef, { axis });
+    } = useProximityHover(containerRef, {
+      axis,
+    });
 
     // Assign each valid child a stable proximity index so callers never thread
     // one through by hand (Table asks for it; here the group owns it).
-    const childArray = Children.toArray(children).filter(isValidElement);
+    const childArray = Children.toArray(children).filter(
+      (child): child is ReactElement<CardProps> =>
+        isValidElement<CardProps>(child),
+    );
     const count = childArray.length;
     const indexed = childArray.map((child, i) =>
-      cloneElement(child as ReactElement<{ index?: number }>, { index: i })
+      cloneElement(child, {
+        index: i,
+      }),
     );
     // Which card is selected — so its neighbours can drop the divider that
     // would otherwise slice through the selection fill.
     const selectedIndex = childArray.findIndex(
-      (child) => (child.props as { selected?: boolean }).selected
+      (child) => child.props.selected,
     );
 
     useEffect(() => {
       measureItems();
-    }, [measureItems]);
+    }, [
+      measureItems,
+    ]);
 
     const outlined = border === "outlined";
     const divided = !separated;
@@ -177,22 +188,28 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
         separated,
         divided,
         outlined,
-      ]
+      ],
     );
 
     const activeRect =
       proximityHover && activeIndex !== null ? itemRects[activeIndex] : null;
+    const activeColor =
+      activeIndex !== null
+        ? childArray[activeIndex]?.props.highlightColor
+        : undefined;
 
     return (
       <CardGroupContext.Provider value={contextValue}>
         {/* biome-ignore lint/a11y/noStaticElementInteractions: Mouse movement only positions a decorative hover layer; each card owns its keyboard interaction. */}
         <div
           ref={(node) => {
-            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current =
-              node;
+            (
+              containerRef as React.MutableRefObject<HTMLDivElement | null>
+            ).current = node;
             if (typeof ref === "function") ref(node);
             else if (ref)
-              (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (ref as React.MutableRefObject<HTMLDivElement | null>).current =
+                node;
           }}
           {...props}
           data-slot="card-group"
@@ -201,9 +218,11 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
             "relative grid",
             // A shared frame clips the highlight + dividers to its rounded
             // corners; separated tiles clip themselves.
-            outlined && !separated && `border border-border/60 overflow-hidden ${shape.container}`,
+            outlined &&
+              !separated &&
+              `border border-border/60 overflow-hidden ${shape.container}`,
             separated ? "gap-2" : "gap-0",
-            className
+            className,
           )}
           style={{
             gridTemplateColumns: `repeat(${Math.max(1, columns)}, minmax(0, 1fr))`,
@@ -219,7 +238,15 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
               <motion.div
                 key={sessionRef.current}
                 aria-hidden
-                className={cn("absolute bg-hover pointer-events-none z-0", shape.container)}
+                data-slot="card-group-highlight"
+                className={cn(
+                  "absolute pointer-events-none z-0 transition-colors duration-150",
+                  !activeColor && "bg-hover",
+                  shape.container,
+                )}
+                style={{
+                  backgroundColor: activeColor,
+                }}
                 initial={{
                   opacity: 0,
                   top: activeRect.top,
@@ -234,8 +261,16 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
                   width: activeRect.width,
                   height: activeRect.height,
                 }}
-                exit={{ opacity: 0, transition: spring.fast.exit }}
-                transition={{ ...spring.fast, opacity: { duration: 0.08 } }}
+                exit={{
+                  opacity: 0,
+                  transition: spring.fast.exit,
+                }}
+                transition={{
+                  ...spring.fast,
+                  opacity: {
+                    duration: 0.08,
+                  },
+                }}
               />
             )}
           </AnimatePresence>
@@ -244,7 +279,7 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
         </div>
       </CardGroupContext.Provider>
     );
-  }
+  },
 );
 
 CardGroup.displayName = "CardGroup";
@@ -262,6 +297,9 @@ interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, "onClick"> {
   label?: string;
   /** Persistent selected state, on top of the transient proximity hover. */
   selected?: boolean;
+  /** Background color for CardGroup's transient proximity highlight. Accepts
+   *  any CSS color and falls back to the group's default hover token. */
+  highlightColor?: CSSProperties["backgroundColor"];
   disabled?: boolean;
   /** Shows a dismiss (✕) button in the corner. */
   dismissible?: boolean;
@@ -286,6 +324,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       external,
       label,
       selected = false,
+      highlightColor,
       disabled = false,
       dismissible = false,
       dismissOnHover = true,
@@ -296,7 +335,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const internalRef = useRef<HTMLDivElement>(null);
     const shape = useShape();
@@ -324,7 +363,10 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       if (index === undefined || !registerItem) return;
       registerItem(index, internalRef.current);
       return () => registerItem(index, null);
-    }, [index, registerItem]);
+    }, [
+      index,
+      registerItem,
+    ]);
 
     // Divider geometry: draw a hairline toward the neighbour below / to the
     // right, but drop it next to the active OR selected card so the highlight
@@ -353,7 +395,11 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     const isCardImage = (child: ReactNode) =>
       isValidElement(child) &&
       (child.type === CardImage ||
-        (child.type as { displayName?: string })?.displayName === "CardImage");
+        (
+          child.type as {
+            displayName?: string;
+          }
+        )?.displayName === "CardImage");
     const hasImage = Children.toArray(children).some(isCardImage);
     const inlineImage = isInline && hasImage;
     const clickable = !!href || !!onClick;
@@ -377,30 +423,41 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     // alternative to nesting interactive elements inside a button/anchor. A
     // disabled card drops the overlay entirely so it can't be tabbed to or
     // activated by keyboard (pointer-events-none only blocks the mouse).
-    const overlay = clickable && !disabled ? (
-      href ? (
-        <Link
-          href={href}
-          onClick={onClick}
-          target={external ? "_blank" : undefined}
-          rel={external ? "noopener noreferrer" : undefined}
-          aria-label={label}
-          className="absolute inset-0 z-20 outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] rounded-[inherit]"
-        />
-      ) : (
-        <button
-          type="button"
-          onClick={onClick}
-          aria-label={label}
-          aria-pressed={selected || undefined}
-          className="absolute inset-0 z-20 outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] rounded-[inherit]"
-        />
-      )
-    ) : null;
+    const overlay =
+      clickable && !disabled ? (
+        href ? (
+          <Link
+            href={href}
+            onClick={onClick}
+            target={external ? "_blank" : undefined}
+            rel={external ? "noopener noreferrer" : undefined}
+            aria-label={label}
+            className="absolute inset-0 z-20 outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] rounded-[inherit]"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={onClick}
+            aria-label={label}
+            aria-pressed={selected || undefined}
+            className="absolute inset-0 z-20 outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)] rounded-[inherit]"
+          />
+        )
+      ) : null;
 
     const cardContext = useMemo<CardContextValue>(
-      () => ({ emphasized, orientation, clickable, hasImage }),
-      [emphasized, orientation, clickable, hasImage]
+      () => ({
+        emphasized,
+        orientation,
+        clickable,
+        hasImage,
+      }),
+      [
+        emphasized,
+        orientation,
+        clickable,
+        hasImage,
+      ],
     );
 
     // Inline image cards wrap their non-image parts in a centred column so the
@@ -417,7 +474,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           <div
             className={cn(
               "flex min-w-0 flex-1 flex-col justify-center gap-2",
-              compact ? "py-2.5 pr-3" : "py-3.5 pr-4"
+              compact ? "py-2.5 pr-3" : "py-3.5 pr-4",
             )}
           >
             {rest}
@@ -430,14 +487,17 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <CardContext.Provider value={cardContext}>
         <div
           ref={(node) => {
-            (internalRef as React.MutableRefObject<HTMLDivElement | null>).current =
-              node;
+            (
+              internalRef as React.MutableRefObject<HTMLDivElement | null>
+            ).current = node;
             if (typeof ref === "function") ref(node);
             else if (ref)
-              (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+              (ref as React.MutableRefObject<HTMLDivElement | null>).current =
+                node;
           }}
           data-slot="card"
           data-proximity-index={index}
+          data-highlight-color={highlightColor}
           data-selected={selected || undefined}
           data-orientation={orientation}
           aria-disabled={disabled || undefined}
@@ -450,12 +510,15 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
               : isInline
                 ? cn(
                     "flex flex-row items-center",
-                    compact ? "gap-2.5 pl-3" : "gap-3 pl-4"
+                    compact ? "gap-2.5 pl-3" : "gap-3 pl-4",
                   )
                 : cn("flex flex-col", compact ? "pb-3" : "pb-4"),
             // Standalone (no group) cards can't lean on the group highlight, so
             // they carry their own hover tint when interactive.
-            !group && clickable && !disabled && "transition-colors duration-80 hover:bg-hover",
+            !group &&
+              clickable &&
+              !disabled &&
+              "transition-colors duration-80 hover:bg-hover",
             // Inline rows are single-line, so the corner dismiss would sit on
             // the title's tail: the header yields right padding whenever the
             // control is present — only while it's revealed in the on-hover
@@ -468,7 +531,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
                 : "[&_[data-slot=card-header]]:pr-10"),
             tileShape,
             disabled && "opacity-50 pointer-events-none",
-            className
+            className,
           )}
           {...props}
         >
@@ -479,7 +542,10 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           {selected && (
             <span
               aria-hidden
-              className={cn("absolute inset-0 -z-10 bg-active pointer-events-none", shape.container)}
+              className={cn(
+                "absolute inset-0 -z-10 bg-active pointer-events-none",
+                shape.container,
+              )}
             />
           )}
 
@@ -498,7 +564,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
               aria-hidden
               className={cn(
                 "absolute top-0 right-0 w-px bg-border/60 pointer-events-none -z-10",
-                showBottom ? "bottom-px" : "bottom-0"
+                showBottom ? "bottom-px" : "bottom-0",
               )}
             />
           )}
@@ -530,7 +596,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
                 // pointer-events never blocks tabbing.
                 dismissOnHover &&
                   "pointer-events-none opacity-0 transition-opacity duration-80 group-hover/card:pointer-events-auto group-hover/card:opacity-100 group-focus-within/card:pointer-events-auto group-focus-within/card:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100",
-                shape.button
+                shape.button,
               )}
             >
               <XIcon size={compact ? 13 : 15} strokeWidth={1.5} />
@@ -543,7 +609,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     // A size prop pins the card (and everything ladder-aware inside it) to one
     // ladder step; the parts read the context.
     return size ? <SizeProvider size={size}>{card}</SizeProvider> : card;
-  }
+  },
 );
 
 Card.displayName = "Card";
@@ -572,12 +638,12 @@ const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
               : compact
                 ? "px-3 pt-3"
                 : "px-4 pt-4",
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 CardHeader.displayName = "CardHeader";
@@ -610,13 +676,18 @@ const CardTitle = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
         className={cn(
           "inline-grid grid-cols-[minmax(0,1fr)] leading-snug",
           compact ? "text-[13px]" : "text-[14px]",
-          className
+          className,
         )}
         {...props}
       >
         <span
-          className={cn("col-start-1 row-start-1 invisible min-w-0 overflow-hidden text-ellipsis", trim)}
-          style={{ fontVariationSettings: fontWeights.semibold }}
+          className={cn(
+            "col-start-1 row-start-1 invisible min-w-0 overflow-hidden text-ellipsis",
+            trim,
+          )}
+          style={{
+            fontVariationSettings: fontWeights.semibold,
+          }}
           aria-hidden="true"
         >
           {children}
@@ -624,7 +695,7 @@ const CardTitle = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
         <span
           className={cn(
             "col-start-1 row-start-1 min-w-0 overflow-hidden text-ellipsis text-foreground transition-[font-variation-settings] duration-80",
-            trim
+            trim,
           )}
           style={{
             // normal → semibold on emphasis, matching nav-item / menu-item /
@@ -638,7 +709,7 @@ const CardTitle = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
         </span>
       </span>
     );
-  }
+  },
 );
 
 CardTitle.displayName = "CardTitle";
@@ -658,7 +729,7 @@ const CardDescription = forwardRef<
       className={cn(
         "leading-normal text-muted-foreground",
         compact ? "text-[13px]" : "text-[14px]",
-        className
+        className,
       )}
       {...props}
     />
@@ -678,11 +749,11 @@ const CardAction = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
       data-slot="card-action"
       className={cn(
         "relative z-30 col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  ),
 );
 
 CardAction.displayName = "CardAction";
@@ -700,12 +771,12 @@ const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
         data-slot="card-content"
         className={cn(
           orientation === "inline" ? "" : compact ? "px-3 pt-2.5" : "px-4 pt-3",
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 CardContent.displayName = "CardContent";
@@ -733,12 +804,12 @@ const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
             : orientation === "inline"
               ? cn("shrink-0 ml-auto", compact ? "pr-3" : "pr-4")
               : cn("flex-wrap", compact ? "px-3 pt-2.5" : "px-4 pt-3"),
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 
 CardFooter.displayName = "CardFooter";
@@ -748,7 +819,12 @@ CardFooter.displayName = "CardFooter";
 // but the connective tissue most product cards need. A tuple renders a
 // connected logo pair (e.g. a trigger — target).
 
-type CardLogo = string | [string, string];
+type CardLogo =
+  | string
+  | [
+      string,
+      string,
+    ];
 
 interface CardMediaProps {
   logo?: CardLogo;
@@ -758,7 +834,13 @@ interface CardMediaProps {
   className?: string;
 }
 
-function CardMedia({ logo, logoAlt, icon: Icon, size = 22, className }: CardMediaProps) {
+function CardMedia({
+  logo,
+  logoAlt,
+  icon: Icon,
+  size = 22,
+  className,
+}: CardMediaProps) {
   const { orientation } = useContext(CardContext);
   const shape = useShape();
   const sizeClasses = useSize();
@@ -769,7 +851,11 @@ function CardMedia({ logo, logoAlt, icon: Icon, size = 22, className }: CardMedi
   const wrap = cn(orientation === "inline" ? "" : "mb-2", className);
 
   if (logo) {
-    const logos = Array.isArray(logo) ? logo : [logo];
+    const logos = Array.isArray(logo)
+      ? logo
+      : [
+          logo,
+        ];
     return (
       <span
         data-slot="card-media"
@@ -785,7 +871,10 @@ function CardMedia({ logo, logoAlt, icon: Icon, size = 22, className }: CardMedi
               width={size}
               height={size}
               className={cn("object-contain", shape.bg)}
-              style={{ width: size, height: size }}
+              style={{
+                width: size,
+                height: size,
+              }}
             />
           </span>
         ))}
@@ -802,10 +891,14 @@ function CardMedia({ logo, logoAlt, icon: Icon, size = 22, className }: CardMedi
         className={cn(
           "inline-flex items-center justify-center shrink-0 size-8 bg-hover",
           shape.bg,
-          wrap
+          wrap,
         )}
       >
-        <Icon size={compact ? 16 : 18} strokeWidth={1.5} className="text-muted-foreground" />
+        <Icon
+          size={compact ? 16 : 18}
+          strokeWidth={1.5}
+          className="text-muted-foreground"
+        />
       </span>
     );
   }
@@ -836,10 +929,8 @@ function CardImage({ src, alt, className }: CardImageProps) {
       // clip. (A framed tile still clips the surrounding surface as before.)
       className={cn(
         "object-cover rounded-[2px]",
-        orientation === "inline"
-          ? "size-40 shrink-0"
-          : "w-full aspect-[16/9]",
-        className
+        orientation === "inline" ? "size-40 shrink-0" : "w-full aspect-[16/9]",
+        className,
       )}
     />
   );
@@ -853,24 +944,27 @@ CardImage.displayName = "CardImage";
 // Small uppercase label above the title (e.g. "New Model"). Typographically
 // it's the caption role of the type scale in uppercase — see /docs/sizes.
 
-const CardEyebrow = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
-  ({ className, ...props }, ref) => {
-    const compact = useSize().variant === "compact";
-    return (
-      <span
-        ref={ref}
-        data-slot="card-eyebrow"
-        className={cn(
-          compact ? "text-[11px]" : "text-[12px]",
-          "uppercase tracking-wide text-muted-foreground",
-          className
-        )}
-        style={{ fontVariationSettings: fontWeights.semibold }}
-        {...props}
-      />
-    );
-  }
-);
+const CardEyebrow = forwardRef<
+  HTMLSpanElement,
+  HTMLAttributes<HTMLSpanElement>
+>(({ className, ...props }, ref) => {
+  const compact = useSize().variant === "compact";
+  return (
+    <span
+      ref={ref}
+      data-slot="card-eyebrow"
+      className={cn(
+        compact ? "text-[11px]" : "text-[12px]",
+        "uppercase tracking-wide text-muted-foreground",
+        className,
+      )}
+      style={{
+        fontVariationSettings: fontWeights.semibold,
+      }}
+      {...props}
+    />
+  );
+});
 
 CardEyebrow.displayName = "CardEyebrow";
 
@@ -903,9 +997,11 @@ function CardFeature({ icon: Icon, title, description }: CardFeatureProps) {
         <span
           className={cn(
             "text-foreground [text-box:trim-both_cap_alphabetic]",
-            sizeClasses.text
+            sizeClasses.text,
           )}
-          style={{ fontVariationSettings: fontWeights.medium }}
+          style={{
+            fontVariationSettings: fontWeights.medium,
+          }}
         >
           {title}
         </span>
@@ -913,7 +1009,7 @@ function CardFeature({ icon: Icon, title, description }: CardFeatureProps) {
           <span
             className={cn(
               "leading-relaxed text-muted-foreground",
-              compact ? "text-[11px]" : "text-[12px]"
+              compact ? "text-[11px]" : "text-[12px]",
             )}
           >
             {description}
@@ -931,9 +1027,11 @@ function CardFeature({ icon: Icon, title, description }: CardFeatureProps) {
 type CardButtonVariant = "primary" | "secondary" | "ghost" | "link";
 
 const CARD_BUTTON_VARIANTS: Record<CardButtonVariant, string> = {
-  primary: "bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/80",
+  primary:
+    "bg-foreground text-background hover:bg-foreground/90 active:bg-foreground/80",
   secondary: "bg-accent text-foreground hover:bg-accent/80 active:bg-accent",
-  ghost: "text-muted-foreground hover:text-foreground hover:bg-hover active:bg-active",
+  ghost:
+    "text-muted-foreground hover:text-foreground hover:bg-hover active:bg-active",
   link: "text-foreground underline-offset-4 hover:underline !px-0 !h-auto",
 };
 
@@ -996,7 +1094,7 @@ function CardButton({
     "focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]",
     "disabled:opacity-50 disabled:pointer-events-none",
     shape.button,
-    CARD_BUTTON_VARIANTS[variant]
+    CARD_BUTTON_VARIANTS[variant],
   );
 
   if (href) {
@@ -1007,7 +1105,9 @@ function CardButton({
         target={external ? "_blank" : undefined}
         rel={external ? "noopener noreferrer" : undefined}
         className={classes}
-        style={{ fontVariationSettings: fontWeights.medium }}
+        style={{
+          fontVariationSettings: fontWeights.medium,
+        }}
       >
         {inner}
       </Link>
@@ -1020,32 +1120,34 @@ function CardButton({
       onClick={onClick}
       disabled={disabled}
       className={classes}
-      style={{ fontVariationSettings: fontWeights.medium }}
+      style={{
+        fontVariationSettings: fontWeights.medium,
+      }}
     >
       {inner}
     </button>
   );
 }
 
-export {
-  Card,
-  CardGroup,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardAction,
-  CardContent,
-  CardFooter,
-  CardMedia,
-  CardImage,
-  CardEyebrow,
-  CardFeature,
-  CardButton,
-};
 export type {
-  CardProps,
-  CardGroupProps,
-  CardLogo,
   CardButtonProps,
   CardButtonVariant,
+  CardGroupProps,
+  CardLogo,
+  CardProps,
+};
+export {
+  Card,
+  CardAction,
+  CardButton,
+  CardContent,
+  CardDescription,
+  CardEyebrow,
+  CardFeature,
+  CardFooter,
+  CardGroup,
+  CardHeader,
+  CardImage,
+  CardMedia,
+  CardTitle,
 };

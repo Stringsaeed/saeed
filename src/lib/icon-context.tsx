@@ -64,9 +64,10 @@ import {
 } from "lucide-react";
 
 export interface IconComponentProps {
-  size?: number;
-  strokeWidth?: number;
+  size?: string | number;
+  strokeWidth?: string | number;
   className?: string;
+  "data-icon"?: "inline-start" | "inline-end";
 }
 
 export type IconComponent = ComponentType<IconComponentProps>;

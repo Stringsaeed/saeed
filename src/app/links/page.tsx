@@ -34,7 +34,10 @@ export const metadata: Metadata = {
 
 export default function LinksPage() {
 	return (
-		<main className="flex h-[calc(100dvh-10.75rem)] min-h-0 flex-col pb-4 pt-6 sm:h-[calc(100dvh-5.25rem)] sm:pb-6 sm:pt-8">
+		<main
+			className="flex min-h-0 flex-1 flex-col pb-4 pt-6 sm:pb-6 sm:pt-8"
+			data-layout-fill
+		>
 			<div className="shrink-0">
 				<h1
 					className="text-2xl font-semibold tracking-[-0.035em]"

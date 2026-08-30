@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "bunx --bun @biomejs/biome lint"
+    "lint": "bunx --bun @biomejs/biome lint",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "verify:agent-readiness": "bun scripts/verify-agent-readiness.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

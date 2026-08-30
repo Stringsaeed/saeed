@@ -2,6 +2,11 @@ import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+	outputFileTracingIncludes: {
+		"/api/markdown/*": [
+			"./src/content/blog/*.mdx",
+		],
+	},
 	pageExtensions: [
 		"js",
 		"jsx",

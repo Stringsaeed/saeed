@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Lavishly_Yours } from "next/font/google";
 import { AnalyticsEvents } from "@/components/analytics-events";
 import { JsonLd } from "@/components/json-ld";
+import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { getSiteOrigin, siteDescription, siteName } from "@/lib/site";
 import { getRootStructuredData } from "@/lib/structured-data";
@@ -36,7 +37,7 @@ const lavishlyYours = Lavishly_Yours({
 export const metadata: Metadata = {
 	metadataBase: new URL(getSiteOrigin()),
 	title: {
-		default: siteName,
+		default: `${siteName}, React Native engineer in Dubai`,
 		template: `%s | ${siteName}`,
 	},
 	description: siteDescription,
@@ -50,7 +51,9 @@ export const metadata: Metadata = {
 	creator: siteName,
 	publisher: siteName,
 	keywords: [
+		"Muhammed Saeed",
 		"Saeed",
+		"Stringsaeed",
 		"software engineer",
 		"React Native",
 		"TypeScript",
@@ -103,6 +106,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 					<div className="relative z-10 mx-auto w-full max-w-[44rem] px-6 sm:px-8">
 						<SiteHeader />
 						{children}
+						<SiteFooter />
 					</div>
 				</div>
 				<Analytics />

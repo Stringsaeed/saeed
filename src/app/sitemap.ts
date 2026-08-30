@@ -27,6 +27,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 0.8,
 		},
 		{
+			url: getAbsoluteUrl("/about"),
+			lastModified: siteUpdatedAt,
+			changeFrequency: "yearly",
+			priority: 0.8,
+		},
+		{
+			url: getAbsoluteUrl("/contact"),
+			lastModified: siteUpdatedAt,
+			changeFrequency: "yearly",
+			priority: 0.6,
+		},
+		{
+			url: getAbsoluteUrl("/privacy"),
+			lastModified: siteUpdatedAt,
+			changeFrequency: "yearly",
+			priority: 0.5,
+		},
+		{
 			url: getAbsoluteUrl("/links"),
 			lastModified: siteUpdatedAt,
 			changeFrequency: "monthly",

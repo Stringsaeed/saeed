@@ -55,6 +55,15 @@ export function SiteHeader() {
 				<nav className="flex items-center gap-1" aria-label="Site links">
 					<Link
 						className="text-link px-2 py-2 text-sm"
+						href="/about"
+						data-analytics-event="Navigation Clicked"
+						data-analytics-destination="About"
+						data-analytics-location="Header"
+					>
+						About
+					</Link>
+					<Link
+						className="text-link px-2 py-2 text-sm"
 						href="/blog"
 						data-analytics-event="Navigation Clicked"
 						data-analytics-destination="Blog"

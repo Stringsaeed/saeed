@@ -1,6 +1,7 @@
 import type { BlogPost } from "@/content/blog/posts";
 import {
 	getAbsoluteUrl,
+	siteAlternateNames,
 	siteDescription,
 	siteName,
 	socialProfiles,
@@ -17,7 +18,9 @@ export function getRootStructuredData() {
 				"@id": personId,
 				"@type": "Person",
 				name: siteName,
+				alternateName: siteAlternateNames,
 				url: getAbsoluteUrl(),
+				email: "mailto:stringsaeed@gmail.com",
 				jobTitle: "Software Engineer",
 				description: siteDescription,
 				homeLocation: {
@@ -37,6 +40,7 @@ export function getRootStructuredData() {
 				"@id": websiteId,
 				"@type": "WebSite",
 				name: siteName,
+				alternateName: "This is Saeed",
 				description: siteDescription,
 				url: getAbsoluteUrl(),
 				inLanguage: "en-US",
@@ -45,6 +49,20 @@ export function getRootStructuredData() {
 				},
 				publisher: {
 					"@id": personId,
+				},
+			},
+			{
+				"@id": `${getAbsoluteUrl()}#profile-page`,
+				"@type": "ProfilePage",
+				name: `${siteName}, software engineer`,
+				description: siteDescription,
+				url: getAbsoluteUrl(),
+				inLanguage: "en-US",
+				mainEntity: {
+					"@id": personId,
+				},
+				isPartOf: {
+					"@id": websiteId,
 				},
 			},
 		],

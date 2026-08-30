@@ -1,8 +1,13 @@
 const canonicalOrigin = "https://thisissaeed.com";
 
-export const siteName = "Saeed";
+export const siteName = "Muhammed Saeed";
+export const siteAlternateNames = [
+	"Saeed",
+	"Stringsaeed",
+	"This is Saeed",
+];
 export const siteDescription =
-	"Software engineer in Dubai working on React Native, TypeScript, performance, accessibility, native code, and agent-assisted engineering.";
+	"Muhammed Saeed is a software engineer in Dubai working on React Native, TypeScript, performance, accessibility, native code, and agent-assisted engineering.";
 
 export const socialProfiles = [
 	"https://github.com/stringsaeed",

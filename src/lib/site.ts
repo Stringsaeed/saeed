@@ -1,4 +1,4 @@
-const fallbackOrigin = "https://thisissaeed.com";
+const canonicalOrigin = "https://thisissaeed.com";
 
 export const siteName = "Saeed";
 export const siteDescription =
@@ -40,17 +40,12 @@ function parseOrigin(value: string, source: string) {
 }
 
 export function getSiteOrigin() {
-	const vercelOrigin = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-	if (vercelOrigin) {
-		return parseOrigin(vercelOrigin, "VERCEL_PROJECT_PRODUCTION_URL");
-	}
-
 	const publicOrigin = process.env.NEXT_PUBLIC_SITE_URL?.trim();
 	if (publicOrigin) {
 		return parseOrigin(publicOrigin, "NEXT_PUBLIC_SITE_URL");
 	}
 
-	return fallbackOrigin;
+	return canonicalOrigin;
 }
 
 export function getAbsoluteUrl(path = "/") {

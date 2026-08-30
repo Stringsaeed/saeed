@@ -1,0 +1,61 @@
+
+The best AI development workflow is nothing new. We have used it for years.
+
+Before AI, if you asked how successful software teams shipped consistently, the answer was usually some form of agile product development. The label varied and so did the exact process, but the team often looked familiar: product management, design, engineers with different levels of experience, and QA.
+
+That mix worked because software delivery was never only about writing code. Someone had to define the problem. Someone had to explore the interaction. Someone had to make technical decisions, implement them, challenge the result, test the real flow, and decide whether it was ready to ship.
+
+The handoffs could be slow, but the responsibilities were sound.
+
+## A squad made of agents
+
+The useful question is not, "How can one agent write more code?" It is, "How can agents take on the roles and feedback loops of a strong software squad?"
+
+Keep a human responsible for the goal, the tradeoffs, and the release decision. Then give the work to specialist agents:
+
+- A product agent can challenge the problem and turn the conversation into a specification.
+- A planning agent can split that specification into small, ordered tickets.
+- Builder agents can implement each ticket in isolation and test as they go.
+- Review agents can judge the diff against both the specification and the codebase's standards.
+- A QA agent can drive the real product and collect evidence.
+
+This is not a new development process. It is a familiar squad with much faster handoffs.
+
+The mapping is not perfectly one-to-one. Agents do not carry years of product context or take responsibility when a bad decision reaches customers. They are better treated as temporary specialists working inside a process that a human owns.
+
+## What current agent workflows already do
+
+[Matt Pocock's skill system](https://www.aihero.dev/skills) makes the sequence explicit. Its main flow goes from grilling the idea, to writing a specification, to creating tickets, to test-first implementation, and finally code review. Each skill produces the input for the next one.
+
+[Pstack's guide](https://github.com/cursor/plugins/blob/main/pstack/docs/guide/README.md) takes the same idea further. A routing layer chooses a playbook. Specialist agents investigate, design, build, clean, review, and verify. The workflow asks for a checkable finish condition and evidence from the real artifact, not only a passing build. A human still decides when the work is ready to merge or release.
+
+Look past the names of the tools and the pattern is obvious:
+
+1. Define what success means.
+2. Shape the work before implementation.
+3. Split responsibilities.
+4. Build in small, reviewable units.
+5. Verify independently.
+6. Keep a human at the release boundary.
+
+That is a good software team.
+
+## What actually becomes faster
+
+AI does not remove planning, design, review, or QA. It compresses the waiting between them.
+
+A research agent can return while a planning agent inspects the codebase. Several builders can work on isolated tickets at the same time. Review can begin as soon as a focused diff exists. Verification can rerun after every meaningful change instead of waiting for the end of a sprint.
+
+Work that once moved across a squad over days or weeks can sometimes move through the same loop in hours. That is possible when the task is scoped, the checks are executable, and the agents have enough context. It is not a promise that every feature should ship in an afternoon.
+
+The faster the loop gets, the more important the quality gates become. Weak specifications produce the wrong code faster. Missing tests make parallel work harder to trust. A vague "looks good" from the same agent that wrote the change is not independent review.
+
+The goal is not maximum code output. The goal is a shorter path from an idea to evidence that it works.
+
+## The process was here all along
+
+In [my practical agentic development workflow](/blog/practical-agentic-development-workflow), I described the sequence I use: grill the idea, write the specification, create the issues, implement, and review. The deeper point is that none of those steps came from AI.
+
+We already knew how to ship software well. We knew that clear ownership, small batches, specialist roles, independent review, and real QA worked.
+
+Agents give us a way to run that system faster. The hard part is resisting the urge to skip it just because code became cheap.

@@ -1,0 +1,43 @@
+
+I stumbled on this animation a couple of weeks ago on Twitter. It was a beautiful prototype from [@JordanAmblin](https://twitter.com/JordanAmblin).
+
+[View the original prototype on X →](https://twitter.com/i/web/status/1765047420390445293)
+
+So I decided to recreate it in React Native using `react-native-reanimated`, `react-native-gesture-handler`, and [@gorhom/bottom-sheet](https://github.com/gorhom/react-native-bottom-sheet).
+
+The goal was to utilize actual components to ensure it can be easily adapted for real-world applications.
+
+## Demo
+
+> Videos from the original post. iOS and Android behave identically with the Reanimated worklet driving the underlay.
+
+## Approach
+
+- **Gesture:** `Pan` from `react-native-gesture-handler` mapped to a shared value. No JS thread hops during drag.
+- **Animation:** `useAnimatedStyle` + `withSpring` for the sheet and the underlay scale/opacity. `interpolate` ties them together.
+- **Sheet:** `@gorhom/bottom-sheet` for snap points and backdrop. Underlay is a sibling view that reacts to the sheet's animated position.
+- **Detail:** `simultaneousWithExternalGesture` so the sheet doesn't fight scroll inside.
+
+```tsx
+import BottomSheet from "@gorhom/bottom-sheet";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+	useSharedValue,
+	useAnimatedStyle,
+	interpolate,
+	withSpring,
+} from "react-native-reanimated";
+
+const position = useSharedValue(0);
+
+const underlayStyle = useAnimatedStyle(() => ({
+	opacity: interpolate(position.value, [0, 1], [0, 1]),
+	transform: [{ scale: interpolate(position.value, [0, 1], [0.96, 1]) }],
+}));
+```
+
+## Takeaway
+
+Prototypes are cheap. Making them shippable means real components, real gestures, and worklets that stay on the UI thread.
+
+Full example: [Stringsaaed/underlay-pattern](https://github.com/Stringsaaed/underlay-pattern)

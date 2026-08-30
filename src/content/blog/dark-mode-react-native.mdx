@@ -1,0 +1,104 @@
+
+As a React Native developer committed to delivering exceptional user experiences, I always strive to optimize the UI by incorporating features like dark mode. This is my journey implementing a seamless dark mode experience.
+
+## The Challenge: Consistency in Theme Selection
+
+When a user selects a preferred theme that doesn't align with the system theme, native components inadvertently adopt the system theme. This inconsistency disrupts the application's appearance.
+
+## Step 1: Creating a React Context for the Theme
+
+```tsx
+import React, { createContext, useState, useContext } from "react";
+
+const ThemeContext = createContext<
+	{ theme: string; toggleTheme: () => void } | undefined
+>(undefined);
+
+export const useTheme = () => useContext(ThemeContext);
+
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+	const [theme, setTheme] = useState("light");
+	const toggleTheme = () => {
+		setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+	};
+	return (
+		<ThemeContext.Provider value={{ theme, toggleTheme }}>
+			{children}
+		</ThemeContext.Provider>
+	);
+};
+```
+
+## Step 2: Enabling User Theme Persistence Using Storage
+
+```tsx
+import React, { createContext, useState, useContext, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const ThemeContext = createContext<
+	{ theme: string; toggleTheme: () => void } | undefined
+>(undefined);
+export const useTheme = () => useContext(ThemeContext);
+
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+	const [theme, setTheme] = useState("light");
+
+	const toggleTheme = async () => {
+		const newTheme = theme === "light" ? "dark" : "light";
+		setTheme(newTheme);
+		await AsyncStorage.setItem("user-theme", newTheme);
+	};
+
+	useEffect(() => {
+		const loadTheme = async () => {
+			const storedTheme = await AsyncStorage.getItem("user-theme");
+			if (storedTheme) setTheme(storedTheme);
+		};
+		loadTheme();
+	}, []);
+
+	return (
+		<ThemeContext.Provider value={{ theme, toggleTheme }}>
+			{children}
+		</ThemeContext.Provider>
+	);
+};
+```
+
+## Step 3: Integrating the Appearance API
+
+Incorporating the [Appearance API](https://reactnative.dev/docs/appearance) allows us to explicitly inform native components about the user's color scheme preferences.
+
+```tsx
+import { Appearance } from "react-native";
+
+useEffect(() => {
+	const loadTheme = async () => {
+		const storedTheme = await AsyncStorage.getItem("user-theme");
+		if (storedTheme) {
+			setTheme(storedTheme);
+		} else {
+			const systemTheme = Appearance.getColorScheme();
+			setTheme(systemTheme || "light");
+		}
+	};
+	loadTheme();
+}, []);
+```
+
+## Exploring Theme Variations
+
+### Without Appearance API
+
+- **System: Dark, User: Light** means native components follow system (dark), while the app follows user (light) → mismatch.
+- **System: Light, User: Dark** causes the inverse mismatch.
+
+### With Appearance API
+
+- User selection consistently wins, regardless of system theme. Native components stay in sync.
+
+## Conclusion
+
+Implementing dark mode significantly enhances UX. Through Context for theme management, persistence, and the Appearance API for native sync, you get a robust theming system that feels native.
+
+Originally published at [saeed.guru/blog/posts/dark-mode-react-native](https://saeed.guru/blog/posts/dark-mode-react-native).

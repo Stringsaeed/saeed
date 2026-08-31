@@ -344,12 +344,6 @@
     opacity: 1;
   }
 
-  .sticker img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
   .signature-name {
     display: inline-block;
     clip-path: inset(0 100% 0 0);

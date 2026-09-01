@@ -96,7 +96,7 @@ const STICKERS: StickerDefinition[] = [
     sound: "toggle",
     src: "/stickers/keyboard.png",
     story:
-      "This keyboard has a story. Add how it found you, what it represents, and why it earned a place here. Three or four short sentences will fit comfortably.",
+      "I'm a 90s kid. Computers showed up early, and the keyboards were mechanical. That's why I still use one. It feels nostalgic, and the sound still gets me going.",
     width: 240,
     height: 160,
   },
@@ -106,7 +106,7 @@ const STICKERS: StickerDefinition[] = [
     sound: "bloom",
     src: "/stickers/monstera.png",
     story:
-      "This monstera has a story. Add the memory behind it, the detail you still notice, and why it matters to you. Three or four short sentences will fit comfortably.",
+      "I have a monkey monstera and a Thai one at home. They grow like crazy. Seeing them in the morning is a boost.",
     width: 184,
     height: 184,
   },
@@ -116,7 +116,7 @@ const STICKERS: StickerDefinition[] = [
     sound: "pulse",
     src: "/stickers/bass.png",
     story:
-      "This bass has a story. Add where it came from, a moment you connect with it, and why it belongs here. Three or four short sentences will fit comfortably.",
+      "I started noticing bass in 2013. Someone was playing and I thought they weren't doing anything. Then I listened properly and realized bass is what makes a song move. Arctic Monkeys' bass lines are what actually hooked me.",
     width: 160,
     height: 191,
   },

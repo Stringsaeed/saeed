@@ -8,6 +8,18 @@ export type BlogPost = {
 
 export const posts: readonly BlogPost[] = [
 	{
+		slug: "every-team-needs-a-gardener",
+		title: "Every Team Needs a Gardener",
+		description:
+			"Anyone can write code with an agent. The engineer still builds the foundations and keeps the garden tidy.",
+		date: "2026-09-01T12:00:00.000Z",
+		tags: [
+			"AI",
+			"Agents",
+			"Engineering",
+		],
+	},
+	{
 		slug: "best-ai-workflow-is-nothing-new",
 		title: "The Best AI Workflow Is Nothing New",
 		description:
@@ -146,6 +158,8 @@ export const postLoaders: Record<
 		default: React.ComponentType;
 	}>
 > = {
+	"every-team-needs-a-gardener": () =>
+		import("./every-team-needs-a-gardener.mdx"),
 	"best-ai-workflow-is-nothing-new": () =>
 		import("./best-ai-workflow-is-nothing-new.mdx"),
 	"ai-implementation-bottleneck": () =>

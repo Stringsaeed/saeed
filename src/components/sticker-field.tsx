@@ -23,7 +23,7 @@ type Rectangle = {
 };
 
 type StickerDefinition = {
-  id: "bass" | "keyboard" | "monstera";
+  id: "bass" | "controller" | "keyboard" | "monstera";
   label: string;
   sound: SoundName;
   src: string;
@@ -119,6 +119,16 @@ const STICKERS: StickerDefinition[] = [
       "I started noticing bass in 2013. Someone was playing and I thought they weren't doing anything. Then I listened properly and realized bass is what makes a song move. Arctic Monkeys' bass lines are what actually hooked me.",
     width: 160,
     height: 191,
+  },
+  {
+    id: "controller",
+    label: "PlayStation",
+    sound: "pulse",
+    src: "/stickers/controller.png",
+    story:
+      "I've played PlayStation since the first one. We used to go to the end of the street to play Winning Eleven 3. We called it japanese, يابانية. The Konami code still lives in my head. After covid I bought a PS4. Last birthday my wife got me a PS5.",
+    width: 240,
+    height: 160,
   },
 ];
 

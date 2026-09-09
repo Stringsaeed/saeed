@@ -13,7 +13,7 @@ import { formatPostDate, posts } from "@/content/blog/posts";
 const work = [
   {
     company: "Aquanow",
-    period: "2026 to present",
+    period: "Apr 2026 to Sep 2026",
     href: "https://aquanow.io/",
     logo: "/work/aquanow.png",
     brand: "#3FA2F0",

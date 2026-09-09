@@ -10,6 +10,7 @@ const avatars = [
 	"/static/solid-blue.svg",
 	"/static/line.svg",
 	"/static/line-blue.svg",
+	"/static/hash.png",
 ];
 
 const interval = 3000;

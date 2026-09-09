@@ -44,9 +44,9 @@ const socialLinks = [
 
 export function SiteHeader() {
   return (
-    <header className="flex flex-col gap-3 py-6 sm:flex-row sm:items-center sm:justify-between">
+    <header className="flex items-center justify-between gap-3 py-6">
       <Link
-        className="flex self-start items-center gap-3 sm:self-auto"
+        className="flex shrink-0 items-center gap-3"
         href="/"
         data-analytics-event="Navigation Clicked"
         data-analytics-destination="Home"
@@ -56,7 +56,7 @@ export function SiteHeader() {
         <span className="signature-name">Saeed</span>
       </Link>
 
-      <nav className="flex items-center gap-1" aria-label="Site links">
+      <nav className="ml-auto flex items-center gap-1" aria-label="Site links">
         <Button asChild variant="ghost" leadingIcon={RiArticleLine}>
           <Link
             href="/blog"

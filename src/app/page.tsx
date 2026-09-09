@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatPostDate, posts } from "@/content/blog/posts";
+import { MobileStickerField } from "@/components/mobile-sticker-field";
 
 const work = [
   {
@@ -72,6 +73,8 @@ export default function Home() {
         I work on React Native, TypeScript, performance, accessibility, native
         code, and agent-assisted engineering.
       </p>
+
+      <MobileStickerField />
 
       <div
         className="mt-12"

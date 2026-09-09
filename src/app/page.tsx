@@ -12,6 +12,15 @@ import { formatPostDate, posts } from "@/content/blog/posts";
 
 const work = [
   {
+    company: "Aquanow",
+    period: "Apr 2026 to Sep 2026",
+    href: "https://aquanow.io/",
+    logo: "/work/aquanow.png",
+    brand: "#3FA2F0",
+    description:
+      "React Native and TypeScript on digital-asset infrastructure and liquidity.",
+  },
+  {
     company: "Thndr",
     period: "2025 to 2026",
     href: "https://thndr.app/",

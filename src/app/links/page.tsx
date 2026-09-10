@@ -53,7 +53,10 @@ export default function LinksPage() {
 				</p>
 			</div>
 
-			<div className="relative left-1/2 mt-6 min-h-0 w-[min(56rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-1 overflow-auto overscroll-contain rounded-lg border border-border bg-background/80">
+			<div
+				className="relative left-1/2 mt-6 min-h-0 w-[min(56rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-1 overflow-auto overscroll-contain rounded-lg border border-border bg-background/80"
+				data-sticker-protected
+			>
 				<table className="w-full min-w-[52rem] table-fixed text-left text-xs leading-5">
 					<caption className="sr-only">
 						Saved websites and tools with category, URL, and notes.

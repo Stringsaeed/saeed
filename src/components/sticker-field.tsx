@@ -305,8 +305,16 @@ function transformSticker(
 function placeStickers(geometry: FieldGeometry, seed: number) {
   if (geometry.width < MINIMUM_VIEWPORT_WIDTH) return [];
 
-  const protectedColumn = geometry.protectedRectangles[0];
-  if (!protectedColumn) return [];
+  if (geometry.protectedRectangles.length === 0) return [];
+
+  const protectedColumn = geometry.protectedRectangles.reduce(
+    (column, rectangle) => ({
+      left: Math.min(column.left, rectangle.left),
+      top: Math.min(column.top, rectangle.top),
+      right: Math.max(column.right, rectangle.right),
+      bottom: Math.max(column.bottom, rectangle.bottom),
+    }),
+  );
 
   const scale = getScale(geometry.width);
   const random = createRandom(seed);
@@ -393,6 +401,16 @@ function getSeed() {
   const values = new Uint32Array(1);
   window.crypto.getRandomValues(values);
   return values[0] ?? Date.now();
+}
+
+function getPathSeed(pathname: string) {
+  let value = 2166136261;
+
+  for (let index = 0; index < pathname.length; index += 1) {
+    value = Math.imul(value ^ pathname.charCodeAt(index), 16777619);
+  }
+
+  return value >>> 0;
 }
 
 export function StickerField() {
@@ -505,13 +523,12 @@ export function StickerField() {
   );
 
   useEffect(() => {
-    if (pathname !== "/") return;
-
     const field = fieldRef.current;
     if (!field) return;
 
     bind(field);
     seedRef.current ??= getSeed();
+    const routeSeed = seedRef.current ^ getPathSeed(pathname);
     let frame = 0;
     let active = true;
 
@@ -519,7 +536,7 @@ export function StickerField() {
       frame = 0;
       if (!active || seedRef.current === null) return;
       const geometry = getFieldGeometry(field);
-      const nextPlacements = placeStickers(geometry, seedRef.current);
+      const nextPlacements = placeStickers(geometry, routeSeed);
       geometryRef.current = geometry;
       placementsRef.current = nextPlacements;
       setPlacements(nextPlacements);
@@ -534,10 +551,12 @@ export function StickerField() {
     void document.fonts.ready.then(scheduleUpdate);
 
     const resizeObserver = new ResizeObserver(scheduleUpdate);
-    const protectedElement = document.querySelector<HTMLElement>(
+    const protectedElements = document.querySelectorAll<HTMLElement>(
       "[data-sticker-protected]",
     );
-    if (protectedElement) resizeObserver.observe(protectedElement);
+    for (const protectedElement of protectedElements) {
+      resizeObserver.observe(protectedElement);
+    }
     if (field.parentElement) resizeObserver.observe(field.parentElement);
 
     window.addEventListener("resize", scheduleUpdate);
@@ -874,8 +893,6 @@ export function StickerField() {
       toggleStory,
     ],
   );
-
-  if (pathname !== "/") return null;
 
   return (
     <div

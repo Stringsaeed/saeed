@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { formatPostDate, posts } from "@/content/blog/posts";
 import { MobileStickerField } from "@/components/mobile-sticker-field";
+import { SaeedName } from "@/components/saeed-name";
 
 const work = [
   {
@@ -67,7 +68,7 @@ export default function Home() {
         data-analytics-view="Content Viewed"
         data-analytics-label="Intro"
       >
-        I’m Saeed, a software engineer in Dubai.
+        I’m <SaeedName />, a software engineer in Dubai.
       </h1>
       <p className="mt-3 max-w-152 text-base leading-7 text-muted-foreground">
         I work on React Native, TypeScript, performance, accessibility, native

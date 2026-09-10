@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SaeedName } from "@/components/saeed-name";
 import links from "@/data/links.json";
 import { siteName } from "@/lib/site";
 
@@ -47,7 +48,8 @@ export default function LinksPage() {
 					Links
 				</h1>
 				<p className="mt-3 max-w-[36rem] text-sm leading-6 text-muted-foreground">
-					{description}
+					{entries.length} saved websites, tools, articles, and references
+					collected by <SaeedName />.
 				</p>
 			</div>
 

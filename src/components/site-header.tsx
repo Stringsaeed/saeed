@@ -12,6 +12,8 @@ import {
 } from "@remixicon/react";
 import Link from "next/link";
 import { AnimatedAvatar } from "./animated-avatar";
+import { SaeedName } from "./saeed-name";
+import { ThemeSwitcher } from "./theme-switcher";
 import { Button } from "./ui/button";
 
 const socialLinks = [
@@ -53,7 +55,7 @@ export function SiteHeader() {
         data-analytics-location="Header"
       >
         <AnimatedAvatar />
-        <span className="signature-name">Saeed</span>
+        <SaeedName className="signature-name" />
       </Link>
 
       <nav className="ml-auto flex items-center gap-1" aria-label="Site links">
@@ -77,6 +79,7 @@ export function SiteHeader() {
             Links
           </Link>
         </Button>
+        <ThemeSwitcher />
       </nav>
     </header>
   );

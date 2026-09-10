@@ -266,7 +266,7 @@ export function MobileStickerField() {
 
   return (
     <section aria-label="Sticker stories" className="mt-8 min-[960px]:hidden">
-      <h2 className="list-heading">Sticker desk</h2>
+      <h2 className="list-heading">Desk</h2>
       <div className="relative mt-3 h-64 overflow-hidden rounded-3xl border border-border/60 bg-muted/40">
         <div
           aria-hidden

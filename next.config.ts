@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
 	allowedDevOrigins: ["127.0.0.1", "192.168.1.123"],
 	images: {
 		qualities: [75, 90],
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "www.google.com",
+				pathname: "/s2/favicons",
+			},
+		],
 	},
 	pageExtensions: [
 		"js",

@@ -436,5 +436,119 @@
     "type": "Tool",
     "url": "https://interbase.ai/",
     "description": "An open-source CLI agent with model choice, prompt aliases, long-running goals, and remote access."
+  },
+  {
+    "website": "Good Websites",
+    "type": "Gallery",
+    "url": "https://brianlovin.com/sites",
+    "description": "Brian Lovin's curated collection of notable personal and product websites."
+  },
+  {
+    "website": "Marco Cornacchia",
+    "type": "Portfolio",
+    "url": "https://www.marco.fyi/",
+    "description": "Product designer Marco Cornacchia's interactive portfolio."
+  },
+  {
+    "website": "Design Engineer Jobs",
+    "type": "Job Board",
+    "url": "https://designengineer.io/",
+    "description": "A job board focused on design engineering and adjacent roles."
+  },
+  {
+    "website": "Shadow",
+    "type": "Project",
+    "url": "https://www.ishaand.com/shadow",
+    "description": "Ishaan Dey's case study of an open-source background coding agent and real-time interface."
+  },
+  {
+    "website": "Doodles",
+    "type": "Experiment",
+    "url": "https://doodle.mary-louise.com/",
+    "description": "An experiment that turns prompts into AI-generated hand-drawn sketches."
+  },
+  {
+    "website": "I'm Hard, I'm Wet",
+    "type": "Essay",
+    "url": "https://thedosagemakesitso.substack.com/p/im-hard-im-wet",
+    "description": "Dmitry's essay on how masculine and feminine roles are formed and performed."
+  },
+  {
+    "website": "Designers and Machines",
+    "type": "Community",
+    "url": "https://www.designers-machines.com/",
+    "description": "A monthly San Francisco dinner where designers demo what they are building with AI."
+  },
+  {
+    "website": "vowels",
+    "type": "Store",
+    "url": "https://vowels.net/",
+    "description": "Made-in-Japan luxury clothing and essentials."
+  },
+  {
+    "website": "120% Lino",
+    "type": "Store",
+    "url": "https://120percento.com/",
+    "description": "Italian linen clothing for women and men."
+  },
+  {
+    "website": "Agentic Engineering",
+    "type": "Guide",
+    "url": "https://www.arjunvirk.com/writing/ml-guide/chapter-6-agentic-engineering",
+    "description": "Arjun Virk's guide to levels of AI usage and the workspace behind a Level 4 agent."
+  },
+  {
+    "website": "Maggie Appleton's digital garden",
+    "type": "Repository",
+    "url": "https://github.com/MaggieAppleton/maggieappleton.com-V3",
+    "description": "Source code for Maggie Appleton's Astro and MDX digital garden."
+  },
+  {
+    "website": "Cursor Camp",
+    "type": "Experiment",
+    "url": "https://neal.fun/cursor-camp/",
+    "description": "An interactive browser experience by Neal Agarwal."
+  },
+  {
+    "website": "Gradient Border Plugin",
+    "type": "Library",
+    "url": "https://gradient-border.floriankiem.com/",
+    "description": "A Tailwind CSS plugin for configurable gradient borders."
+  },
+  {
+    "website": "Easing Gradients",
+    "type": "Tool",
+    "url": "https://larsenwork.com/easing-gradients/",
+    "description": "An editor and explainer for creating smoother gradients with easing functions."
+  },
+  {
+    "website": "Footer",
+    "type": "Gallery",
+    "url": "https://www.footer.design/",
+    "description": "A curated gallery of website footer designs organized by style."
+  },
+  {
+    "website": "Locale",
+    "type": "Tool",
+    "url": "https://joshpuckett.me/locale",
+    "description": "Preview text across locally installed fonts using the browser's Local Font Access API."
+  },
+  {
+    "website": "Luxury Software",
+    "type": "Essay",
+    "url": "https://nativestudio.substack.com/p/luxury-software",
+    "description": "Jihad Esmail's essay on prosumers, identity, and selling a worldview through software."
+  },
+  {
+    "website": "Design Eng Club",
+    "type": "Community",
+    "url": "https://www.designeng.club/",
+    "description": "A community, newsletter, and event series for people working across design and engineering."
+  },
+  {
+    "website": "Juliette",
+    "type": "Portfolio",
+    "url": "https://shedsgns.me/",
+    "description": "Juliette's portfolio of design work, AI-native projects, experiments, and writing."
   }
 ]

@@ -1,7 +1,7 @@
 import type { SoundName } from "cuelume";
 
 export type StickerDefinition = {
-  id: "bass" | "controller" | "keyboard" | "monstera";
+  id: "bass" | "controller" | "keyboard" | "monstera" | "pencil";
   label: string;
   sound: SoundName;
   src: string;
@@ -44,11 +44,21 @@ export const STICKERS: StickerDefinition[] = [
   {
     id: "controller",
     label: "PlayStation",
-    sound: "pulse",
+    sound: "scan",
     src: "/stickers/controller.png",
     story:
       "I've played PlayStation since the first one. We used to go to the end of the street to play Winning Eleven 3. We called it japanese, يابانية. The Konami code still lives in my head. After covid I bought a PS4. Last birthday my wife got me a PS5.",
     width: 240,
     height: 160,
+  },
+  {
+    id: "pencil",
+    label: "Uni pencil",
+    sound: "tick",
+    src: "/stickers/uni-pencil.png",
+    story:
+      "The story is simple. My father always carried a Uni pen. When my sister and I started high school, he bought each of us a rOtring mechanical pencil to help us study. We had to keep them clean and always have them with us. Of course, I lost mine somewhere. When I saw this Uni pencil, I had to buy it. I loved the design, but more than that, it reminded me of my father. May God rest his soul.",
+    width: 170,
+    height: 142,
   },
 ];

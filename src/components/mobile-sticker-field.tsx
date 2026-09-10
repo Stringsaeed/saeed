@@ -1,12 +1,14 @@
 "use client";
 
 import { RiCloseLine } from "@remixicon/react";
+import { bind } from "cuelume";
 import { useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import Image from "next/image";
 import {
   type MouseEvent,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -27,6 +29,7 @@ const LAYOUT: Record<StickerDefinition["id"], string> = {
   monstera: "right-2 top-1 w-28 rotate-6",
   bass: "left-6 bottom-1 w-24 rotate-3",
   controller: "right-3 bottom-3 w-36 -rotate-3",
+  pencil: "left-1/2 top-20 w-28 -translate-x-1/2 rotate-2",
 };
 const BACKDROP_PADDING = 24;
 const OPEN_DURATION = 0.55;
@@ -170,6 +173,7 @@ function RaisedStickerOverlay({
 
 export function MobileStickerField() {
   const drawerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openId, setOpenId] = useState<StickerDefinition["id"] | null>(null);
@@ -180,6 +184,12 @@ export function MobileStickerField() {
   const resolvedRaisedSticker = isResolvedRaisedSticker(raisedSticker)
     ? raisedSticker
     : null;
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    bind(section);
+  }, []);
 
   const selectSticker = useCallback((event: MouseEvent<HTMLButtonElement>) => {
     const id = event.currentTarget.dataset.stickerId;
@@ -265,7 +275,11 @@ export function MobileStickerField() {
   ]);
 
   return (
-    <section aria-label="Sticker stories" className="mt-8 min-[960px]:hidden">
+    <section
+      ref={sectionRef}
+      aria-label="Sticker stories"
+      className="mt-8 min-[960px]:hidden"
+    >
       <h2 className="list-heading">Desk</h2>
       <div className="relative mt-3 h-64 overflow-hidden rounded-3xl border border-border/60 bg-muted/40">
         <div
@@ -281,6 +295,7 @@ export function MobileStickerField() {
           <button
             key={sticker.id}
             type="button"
+            data-cuelume-press={sticker.sound}
             data-sticker-id={sticker.id}
             onClick={selectSticker}
             aria-label={`Open ${sticker.label.toLowerCase()} sticker story`}

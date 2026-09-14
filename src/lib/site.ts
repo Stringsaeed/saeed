@@ -2,7 +2,7 @@ const canonicalOrigin = "https://thisissaeed.com";
 
 export const siteName = "Saeed";
 export const siteDescription =
-	"Software engineer in Dubai working on React Native, TypeScript, performance, accessibility, native code, and agent-assisted engineering.";
+	"Software engineer in Boston working on React Native, TypeScript, performance, accessibility, native code, and agent-assisted engineering.";
 
 export const socialProfiles = [
 	"https://github.com/stringsaeed",

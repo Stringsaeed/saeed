@@ -22,7 +22,7 @@ export function getRootStructuredData() {
 				description: siteDescription,
 				homeLocation: {
 					"@type": "Place",
-					name: "Dubai, United Arab Emirates",
+					name: "Boston, MA, United States",
 				},
 				knowsAbout: [
 					"React Native",

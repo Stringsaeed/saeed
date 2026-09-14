@@ -8,6 +8,7 @@ import {
   RiLinksLine,
   RiLinkedinFill,
   RiMailLine,
+  RiPhoneLine,
   RiTwitterXFill,
 } from "@remixicon/react";
 import Link from "next/link";
@@ -21,6 +22,11 @@ const socialLinks = [
     label: "Email",
     href: "mailto:stringsaeed@gmail.com",
     icon: RiMailLine,
+  },
+  {
+    label: "Phone",
+    href: "tel:+18578678243",
+    icon: RiPhoneLine,
   },
   {
     label: "GitHub",

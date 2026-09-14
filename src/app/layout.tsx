@@ -94,7 +94,7 @@ export const metadata: Metadata = {
     "React Native",
     "TypeScript",
     "mobile development",
-    "Dubai",
+    "Boston",
   ],
   alternates: {
     canonical: "/",

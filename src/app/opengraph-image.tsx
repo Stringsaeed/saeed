@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { ogLogoSrc } from "@/lib/og-logo";
 
 // biome-ignore lint/style/useComponentExportOnlyModules: Next.js reads this image metadata export.
-export const alt = "Saeed, software engineer in Dubai";
+export const alt = "Saeed, software engineer in Boston";
 
 // biome-ignore lint/style/useComponentExportOnlyModules: Next.js reads this image metadata export.
 export const size = {
@@ -71,7 +71,7 @@ export default function OpenGraphImage() {
             letterSpacing: "-3px",
           }}
         >
-          Software engineer in Dubai
+          Software engineer in Boston
         </div>
         <div
           style={{

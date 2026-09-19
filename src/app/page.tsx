@@ -74,6 +74,10 @@ export default function Home() {
         I work on React Native, TypeScript, performance, accessibility, native
         code, and agent-assisted engineering.
       </p>
+      <p className="mt-3 max-w-152 text-base leading-7 text-muted-foreground">
+        Based in the UAE. Open to roles in the UAE, Egypt, the US (SF / NY /
+        CA), the Netherlands, and Germany. US and Europe need visa support.
+      </p>
 
       <MobileStickerField />
 

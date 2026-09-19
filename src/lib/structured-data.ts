@@ -20,10 +20,6 @@ export function getRootStructuredData() {
 				url: getAbsoluteUrl(),
 				jobTitle: "Software Engineer",
 				description: siteDescription,
-				homeLocation: {
-					"@type": "Place",
-					name: "Boston, MA, United States",
-				},
 				knowsAbout: [
 					"React Native",
 					"TypeScript",

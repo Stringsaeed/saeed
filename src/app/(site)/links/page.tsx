@@ -9,17 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import links from "@/data/links.json";
+import { links } from "@/data/links";
 import { siteName } from "@/lib/site";
 
-type LinkEntry = {
-  website: string;
-  type: string;
-  url: string;
-  description: string;
-};
-
-const entries = links satisfies LinkEntry[];
+const entries = links;
 const description = `${entries.length} saved websites, tools, articles, and references collected by Saeed.`;
 
 function getFaviconUrl(url: string) {

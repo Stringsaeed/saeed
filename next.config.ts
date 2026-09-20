@@ -1,4 +1,3 @@
-import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -17,25 +16,33 @@ const nextConfig: NextConfig = {
         hostname: "www.google.com",
         pathname: "/s2/favicons",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+      },
     ],
   },
-  pageExtensions: [
-    "js",
-    "jsx",
-    "md",
-    "mdx",
-    "ts",
-    "tsx",
-  ],
+  outputFileTracingIncludes: {
+    "/": [
+      "./src/content/blog/**/*.mdx",
+    ],
+    "/blog": [
+      "./src/content/blog/**/*.mdx",
+    ],
+    "/blog/[slug]": [
+      "./src/content/blog/**/*.mdx",
+    ],
+    "/blog/[slug]/opengraph-image": [
+      "./src/content/blog/**/*.mdx",
+    ],
+    "/feed.xml": [
+      "./src/content/blog/**/*.mdx",
+    ],
+    "/sitemap.xml": [
+      "./src/content/blog/**/*.mdx",
+    ],
+  },
   reactCompiler: true,
 };
 
-const withMDX = createMDX({
-  options: {
-    remarkPlugins: [
-      "remark-frontmatter",
-    ],
-  },
-});
-
-export default withMDX(nextConfig);
+export default nextConfig;

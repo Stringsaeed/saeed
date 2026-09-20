@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PostBody } from "@/components/content/post-body";
 import { JsonLd } from "@/components/json-ld";
-import { formatPostDate, getPost, posts } from "@/content/blog/posts";
+import { formatPostDate, getPost, getPosts } from "@/lib/content";
 import { siteName } from "@/lib/site";
 import { getBlogPostStructuredData } from "@/lib/structured-data";
 
@@ -12,11 +13,9 @@ type BlogPostPageProps = {
   }>;
 };
 
-// biome-ignore lint/style/useComponentExportOnlyModules: Next.js uses this export to reject unknown post slugs.
-export const dynamicParams = false;
-
-// biome-ignore lint/style/useComponentExportOnlyModules: Next.js uses this export to prerender dynamic routes.
-export function generateStaticParams() {
+// biome-ignore lint/style/useComponentExportOnlyModules: Next.js uses this export to prerender known posts without blocking new ones.
+export async function generateStaticParams() {
+  const posts = await getPosts();
   return posts.map((post) => ({
     slug: post.slug,
   }));
@@ -27,7 +26,7 @@ export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) notFound();
 
   return {
@@ -66,10 +65,8 @@ export async function generateMetadata({
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getPost(slug);
   if (!post) notFound();
-
-  const { default: Post } = await import(`@/content/blog/${post.slug}.mdx`);
 
   return (
     <main className="pb-24 pt-8 sm:pt-12">
@@ -109,7 +106,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </header>
 
         <div className="article-body mt-10">
-          <Post />
+          <PostBody value={post.body} />
         </div>
         <span
           className="block h-px"

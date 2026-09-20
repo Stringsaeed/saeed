@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
-import "server-only";
 import { postDatePattern } from "@/lib/content-patterns";
+import type { ContentBlock } from "@/lib/markdown-to-portable-text";
+import { markdownToPortableText } from "@/lib/markdown-to-portable-text";
 
 export type BlogPost = {
   slug: string;
@@ -12,12 +13,16 @@ export type BlogPost = {
   tags: readonly string[];
 };
 
+export type BlogPostContent = BlogPost & {
+  body: ContentBlock[];
+};
+
 const blogDirectory = path.join(process.cwd(), "src/content/blog");
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const importExportPattern = /(?:^|\n)[ \t]*(?:import|export)\b/;
 const forbiddenTagPattern = /<\/?(?:script|iframe|object|embed)\b/i;
 
-function assertTrustedMdx(slug: string, source: string) {
+function assertTrustedMarkdown(slug: string, source: string) {
   const withoutFrontmatter = source.replace(/^---\r?\n[\s\S]*?\r?\n---/, "");
   const prose = withoutFrontmatter.replace(/```[\s\S]*?```/g, "");
 
@@ -63,7 +68,14 @@ function readTags(slug: string, value: unknown) {
   return value;
 }
 
-function readPosts(): readonly BlogPost[] {
+function sortPosts<T extends BlogPost>(posts: T[]) {
+  return posts.sort((left, right) => {
+    const byDate = right.date.localeCompare(left.date);
+    return byDate === 0 ? left.slug.localeCompare(right.slug) : byDate;
+  });
+}
+
+export function readLocalPosts(): BlogPostContent[] {
   const posts = fs
     .readdirSync(blogDirectory)
     .filter((file) => file.endsWith(".mdx"))
@@ -74,8 +86,8 @@ function readPosts(): readonly BlogPost[] {
       }
 
       const source = fs.readFileSync(path.join(blogDirectory, file), "utf8");
-      assertTrustedMdx(slug, source);
-      const { data } = matter(source);
+      assertTrustedMarkdown(slug, source);
+      const { data, content } = matter(source);
 
       return {
         slug,
@@ -83,29 +95,9 @@ function readPosts(): readonly BlogPost[] {
         description: readString(slug, "description", data.description),
         date: readDate(slug, data.date),
         tags: readTags(slug, data.tags),
+        body: markdownToPortableText(content),
       };
     });
 
-  return posts.sort((left, right) => {
-    const byDate = right.date.localeCompare(left.date);
-    return byDate === 0 ? left.slug.localeCompare(right.slug) : byDate;
-  });
-}
-
-export const posts = readPosts();
-
-export function getPost(slug: string) {
-  return posts.find((post) => post.slug === slug);
-}
-
-export function formatPostDate(
-  date: string,
-  format: "compact" | "full" = "compact",
-) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: format === "full" ? "long" : "short",
-    day: format === "full" ? "numeric" : undefined,
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(date));
+  return sortPosts(posts);
 }

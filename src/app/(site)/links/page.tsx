@@ -9,11 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { links } from "@/data/links";
+import { getLinks } from "@/lib/content";
+import { isHttpsUrl } from "@/lib/https-url";
 import { siteName } from "@/lib/site";
-
-const entries = links;
-const description = `${entries.length} saved websites, tools, articles, and references collected by Saeed.`;
 
 function getFaviconUrl(url: string) {
   const faviconUrl = new URL("https://www.google.com/s2/favicons");
@@ -22,27 +20,37 @@ function getFaviconUrl(url: string) {
   return faviconUrl.toString();
 }
 
-// biome-ignore lint/style/useComponentExportOnlyModules: Next.js requires metadata to be exported from a page.
-export const metadata: Metadata = {
-  title: "Links",
-  description,
-  alternates: {
-    canonical: "/links",
-  },
-  openGraph: {
-    type: "website",
-    url: "/links",
-    title: `Links | ${siteName}`,
-    description,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `Links | ${siteName}`,
-    description,
-  },
-};
+function linksDescription(count: number) {
+  return `${count} saved websites, tools, articles, and references collected by Saeed.`;
+}
 
-export default function LinksPage() {
+// biome-ignore lint/style/useComponentExportOnlyModules: Next.js requires metadata to be exported from a page.
+export async function generateMetadata(): Promise<Metadata> {
+  const entries = (await getLinks()).filter((entry) => isHttpsUrl(entry.url));
+  const description = linksDescription(entries.length);
+
+  return {
+    title: "Links",
+    description,
+    alternates: {
+      canonical: "/links",
+    },
+    openGraph: {
+      type: "website",
+      url: "/links",
+      title: `Links | ${siteName}`,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Links | ${siteName}`,
+      description,
+    },
+  };
+}
+
+export default async function LinksPage() {
+  const entries = (await getLinks()).filter((entry) => isHttpsUrl(entry.url));
   return (
     <main
       className="flex min-h-0 flex-1 flex-col pb-4 pt-6 sm:pb-6 sm:pt-8"

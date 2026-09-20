@@ -16,7 +16,10 @@ const storage =
       }
     : {
         kind: "github" as const,
-        repo: "Stringsaeed/saeed",
+        repo: {
+          owner: "Stringsaeed",
+          name: "saeed",
+        },
       };
 
 export default config({

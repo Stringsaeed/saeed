@@ -5,7 +5,7 @@ const requiredKeystaticGithubEnv = [
 ] as const;
 
 export function missingKeystaticGithubEnv(
-  env: NodeJS.ProcessEnv = process.env,
+  env: Record<string, string | undefined> = process.env,
 ) {
   return requiredKeystaticGithubEnv.filter((key) => !env[key]?.trim());
 }

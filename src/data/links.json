@@ -551,6 +551,18 @@
       "type": "Portfolio",
       "url": "https://shedsgns.me/",
       "description": "Juliette's portfolio of design work, AI-native projects, experiments, and writing."
+    },
+    {
+      "website": "Smooth Shadow Plugin for Tailwind CSS",
+      "type": "tool",
+      "url": "https://shadow.floriankiem.com/",
+      "description": "A Tailwind CSS plugin for smoother shadows and configurable rings."
+    },
+    {
+      "website": "Cube — JavaScript animation library for UI motion",
+      "type": "tool",
+      "url": "https://www.cube-motion.dev/",
+      "description": "A dependency-free JavaScript animation library for four essential UI motions."
     }
   ]
 }

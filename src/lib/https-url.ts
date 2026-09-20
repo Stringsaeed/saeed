@@ -48,3 +48,18 @@ export function assertHttpsUrl(value: string): string {
 
   return value;
 }
+
+export function isContentHref(value: string): boolean {
+  if (isHttpsUrl(value)) return true;
+  if (
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    value.includes("\\")
+  ) {
+    return false;
+  }
+
+  const lower = stripControlCharacters(value).toLowerCase();
+  if (lower !== value.toLowerCase()) return false;
+  return !forbiddenProtocols.some((protocol) => lower.includes(protocol));
+}

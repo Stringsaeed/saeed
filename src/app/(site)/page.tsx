@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { MobileStickerField } from "@/components/mobile-sticker-field";
+import { SaeedName } from "@/components/saeed-name";
 import {
   Card,
   CardDescription,
@@ -8,9 +10,7 @@ import {
   CardMedia,
   CardTitle,
 } from "@/components/ui/card";
-import { formatPostDate, posts } from "@/content/blog/posts";
-import { MobileStickerField } from "@/components/mobile-sticker-field";
-import { SaeedName } from "@/components/saeed-name";
+import { formatPostDate, getPosts } from "@/lib/content";
 
 const work = [
   {
@@ -60,7 +60,8 @@ const work = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const posts = await getPosts();
   return (
     <main className="pb-20 pt-10 sm:pt-14">
       <h1

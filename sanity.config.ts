@@ -10,7 +10,6 @@ export default defineConfig({
   title: "Saeed",
   projectId,
   dataset,
-  basePath: "/studio",
   plugins: [
     structureTool(),
     codeInput(),

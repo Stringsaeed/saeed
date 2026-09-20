@@ -5,9 +5,6 @@ const nextConfig: NextConfig = {
     "127.0.0.1",
     "192.168.1.123",
   ],
-  compiler: {
-    styledComponents: true,
-  },
   images: {
     qualities: [
       75,

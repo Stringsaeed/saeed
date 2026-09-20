@@ -84,7 +84,11 @@ export default async function Home() {
         data-analytics-label="Work"
       >
         <h2 className="list-heading">Work</h2>
-        <CardGroup className="mt-4" orientation="inline" border="outlined">
+        <CardGroup
+          className="mt-4 smooth-shadow-ring shadow-black smooth-ring-neutral-300/30 bg-background"
+          orientation="inline"
+          border="outlined"
+        >
           {work.map((item) => (
             <Card
               key={item.company}

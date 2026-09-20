@@ -6,10 +6,21 @@ import {
 } from "./src/lib/content-patterns";
 import { httpsUrlPattern } from "./src/lib/https-url";
 
+// `next dev` writes to the local disk. Production builds use GitHub mode, so
+// /keystatic requires a GitHub login and commits as that user. There is no
+// unauthenticated admin and no fallback to local storage in production.
+const storage =
+  process.env.NODE_ENV === "development"
+    ? {
+        kind: "local" as const,
+      }
+    : {
+        kind: "github" as const,
+        repo: "Stringsaeed/saeed",
+      };
+
 export default config({
-  storage: {
-    kind: "local",
-  },
+  storage,
   ui: {
     brand: {
       name: "Saeed",

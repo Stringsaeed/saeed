@@ -1,17 +1,6 @@
 import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
-// *.dev.ts(x) routes exist only for `next dev`, so /keystatic is not in the production build.
-const devOnlyExtensions =
-  process.env.NODE_ENV === "development"
-    ? [
-        "dev.js",
-        "dev.jsx",
-        "dev.ts",
-        "dev.tsx",
-      ]
-    : [];
-
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "127.0.0.1",
@@ -37,7 +26,6 @@ const nextConfig: NextConfig = {
     "mdx",
     "ts",
     "tsx",
-    ...devOnlyExtensions,
   ],
   reactCompiler: true,
 };

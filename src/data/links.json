@@ -1,554 +1,556 @@
-[
-  {
-    "website": "Owner Careers",
-    "type": "Careers",
-    "url": "https://www.owner.com/careers#roles",
-    "description": "Open roles at Owner."
-  },
-  {
-    "website": "Dead Simple Sites",
-    "type": "Gallery",
-    "url": "https://deadsimplesites.com/?via=toools",
-    "description": "A gallery of minimal website designs."
-  },
-  {
-    "website": "Adam Whitcroft",
-    "type": "Profile",
-    "url": "https://x.com/AdamWhitcroft",
-    "description": "Adam Whitcroft on X."
-  },
-  {
-    "website": "Discord's React Native performance",
-    "type": "Article",
-    "url": "https://blog.margelo.com/margelo-discord-react-native-performance",
-    "description": "How Margelo improved Discord's React Native New Architecture animation performance."
-  },
-  {
-    "website": "ui.sh",
-    "type": "Resource",
-    "url": "https://ui.sh/",
-    "description": "Agent skills for building and reviewing interfaces."
-  },
-  {
-    "website": "React Native render pipeline",
-    "type": "Docs",
-    "url": "https://reactnative.dev/architecture/render-pipeline",
-    "description": "How React Native renders, commits, and mounts UI."
-  },
-  {
-    "website": "Understanding keyboards in React Native",
-    "type": "Article",
-    "url": "https://blog.margelo.com/deep-dive-in-keyboard-handling",
-    "description": "A guide to cross-platform keyboard behavior and animation in React Native."
-  },
-  {
-    "website": "Crypto Design Club",
-    "type": "Gallery",
-    "url": "https://cryptodesign.club/?via=toools",
-    "description": "A collection of crypto product design references."
-  },
-  {
-    "website": "Webframe",
-    "type": "Gallery",
-    "url": "https://webframe.xyz/?via=toools",
-    "description": "Screenshots of web application interfaces."
-  },
-  {
-    "website": "Finding hidden gem designers on X",
-    "type": "Post",
-    "url": "https://x.com/dariusdan/status/2060328941827531257",
-    "description": "A thread about finding designers on X."
-  },
-  {
-    "website": "Public Work by Cosmos",
-    "type": "Search",
-    "url": "https://www.cosmos.so/public-work",
-    "description": "A visual search engine for public-domain images."
-  },
-  {
-    "website": "Flora Guo",
-    "type": "Portfolio",
-    "url": "https://www.floguo.com/",
-    "description": "Flora Guo's personal site."
-  },
-  {
-    "website": "Same Energy",
-    "type": "Search",
-    "url": "https://same.energy/",
-    "description": "A visual search engine for finding related images."
-  },
-  {
-    "website": "Omar Abdul-Rahim",
-    "type": "Portfolio",
-    "url": "https://omarabdulrahim.com/",
-    "description": "Product design portfolio."
-  },
-  {
-    "website": "SaaSFrame",
-    "type": "Gallery",
-    "url": "https://saaspo.com/?via=toools",
-    "description": "A curated collection of SaaS website designs."
-  },
-  {
-    "website": "Joshua Wolk",
-    "type": "Portfolio",
-    "url": "https://www.joshuawolk.com/",
-    "description": "Design engineering portfolio."
-  },
-  {
-    "website": "React Native Bottom Sheet",
-    "type": "Library",
-    "url": "https://gorhom.dev/react-native-bottom-sheet/",
-    "description": "Documentation for React Native Bottom Sheet."
-  },
-  {
-    "website": "Illustration LOL",
-    "type": "Gallery",
-    "url": "https://www.illustration.lol/",
-    "description": "Editorial illustration references and creator credits."
-  },
-  {
-    "website": "Adam Ho",
-    "type": "Portfolio",
-    "url": "https://www.adamho.com/",
-    "description": "Independent graphic design and image-making practice."
-  },
-  {
-    "website": "Handheld",
-    "type": "Publication",
-    "url": "https://www.handheld.design/?via=toools",
-    "description": "Mobile design analysis, patterns, and tools."
-  },
-  {
-    "website": "React Native Evals",
-    "type": "Benchmark",
-    "url": "https://rn-evals.vercel.app/",
-    "description": "An open benchmark for AI models working on React Native tasks."
-  },
-  {
-    "website": "Preet Suthar",
-    "type": "Portfolio",
-    "url": "https://preetsuthar.me/",
-    "description": "Design engineering portfolio."
-  },
-  {
-    "website": "Cosmos",
-    "type": "Tool",
-    "url": "https://jobs.cosmos.so/",
-    "description": "A space for collecting visual inspiration."
-  },
-  {
-    "website": "Paradigm sheet",
-    "type": "Sheet",
-    "url": "https://app.paradigmai.com/sheets/76210606-6ce4-4ccc-a005-fb1cf6984a45",
-    "description": "A shared sheet in Paradigm's AI research workspace."
-  },
-  {
-    "website": "Workspaces",
-    "type": "Gallery",
-    "url": "https://www.workspaces.xyz/",
-    "description": "A collection of workspaces and desk setups."
-  },
-  {
-    "website": "userinterface.wiki",
-    "type": "Guide",
-    "url": "https://www.userinterface.wiki/",
-    "description": "A living manual for interface design, motion, and typography."
-  },
-  {
-    "website": "Reactix",
-    "type": "Library",
-    "url": "https://www.reacticx.com/",
-    "description": "Open-source React Native UI components built with Expo and animation libraries."
-  },
-  {
-    "website": "Harin Nitisvaar",
-    "type": "Portfolio",
-    "url": "https://harin.design/",
-    "description": "Interaction design portfolio."
-  },
-  {
-    "website": "react-native-worktree",
-    "type": "Repository",
-    "url": "https://github.com/aleqsio/react-native-worktree",
-    "description": "Metro port switcher for multi-agent React Native development."
-  },
-  {
-    "website": "Avec Careers",
-    "type": "Careers",
-    "url": "https://www.avec.ai/jobs",
-    "description": "Open roles at Avec, an AI email product."
-  },
-  {
-    "website": "Viewport UI",
-    "type": "Gallery",
-    "url": "https://viewport-ui.design/",
-    "description": "A curated collection of interface design references."
-  },
-  {
-    "website": "Awwwards",
-    "type": "Gallery",
-    "url": "https://www.awwwards.com/",
-    "description": "Awarded websites and digital design work."
-  },
-  {
-    "website": "Spotted in Prod",
-    "type": "Gallery",
-    "url": "https://www.spottedinprod.com/clips",
-    "description": "A collection of notable iOS apps and interactions."
-  },
-  {
-    "website": "Site of Sites",
-    "type": "Gallery",
-    "url": "https://www.siteofsites.co/",
-    "description": "A curated web design gallery."
-  },
-  {
-    "website": "Design Spells",
-    "type": "Gallery",
-    "url": "https://designspells.com/",
-    "description": "Micro-interactions and small interface details."
-  },
-  {
-    "website": "Unsection",
-    "type": "Gallery",
-    "url": "https://www.unsection.com/",
-    "description": "Website sections organized by patterns such as hero, pricing, and CTA."
-  },
-  {
-    "website": "Aave Labs Careers",
-    "type": "Careers",
-    "url": "https://avara.xyz/careers",
-    "description": "Open roles at Aave Labs."
-  },
-  {
-    "website": "Alex Burdin",
-    "type": "Portfolio",
-    "url": "https://burd.in/",
-    "description": "Selected design work by Alex Burdin."
-  },
-  {
-    "website": "Using AI as a Design Engineer",
-    "type": "Article",
-    "url": "https://jakub.kr/work/using-ai-as-a-design-engineer",
-    "description": "Jakub Krol's workflow for using AI in design engineering."
-  },
-  {
-    "website": "Design Systems Database",
-    "type": "Gallery",
-    "url": "https://designsystems.surf/",
-    "description": "Components and foundations from production design systems."
-  },
-  {
-    "website": "SiteInspire",
-    "type": "Gallery",
-    "url": "https://www.siteinspire.com/websites",
-    "description": "A curated gallery of website design."
-  },
-  {
-    "website": "Why vibe-coded apps look cheap",
-    "type": "Post",
-    "url": "https://x.com/Hartdrawss/status/2034890067236594136",
-    "description": "A thread about improving the visual quality of AI-generated applications."
-  },
-  {
-    "website": "Hamza Alabou",
-    "type": "Portfolio",
-    "url": "https://www.hamzaalabou.com/",
-    "description": "Design engineering portfolio."
-  },
-  {
-    "website": "Agentic Engineering Guide",
-    "type": "Guide",
-    "url": "https://agentic-engineering.swmansion.com/",
-    "description": "Practical guidance for agentic engineering in software projects."
-  },
-  {
-    "website": "Async, sync, and in between",
-    "type": "Article",
-    "url": "https://antfu.me/posts/async-sync-in-between",
-    "description": "Anthony Fu explores approaches between synchronous and asynchronous functions."
-  },
-  {
-    "website": "Issue tracking is dead",
-    "type": "Announcement",
-    "url": "https://linear.app/next",
-    "description": "Linear's direction for context-driven product development."
-  },
-  {
-    "website": "Websitevice",
-    "type": "Gallery",
-    "url": "https://websitevice.com/",
-    "description": "Practical website examples for design inspiration."
-  },
-  {
-    "website": "Recent",
-    "type": "Gallery",
-    "url": "https://recent.design/",
-    "description": "A daily feed of design, websites, and digital products."
-  },
-  {
-    "website": "Bitvavo Careers",
-    "type": "Careers",
-    "url": "https://jobs.bitvavo.com/find-your-role",
-    "description": "Open roles at Bitvavo."
-  },
-  {
-    "website": "VSCO Careers",
-    "type": "Careers",
-    "url": "https://www.vsco.co/about/careers",
-    "description": "Open roles at VSCO."
-  },
-  {
-    "website": "Sydney Nguyen",
-    "type": "Portfolio",
-    "url": "https://sydneyknguyen.com/",
-    "description": "UX and interface design portfolio."
-  },
-  {
-    "website": "EPI Company Careers",
-    "type": "Careers",
-    "url": "https://careers.epicompany.eu/jobs?department=Product+%26+Engineering+%26+Experience&query=&split_view=true",
-    "description": "Product, engineering, and experience roles at EPI Company."
-  },
-  {
-    "website": "Kota Senior Mobile Engineer",
-    "type": "Job",
-    "url": "https://jobs.ashbyhq.com/kota/0d2693bd-73da-4b96-80b0-3dbd8f0f74a1/application",
-    "description": "Senior Mobile Engineer role at Kota."
-  },
-  {
-    "website": "Augustus Careers",
-    "type": "Careers",
-    "url": "https://augustus.com/careers",
-    "description": "Open roles at Augustus."
-  },
-  {
-    "website": "Interfaze",
-    "type": "AI Tool",
-    "url": "https://interfaze.ai/",
-    "description": "A model for deterministic tasks such as OCR and structured extraction."
-  },
-  {
-    "website": "Three Letter Acronym",
-    "type": "Blog",
-    "url": "https://tla.systems/blog/",
-    "description": "An independent software development blog."
-  },
-  {
-    "website": "Why software factories fail",
-    "type": "Post",
-    "url": "https://x.com/dexhorthy/status/2080697380379427275",
-    "description": "A thread about the limits of software factories."
-  },
-  {
-    "website": "Founding Engineer",
-    "type": "Job",
-    "url": "https://polar-nation-10f.notion.site/Founding-Engineer-32791c5a40538085808ae593c014689b",
-    "description": "Founding Engineer role published through Notion."
-  },
-  {
-    "website": "Scape Software Engineer",
-    "type": "Job",
-    "url": "https://scape.app/careers/software-engineer",
-    "description": "Software Engineer role covering product systems, integrations, and AI workflows."
-  },
-  {
-    "website": "Kage landing page",
-    "type": "Post",
-    "url": "https://x.com/mengto/status/2086023649526452265",
-    "description": "An open-source Three.js landing page."
-  },
-  {
-    "website": "Zed Product Design Engineer",
-    "type": "Job",
-    "url": "https://zed.dev/jobs/product-designer",
-    "description": "Product Design Engineer role at Zed."
-  },
-  {
-    "website": "FC Barcelona away jersey",
-    "type": "Store",
-    "url": "https://store.fcbarcelona.com/en-ae/products/fc-barcelona-away-fullshirt-26-27-player-lamine-yamal-ucl-away-2627?variant=55885577290113",
-    "description": "Lamine Yamal 2026/27 UEFA Champions League away jersey."
-  },
-  {
-    "website": "Design Engineering by Flora Guo",
-    "type": "Guide",
-    "url": "https://www.floguo.com/notes/design-engineering",
-    "description": "A living collection of design engineering notes and resources."
-  },
-  {
-    "website": "App Stacks",
-    "type": "Gallery",
-    "url": "https://appstacks.club/",
-    "description": "Stories, technology stacks, and tools behind selected apps."
-  },
-  {
-    "website": "Emdash",
-    "type": "Tool",
-    "url": "https://emdash.sh/",
-    "description": "An open-source environment for running coding agents in parallel."
-  },
-  {
-    "website": "Capy",
-    "type": "Tool",
-    "url": "https://capy.ai/",
-    "description": "Cloud coding agents for engineering tasks and code review."
-  },
-  {
-    "website": "Superset",
-    "type": "Tool",
-    "url": "https://superset.sh/",
-    "description": "A local-first workspace manager for running coding agents in parallel."
-  },
-  {
-    "website": "Letta Agent",
-    "type": "Tool",
-    "url": "https://www.letta.com/agent/",
-    "description": "Stateful agents with persistent memory and scheduled work."
-  },
-  {
-    "website": "Conductor",
-    "type": "Tool",
-    "url": "https://www.conductor.build/",
-    "description": "Cloud workspaces for running and reviewing coding agents."
-  },
-  {
-    "website": "Paseo",
-    "type": "Tool",
-    "url": "https://paseo.sh/",
-    "description": "An open-source coding-agent orchestrator for desktop, web, mobile, and CLI."
-  },
-  {
-    "website": "Herdr",
-    "type": "Tool",
-    "url": "https://herdr.dev/",
-    "description": "A persistent terminal runtime for coding agents."
-  },
-  {
-    "website": "Helmor",
-    "type": "Tool",
-    "url": "https://helmor.ai/",
-    "description": "A local workbench for orchestrating, reviewing, testing, and merging agent work."
-  },
-  {
-    "website": "Interbase",
-    "type": "Tool",
-    "url": "https://interbase.ai/",
-    "description": "An open-source CLI agent with model choice, prompt aliases, long-running goals, and remote access."
-  },
-  {
-    "website": "Good Websites",
-    "type": "Gallery",
-    "url": "https://brianlovin.com/sites",
-    "description": "Brian Lovin's curated collection of notable personal and product websites."
-  },
-  {
-    "website": "Marco Cornacchia",
-    "type": "Portfolio",
-    "url": "https://www.marco.fyi/",
-    "description": "Product designer Marco Cornacchia's interactive portfolio."
-  },
-  {
-    "website": "Design Engineer Jobs",
-    "type": "Job Board",
-    "url": "https://designengineer.io/",
-    "description": "A job board focused on design engineering and adjacent roles."
-  },
-  {
-    "website": "Shadow",
-    "type": "Project",
-    "url": "https://www.ishaand.com/shadow",
-    "description": "Ishaan Dey's case study of an open-source background coding agent and real-time interface."
-  },
-  {
-    "website": "Doodles",
-    "type": "Experiment",
-    "url": "https://doodle.mary-louise.com/",
-    "description": "An experiment that turns prompts into AI-generated hand-drawn sketches."
-  },
-  {
-    "website": "I'm Hard, I'm Wet",
-    "type": "Essay",
-    "url": "https://thedosagemakesitso.substack.com/p/im-hard-im-wet",
-    "description": "Dmitry's essay on how masculine and feminine roles are formed and performed."
-  },
-  {
-    "website": "Designers and Machines",
-    "type": "Community",
-    "url": "https://www.designers-machines.com/",
-    "description": "A monthly San Francisco dinner where designers demo what they are building with AI."
-  },
-  {
-    "website": "vowels",
-    "type": "Store",
-    "url": "https://vowels.net/",
-    "description": "Made-in-Japan luxury clothing and essentials."
-  },
-  {
-    "website": "120% Lino",
-    "type": "Store",
-    "url": "https://120percento.com/",
-    "description": "Italian linen clothing for women and men."
-  },
-  {
-    "website": "Agentic Engineering",
-    "type": "Guide",
-    "url": "https://www.arjunvirk.com/writing/ml-guide/chapter-6-agentic-engineering",
-    "description": "Arjun Virk's guide to levels of AI usage and the workspace behind a Level 4 agent."
-  },
-  {
-    "website": "Maggie Appleton's digital garden",
-    "type": "Repository",
-    "url": "https://github.com/MaggieAppleton/maggieappleton.com-V3",
-    "description": "Source code for Maggie Appleton's Astro and MDX digital garden."
-  },
-  {
-    "website": "Cursor Camp",
-    "type": "Experiment",
-    "url": "https://neal.fun/cursor-camp/",
-    "description": "An interactive browser experience by Neal Agarwal."
-  },
-  {
-    "website": "Gradient Border Plugin",
-    "type": "Library",
-    "url": "https://gradient-border.floriankiem.com/",
-    "description": "A Tailwind CSS plugin for configurable gradient borders."
-  },
-  {
-    "website": "Easing Gradients",
-    "type": "Tool",
-    "url": "https://larsenwork.com/easing-gradients/",
-    "description": "An editor and explainer for creating smoother gradients with easing functions."
-  },
-  {
-    "website": "Footer",
-    "type": "Gallery",
-    "url": "https://www.footer.design/",
-    "description": "A curated gallery of website footer designs organized by style."
-  },
-  {
-    "website": "Locale",
-    "type": "Tool",
-    "url": "https://joshpuckett.me/locale",
-    "description": "Preview text across locally installed fonts using the browser's Local Font Access API."
-  },
-  {
-    "website": "Luxury Software",
-    "type": "Essay",
-    "url": "https://nativestudio.substack.com/p/luxury-software",
-    "description": "Jihad Esmail's essay on prosumers, identity, and selling a worldview through software."
-  },
-  {
-    "website": "Design Eng Club",
-    "type": "Community",
-    "url": "https://www.designeng.club/",
-    "description": "A community, newsletter, and event series for people working across design and engineering."
-  },
-  {
-    "website": "Juliette",
-    "type": "Portfolio",
-    "url": "https://shedsgns.me/",
-    "description": "Juliette's portfolio of design work, AI-native projects, experiments, and writing."
-  }
-]
+{
+  "links": [
+    {
+      "website": "Owner Careers",
+      "type": "Careers",
+      "url": "https://www.owner.com/careers#roles",
+      "description": "Open roles at Owner."
+    },
+    {
+      "website": "Dead Simple Sites",
+      "type": "Gallery",
+      "url": "https://deadsimplesites.com/?via=toools",
+      "description": "A gallery of minimal website designs."
+    },
+    {
+      "website": "Adam Whitcroft",
+      "type": "Profile",
+      "url": "https://x.com/AdamWhitcroft",
+      "description": "Adam Whitcroft on X."
+    },
+    {
+      "website": "Discord's React Native performance",
+      "type": "Article",
+      "url": "https://blog.margelo.com/margelo-discord-react-native-performance",
+      "description": "How Margelo improved Discord's React Native New Architecture animation performance."
+    },
+    {
+      "website": "ui.sh",
+      "type": "Resource",
+      "url": "https://ui.sh/",
+      "description": "Agent skills for building and reviewing interfaces."
+    },
+    {
+      "website": "React Native render pipeline",
+      "type": "Docs",
+      "url": "https://reactnative.dev/architecture/render-pipeline",
+      "description": "How React Native renders, commits, and mounts UI."
+    },
+    {
+      "website": "Understanding keyboards in React Native",
+      "type": "Article",
+      "url": "https://blog.margelo.com/deep-dive-in-keyboard-handling",
+      "description": "A guide to cross-platform keyboard behavior and animation in React Native."
+    },
+    {
+      "website": "Crypto Design Club",
+      "type": "Gallery",
+      "url": "https://cryptodesign.club/?via=toools",
+      "description": "A collection of crypto product design references."
+    },
+    {
+      "website": "Webframe",
+      "type": "Gallery",
+      "url": "https://webframe.xyz/?via=toools",
+      "description": "Screenshots of web application interfaces."
+    },
+    {
+      "website": "Finding hidden gem designers on X",
+      "type": "Post",
+      "url": "https://x.com/dariusdan/status/2060328941827531257",
+      "description": "A thread about finding designers on X."
+    },
+    {
+      "website": "Public Work by Cosmos",
+      "type": "Search",
+      "url": "https://www.cosmos.so/public-work",
+      "description": "A visual search engine for public-domain images."
+    },
+    {
+      "website": "Flora Guo",
+      "type": "Portfolio",
+      "url": "https://www.floguo.com/",
+      "description": "Flora Guo's personal site."
+    },
+    {
+      "website": "Same Energy",
+      "type": "Search",
+      "url": "https://same.energy/",
+      "description": "A visual search engine for finding related images."
+    },
+    {
+      "website": "Omar Abdul-Rahim",
+      "type": "Portfolio",
+      "url": "https://omarabdulrahim.com/",
+      "description": "Product design portfolio."
+    },
+    {
+      "website": "SaaSFrame",
+      "type": "Gallery",
+      "url": "https://saaspo.com/?via=toools",
+      "description": "A curated collection of SaaS website designs."
+    },
+    {
+      "website": "Joshua Wolk",
+      "type": "Portfolio",
+      "url": "https://www.joshuawolk.com/",
+      "description": "Design engineering portfolio."
+    },
+    {
+      "website": "React Native Bottom Sheet",
+      "type": "Library",
+      "url": "https://gorhom.dev/react-native-bottom-sheet/",
+      "description": "Documentation for React Native Bottom Sheet."
+    },
+    {
+      "website": "Illustration LOL",
+      "type": "Gallery",
+      "url": "https://www.illustration.lol/",
+      "description": "Editorial illustration references and creator credits."
+    },
+    {
+      "website": "Adam Ho",
+      "type": "Portfolio",
+      "url": "https://www.adamho.com/",
+      "description": "Independent graphic design and image-making practice."
+    },
+    {
+      "website": "Handheld",
+      "type": "Publication",
+      "url": "https://www.handheld.design/?via=toools",
+      "description": "Mobile design analysis, patterns, and tools."
+    },
+    {
+      "website": "React Native Evals",
+      "type": "Benchmark",
+      "url": "https://rn-evals.vercel.app/",
+      "description": "An open benchmark for AI models working on React Native tasks."
+    },
+    {
+      "website": "Preet Suthar",
+      "type": "Portfolio",
+      "url": "https://preetsuthar.me/",
+      "description": "Design engineering portfolio."
+    },
+    {
+      "website": "Cosmos",
+      "type": "Tool",
+      "url": "https://jobs.cosmos.so/",
+      "description": "A space for collecting visual inspiration."
+    },
+    {
+      "website": "Paradigm sheet",
+      "type": "Sheet",
+      "url": "https://app.paradigmai.com/sheets/76210606-6ce4-4ccc-a005-fb1cf6984a45",
+      "description": "A shared sheet in Paradigm's AI research workspace."
+    },
+    {
+      "website": "Workspaces",
+      "type": "Gallery",
+      "url": "https://www.workspaces.xyz/",
+      "description": "A collection of workspaces and desk setups."
+    },
+    {
+      "website": "userinterface.wiki",
+      "type": "Guide",
+      "url": "https://www.userinterface.wiki/",
+      "description": "A living manual for interface design, motion, and typography."
+    },
+    {
+      "website": "Reactix",
+      "type": "Library",
+      "url": "https://www.reacticx.com/",
+      "description": "Open-source React Native UI components built with Expo and animation libraries."
+    },
+    {
+      "website": "Harin Nitisvaar",
+      "type": "Portfolio",
+      "url": "https://harin.design/",
+      "description": "Interaction design portfolio."
+    },
+    {
+      "website": "react-native-worktree",
+      "type": "Repository",
+      "url": "https://github.com/aleqsio/react-native-worktree",
+      "description": "Metro port switcher for multi-agent React Native development."
+    },
+    {
+      "website": "Avec Careers",
+      "type": "Careers",
+      "url": "https://www.avec.ai/jobs",
+      "description": "Open roles at Avec, an AI email product."
+    },
+    {
+      "website": "Viewport UI",
+      "type": "Gallery",
+      "url": "https://viewport-ui.design/",
+      "description": "A curated collection of interface design references."
+    },
+    {
+      "website": "Awwwards",
+      "type": "Gallery",
+      "url": "https://www.awwwards.com/",
+      "description": "Awarded websites and digital design work."
+    },
+    {
+      "website": "Spotted in Prod",
+      "type": "Gallery",
+      "url": "https://www.spottedinprod.com/clips",
+      "description": "A collection of notable iOS apps and interactions."
+    },
+    {
+      "website": "Site of Sites",
+      "type": "Gallery",
+      "url": "https://www.siteofsites.co/",
+      "description": "A curated web design gallery."
+    },
+    {
+      "website": "Design Spells",
+      "type": "Gallery",
+      "url": "https://designspells.com/",
+      "description": "Micro-interactions and small interface details."
+    },
+    {
+      "website": "Unsection",
+      "type": "Gallery",
+      "url": "https://www.unsection.com/",
+      "description": "Website sections organized by patterns such as hero, pricing, and CTA."
+    },
+    {
+      "website": "Aave Labs Careers",
+      "type": "Careers",
+      "url": "https://avara.xyz/careers",
+      "description": "Open roles at Aave Labs."
+    },
+    {
+      "website": "Alex Burdin",
+      "type": "Portfolio",
+      "url": "https://burd.in/",
+      "description": "Selected design work by Alex Burdin."
+    },
+    {
+      "website": "Using AI as a Design Engineer",
+      "type": "Article",
+      "url": "https://jakub.kr/work/using-ai-as-a-design-engineer",
+      "description": "Jakub Krol's workflow for using AI in design engineering."
+    },
+    {
+      "website": "Design Systems Database",
+      "type": "Gallery",
+      "url": "https://designsystems.surf/",
+      "description": "Components and foundations from production design systems."
+    },
+    {
+      "website": "SiteInspire",
+      "type": "Gallery",
+      "url": "https://www.siteinspire.com/websites",
+      "description": "A curated gallery of website design."
+    },
+    {
+      "website": "Why vibe-coded apps look cheap",
+      "type": "Post",
+      "url": "https://x.com/Hartdrawss/status/2034890067236594136",
+      "description": "A thread about improving the visual quality of AI-generated applications."
+    },
+    {
+      "website": "Hamza Alabou",
+      "type": "Portfolio",
+      "url": "https://www.hamzaalabou.com/",
+      "description": "Design engineering portfolio."
+    },
+    {
+      "website": "Agentic Engineering Guide",
+      "type": "Guide",
+      "url": "https://agentic-engineering.swmansion.com/",
+      "description": "Practical guidance for agentic engineering in software projects."
+    },
+    {
+      "website": "Async, sync, and in between",
+      "type": "Article",
+      "url": "https://antfu.me/posts/async-sync-in-between",
+      "description": "Anthony Fu explores approaches between synchronous and asynchronous functions."
+    },
+    {
+      "website": "Issue tracking is dead",
+      "type": "Announcement",
+      "url": "https://linear.app/next",
+      "description": "Linear's direction for context-driven product development."
+    },
+    {
+      "website": "Websitevice",
+      "type": "Gallery",
+      "url": "https://websitevice.com/",
+      "description": "Practical website examples for design inspiration."
+    },
+    {
+      "website": "Recent",
+      "type": "Gallery",
+      "url": "https://recent.design/",
+      "description": "A daily feed of design, websites, and digital products."
+    },
+    {
+      "website": "Bitvavo Careers",
+      "type": "Careers",
+      "url": "https://jobs.bitvavo.com/find-your-role",
+      "description": "Open roles at Bitvavo."
+    },
+    {
+      "website": "VSCO Careers",
+      "type": "Careers",
+      "url": "https://www.vsco.co/about/careers",
+      "description": "Open roles at VSCO."
+    },
+    {
+      "website": "Sydney Nguyen",
+      "type": "Portfolio",
+      "url": "https://sydneyknguyen.com/",
+      "description": "UX and interface design portfolio."
+    },
+    {
+      "website": "EPI Company Careers",
+      "type": "Careers",
+      "url": "https://careers.epicompany.eu/jobs?department=Product+%26+Engineering+%26+Experience&query=&split_view=true",
+      "description": "Product, engineering, and experience roles at EPI Company."
+    },
+    {
+      "website": "Kota Senior Mobile Engineer",
+      "type": "Job",
+      "url": "https://jobs.ashbyhq.com/kota/0d2693bd-73da-4b96-80b0-3dbd8f0f74a1/application",
+      "description": "Senior Mobile Engineer role at Kota."
+    },
+    {
+      "website": "Augustus Careers",
+      "type": "Careers",
+      "url": "https://augustus.com/careers",
+      "description": "Open roles at Augustus."
+    },
+    {
+      "website": "Interfaze",
+      "type": "AI Tool",
+      "url": "https://interfaze.ai/",
+      "description": "A model for deterministic tasks such as OCR and structured extraction."
+    },
+    {
+      "website": "Three Letter Acronym",
+      "type": "Blog",
+      "url": "https://tla.systems/blog/",
+      "description": "An independent software development blog."
+    },
+    {
+      "website": "Why software factories fail",
+      "type": "Post",
+      "url": "https://x.com/dexhorthy/status/2080697380379427275",
+      "description": "A thread about the limits of software factories."
+    },
+    {
+      "website": "Founding Engineer",
+      "type": "Job",
+      "url": "https://polar-nation-10f.notion.site/Founding-Engineer-32791c5a40538085808ae593c014689b",
+      "description": "Founding Engineer role published through Notion."
+    },
+    {
+      "website": "Scape Software Engineer",
+      "type": "Job",
+      "url": "https://scape.app/careers/software-engineer",
+      "description": "Software Engineer role covering product systems, integrations, and AI workflows."
+    },
+    {
+      "website": "Kage landing page",
+      "type": "Post",
+      "url": "https://x.com/mengto/status/2086023649526452265",
+      "description": "An open-source Three.js landing page."
+    },
+    {
+      "website": "Zed Product Design Engineer",
+      "type": "Job",
+      "url": "https://zed.dev/jobs/product-designer",
+      "description": "Product Design Engineer role at Zed."
+    },
+    {
+      "website": "FC Barcelona away jersey",
+      "type": "Store",
+      "url": "https://store.fcbarcelona.com/en-ae/products/fc-barcelona-away-fullshirt-26-27-player-lamine-yamal-ucl-away-2627?variant=55885577290113",
+      "description": "Lamine Yamal 2026/27 UEFA Champions League away jersey."
+    },
+    {
+      "website": "Design Engineering by Flora Guo",
+      "type": "Guide",
+      "url": "https://www.floguo.com/notes/design-engineering",
+      "description": "A living collection of design engineering notes and resources."
+    },
+    {
+      "website": "App Stacks",
+      "type": "Gallery",
+      "url": "https://appstacks.club/",
+      "description": "Stories, technology stacks, and tools behind selected apps."
+    },
+    {
+      "website": "Emdash",
+      "type": "Tool",
+      "url": "https://emdash.sh/",
+      "description": "An open-source environment for running coding agents in parallel."
+    },
+    {
+      "website": "Capy",
+      "type": "Tool",
+      "url": "https://capy.ai/",
+      "description": "Cloud coding agents for engineering tasks and code review."
+    },
+    {
+      "website": "Superset",
+      "type": "Tool",
+      "url": "https://superset.sh/",
+      "description": "A local-first workspace manager for running coding agents in parallel."
+    },
+    {
+      "website": "Letta Agent",
+      "type": "Tool",
+      "url": "https://www.letta.com/agent/",
+      "description": "Stateful agents with persistent memory and scheduled work."
+    },
+    {
+      "website": "Conductor",
+      "type": "Tool",
+      "url": "https://www.conductor.build/",
+      "description": "Cloud workspaces for running and reviewing coding agents."
+    },
+    {
+      "website": "Paseo",
+      "type": "Tool",
+      "url": "https://paseo.sh/",
+      "description": "An open-source coding-agent orchestrator for desktop, web, mobile, and CLI."
+    },
+    {
+      "website": "Herdr",
+      "type": "Tool",
+      "url": "https://herdr.dev/",
+      "description": "A persistent terminal runtime for coding agents."
+    },
+    {
+      "website": "Helmor",
+      "type": "Tool",
+      "url": "https://helmor.ai/",
+      "description": "A local workbench for orchestrating, reviewing, testing, and merging agent work."
+    },
+    {
+      "website": "Interbase",
+      "type": "Tool",
+      "url": "https://interbase.ai/",
+      "description": "An open-source CLI agent with model choice, prompt aliases, long-running goals, and remote access."
+    },
+    {
+      "website": "Good Websites",
+      "type": "Gallery",
+      "url": "https://brianlovin.com/sites",
+      "description": "Brian Lovin's curated collection of notable personal and product websites."
+    },
+    {
+      "website": "Marco Cornacchia",
+      "type": "Portfolio",
+      "url": "https://www.marco.fyi/",
+      "description": "Product designer Marco Cornacchia's interactive portfolio."
+    },
+    {
+      "website": "Design Engineer Jobs",
+      "type": "Job Board",
+      "url": "https://designengineer.io/",
+      "description": "A job board focused on design engineering and adjacent roles."
+    },
+    {
+      "website": "Shadow",
+      "type": "Project",
+      "url": "https://www.ishaand.com/shadow",
+      "description": "Ishaan Dey's case study of an open-source background coding agent and real-time interface."
+    },
+    {
+      "website": "Doodles",
+      "type": "Experiment",
+      "url": "https://doodle.mary-louise.com/",
+      "description": "An experiment that turns prompts into AI-generated hand-drawn sketches."
+    },
+    {
+      "website": "I'm Hard, I'm Wet",
+      "type": "Essay",
+      "url": "https://thedosagemakesitso.substack.com/p/im-hard-im-wet",
+      "description": "Dmitry's essay on how masculine and feminine roles are formed and performed."
+    },
+    {
+      "website": "Designers and Machines",
+      "type": "Community",
+      "url": "https://www.designers-machines.com/",
+      "description": "A monthly San Francisco dinner where designers demo what they are building with AI."
+    },
+    {
+      "website": "vowels",
+      "type": "Store",
+      "url": "https://vowels.net/",
+      "description": "Made-in-Japan luxury clothing and essentials."
+    },
+    {
+      "website": "120% Lino",
+      "type": "Store",
+      "url": "https://120percento.com/",
+      "description": "Italian linen clothing for women and men."
+    },
+    {
+      "website": "Agentic Engineering",
+      "type": "Guide",
+      "url": "https://www.arjunvirk.com/writing/ml-guide/chapter-6-agentic-engineering",
+      "description": "Arjun Virk's guide to levels of AI usage and the workspace behind a Level 4 agent."
+    },
+    {
+      "website": "Maggie Appleton's digital garden",
+      "type": "Repository",
+      "url": "https://github.com/MaggieAppleton/maggieappleton.com-V3",
+      "description": "Source code for Maggie Appleton's Astro and MDX digital garden."
+    },
+    {
+      "website": "Cursor Camp",
+      "type": "Experiment",
+      "url": "https://neal.fun/cursor-camp/",
+      "description": "An interactive browser experience by Neal Agarwal."
+    },
+    {
+      "website": "Gradient Border Plugin",
+      "type": "Library",
+      "url": "https://gradient-border.floriankiem.com/",
+      "description": "A Tailwind CSS plugin for configurable gradient borders."
+    },
+    {
+      "website": "Easing Gradients",
+      "type": "Tool",
+      "url": "https://larsenwork.com/easing-gradients/",
+      "description": "An editor and explainer for creating smoother gradients with easing functions."
+    },
+    {
+      "website": "Footer",
+      "type": "Gallery",
+      "url": "https://www.footer.design/",
+      "description": "A curated gallery of website footer designs organized by style."
+    },
+    {
+      "website": "Locale",
+      "type": "Tool",
+      "url": "https://joshpuckett.me/locale",
+      "description": "Preview text across locally installed fonts using the browser's Local Font Access API."
+    },
+    {
+      "website": "Luxury Software",
+      "type": "Essay",
+      "url": "https://nativestudio.substack.com/p/luxury-software",
+      "description": "Jihad Esmail's essay on prosumers, identity, and selling a worldview through software."
+    },
+    {
+      "website": "Design Eng Club",
+      "type": "Community",
+      "url": "https://www.designeng.club/",
+      "description": "A community, newsletter, and event series for people working across design and engineering."
+    },
+    {
+      "website": "Juliette",
+      "type": "Portfolio",
+      "url": "https://shedsgns.me/",
+      "description": "Juliette's portfolio of design work, AI-native projects, experiments, and writing."
+    }
+  ]
+}

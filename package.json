@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "bunx --bun @biomejs/biome lint",
-    "seed:sanity": "bun scripts/import-sanity.ts",
     "studio:deploy": "sanity deploy"
   },
   "dependencies": {

@@ -563,12 +563,6 @@
       "type": "tool",
       "url": "https://www.cube-motion.dev/",
       "description": "A dependency-free JavaScript animation library for four essential UI motions."
-    },
-    {
-      "website": "Scrollbars",
-      "type": "Docs",
-      "url": "https://www.fluidfunctionalism.com/docs/scrollbars",
-      "description": "A scrollbar that stays out of the way but never disappears, over shadcn's scroll-fade as the baseline edge treatment — restyled to the shape system, with native scroll physics on touch."
     }
   ]
 }

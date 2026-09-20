@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { SaeedName } from "@/components/saeed-name";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -71,10 +72,14 @@ export default async function LinksPage() {
       </div>
 
       <div
-        className="relative left-1/2 mt-6 min-h-0 w-[min(56rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-1 overflow-hidden rounded-lg bg-background ring-1 ring-border"
+        className="relative left-1/2 mt-6 min-h-0 w-[min(56rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-1 overflow-hidden rounded-lg bg-background ring-1 ring-border  smooth-shadow-ring shadow-black smooth-ring-neutral-300/30"
         data-sticker-protected
       >
-        <div className="h-full min-h-0 overflow-auto overscroll-contain">
+        <ScrollArea
+          orientation="both"
+          className="h-full min-h-0"
+          viewportClassName="overscroll-contain scroll-fade"
+        >
           <Table className="min-w-208 table-fixed leading-5">
             <caption className="sr-only">
               Saved websites and tools with category, URL, and notes.
@@ -163,7 +168,7 @@ export default async function LinksPage() {
               ))}
             </TableBody>
           </Table>
-        </div>
+        </ScrollArea>
       </div>
     </main>
   );

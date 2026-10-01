@@ -1,7 +1,7 @@
 import type { SoundName } from "cuelume";
 
 export type StickerDefinition = {
-  id: "bass" | "controller" | "keyboard" | "monstera" | "pencil";
+  id: "babylon" | "bass" | "controller" | "keyboard" | "monstera" | "pencil";
   label: string;
   sound: SoundName;
   src: string;
@@ -60,5 +60,15 @@ export const STICKERS: StickerDefinition[] = [
       "The story is simple. My father always carried a Uni pen. When my sister and I started high school, he bought each of us a rOtring mechanical pencil to help us study. We had to keep them clean and always have them with us. Of course, I lost mine somewhere. When I saw this Uni pencil, I had to buy it. I loved the design, but more than that, it reminded me of my father. May God rest his soul.",
     width: 170,
     height: 142,
+  },
+  {
+    id: "babylon",
+    label: "Babylon perfume",
+    sound: "arrival",
+    src: "/stickers/babylon.png",
+    story:
+      "I like earthy and woody notes, and I couldn't resist this one. I love leaving a woody, earthy impression when I walk in or walk out. It's too good.",
+    width: 120,
+    height: 180,
   },
 ];

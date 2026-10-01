@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BookShelf } from "@/components/book-shelf";
 import { MobileStickerField } from "@/components/mobile-sticker-field";
 import { SaeedName } from "@/components/saeed-name";
 import {
@@ -164,6 +165,17 @@ export default async function Home() {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div
+        className="mt-12"
+        data-analytics-view="Content Viewed"
+        data-analytics-label="Library"
+      >
+        <h2 className="list-heading">Library</h2>
+        <div className="mt-5">
+          <BookShelf />
+        </div>
       </div>
     </main>
   );

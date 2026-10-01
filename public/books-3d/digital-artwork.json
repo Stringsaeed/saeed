@@ -1,0 +1,61 @@
+{
+  "updated": "2026-10-01",
+  "inspired": {
+    "front": {
+      "source": "User-supplied digital front cover, codex-clipboard-250796aa-f538-4916-ad8e-7cc8dfa7bdf6.png",
+      "crop": [
+        9,
+        9,
+        1721,
+        2551
+      ],
+      "output": "inspired/front-art.jpg"
+    },
+    "back": {
+      "source": "User-supplied back cover, codex-clipboard-a2b4acb4-3033-4309-bd42-555ee99c2d80.png",
+      "output": "inspired/back-art.jpg"
+    },
+    "spine": {
+      "source": "Existing bookshelf SVG art in src/components/book-spine.tsx",
+      "output": "inspired/spine-shelf.svg",
+      "script": "scripts/export-bookshelf-spines.tsx",
+      "includesSmallPhotographicArtCutout": false
+    }
+  },
+  "the-design-of-everyday-things": {
+    "front": {
+      "source": "Existing project digital artwork, public/books/the-design-of-everyday-things.jpg",
+      "output": "/books/the-design-of-everyday-things.jpg"
+    },
+    "back": {
+      "source": "Vector reconstruction of user-supplied codex-clipboard-80bbaf93-6146-44fa-bac5-7a15d538f8ff.png",
+      "editable": "the-design-of-everyday-things/back-vector.svg",
+      "output": "the-design-of-everyday-things/back-vector.png",
+      "script": "scripts/prepare-everyday-back.py",
+      "notes": "Retypeset wording and layout with flat colors; barcode rebuilt as EAN-13 plus EAN-5. Font/layout approximation, not original publisher artwork."
+    },
+    "spine": {
+      "source": "Existing bookshelf SVG art in src/components/book-spine.tsx",
+      "output": "the-design-of-everyday-things/spine-shelf.svg",
+      "script": "scripts/export-bookshelf-spines.tsx",
+      "includesSmallPhotographicArtCutout": true
+    }
+  },
+  "the-staff-engineers-path": {
+    "front": {
+      "source": "Existing project digital artwork, public/books/the-staff-engineers-path.jpg",
+      "output": "/books/the-staff-engineers-path.jpg"
+    },
+    "back": {
+      "source": "User-supplied digital back cover, codex-clipboard-ff54cb50-c935-42c3-95e2-ac07c81c84bc.png",
+      "output": "the-staff-engineers-path/back-art.png",
+      "processing": "Copied unchanged"
+    },
+    "spine": {
+      "source": "Existing bookshelf SVG art in src/components/book-spine.tsx",
+      "output": "the-staff-engineers-path/spine-shelf.svg",
+      "script": "scripts/export-bookshelf-spines.tsx",
+      "includesSmallPhotographicArtCutout": true
+    }
+  }
+}

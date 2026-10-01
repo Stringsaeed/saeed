@@ -1,0 +1,119 @@
+{
+  "page": "https://press.stripe.com/where-is-my-flying-car",
+  "materials": {
+    "where-is-my-flying-car": {
+      "shininess": 8,
+      "thickness": 2.85,
+      "diffuseMapCustom": "WIMFC_diffuse",
+      "diffuseBaseColor": [
+        0.471,
+        0.467,
+        0.467
+      ],
+      "bumpMapBase": "shared_bump_buckram",
+      "bumpScaleBase": 0.04,
+      "bumpMapCustom": "WIMFC_bump",
+      "bumpScaleCustom": 0.1,
+      "foilMap": "WIMFC_foil",
+      "foilDetail": 1,
+      "foilSpecular": 0.3,
+      "foilOpacity": 0.85,
+      "reflectiveness": 0.1
+    },
+    "scaling-people": {
+      "shininess": 3,
+      "thickness": 3.4,
+      "diffuseMapCustom": "SP_diffuse",
+      "diffuseBaseColor": [
+        0.21,
+        0.29,
+        0.6
+      ],
+      "bumpMapBase": "shared_bump_paper",
+      "bumpScaleBase": 0.03,
+      "bumpMapCustom": "SP_bump",
+      "bumpScaleCustom": 0.04,
+      "foilMap": "SP_foil",
+      "foilDetail": 2,
+      "foilSpecular": 0.0,
+      "foilOpacity": 1.1,
+      "glossMap": "SP_gloss",
+      "glossSpecular": 0.6,
+      "glossOpacity": 0.03,
+      "reflectiveness": 0.6
+    },
+    "an-elegant-puzzle": {
+      "shininess": 8,
+      "thickness": 3.4,
+      "diffuseMapCustom": "AEP_diffuse",
+      "diffuseBaseColor": [
+        0.0862,
+        0.0862,
+        0.0862
+      ],
+      "bumpMapBase": "shared_bump_buckram",
+      "bumpScaleBase": 0.04,
+      "bumpMapCustom": "AEP_bump",
+      "bumpScaleCustom": 0.05,
+      "foilMap": "AEP_foil",
+      "foilDetail": 1,
+      "foilSpecular": 0.1,
+      "foilOpacity": 1,
+      "reflectiveness": 0.04
+    }
+  },
+  "textures": {
+    "AEP_bump": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/6ofvxdT98sQkSGQVsNwvCw/7ec263469b68cfb79b258223ff584d05/AEP_bump.jpg?fm=webp&q=60&w=1920",
+      "file": "/books-3d/shared/AEP_bump.webp"
+    },
+    "AEP_diffuse": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/7nAMwiShXZ1ZseQv9izipm/2dfc29aa312ee847de992eb00bf32919/AEP_diffuse.png?fm=webp&q=60&w=1920",
+      "file": "/books-3d/shared/AEP_diffuse.webp"
+    },
+    "AEP_foil": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/6ERCAPptgpsH5jfCr1rEYO/6d7a12f79bd2af28c3efadd3a2dad2e9/AEP_foil.png?w=1920",
+      "file": "/books-3d/shared/AEP_foil.png"
+    },
+    "SP_bump": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/1LxllmpIB1fQHaAhlHIhE7/2e00fcc34f68ed1165f3fb178300b2b3/SP_bump.png?&w=1920",
+      "file": "/books-3d/shared/SP_bump.png"
+    },
+    "SP_diffuse": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/4MbmPagXJvRR9UgPY7HKPa/8e02a70d74e1b8396d9555c5531cab23/SP_diffuse.jpg?fm=webp&q=60&w=1920",
+      "file": "/books-3d/shared/SP_diffuse.webp"
+    },
+    "SP_foil": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/4MGPSslHFTTvBSA4BY2TLO/c0426964170f97150ce5009ad4693fa3/SP_foil.png?w=1920",
+      "file": "/books-3d/shared/SP_foil.png"
+    },
+    "SP_gloss": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/7Kk5WdtiKdUbU0aNjBZicP/6fed87ea6ac7347ec89743244c844e87/SP_gloss.png?fm=webp&q=60&w=1920",
+      "file": "/books-3d/shared/SP_gloss.webp"
+    },
+    "WIMFC_bump": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/1BP6fmkh8YJQGnVPFrZ5Hj/cc61d1947d2f1a91c9c9d45376d50cc5/WIMFC_bump.jpg?w=1920",
+      "file": "/books-3d/shared/WIMFC_bump.jpg"
+    },
+    "WIMFC_diffuse": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/48bjCo7hZ07iMN45fVi0XW/154fa1ab150db2de6585ea1ea0c40ab3/WIMFC_diffuse.png?w=1920",
+      "file": "/books-3d/shared/WIMFC_diffuse.png"
+    },
+    "WIMFC_foil": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/1WghVN4OzScMvJlXtCD71S/a2908a652953f2040a2771905767a49e/WIMFC_foil.png?w=1920",
+      "file": "/books-3d/shared/WIMFC_foil.png"
+    },
+    "shared_bump_buckram": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/2a7739fCj3KI5KYTV6RqSU/9c18f7bdbd82b496a66357430357e922/shared_bump_buckram.jpg?w=1920",
+      "file": "/books-3d/shared/shared_bump_buckram.jpg"
+    },
+    "shared_bump_paper": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/5hofqL08noCppsPsdxjvso/de26fe8a37a37f6c79e39fc8be160fcd/shared_bump_paper.jpg?w=1920",
+      "file": "/books-3d/shared/shared_bump_paper.jpg"
+    },
+    "shared_diffuse_overlay": {
+      "url": "https://images.ctfassets.net/fzn2n1nzq965/5kON77i1wHLP73SOBDNlJV/51e1684d6650038bc2ce70da92b53f3f/shared_diffuse_overlay.jpg?fm=webp&q=60&w=1920",
+      "file": "/books-3d/shared/shared_diffuse_overlay.webp"
+    }
+  }
+}

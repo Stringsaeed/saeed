@@ -207,11 +207,3 @@ export const BOOKS: readonly Book[] = [
     },
   },
 ];
-
-// Colour of the spine board where it shows at the head and foot of the book.
-export function spineColor(book: Book) {
-  if (book.spine.design === "stripe-press" || book.spine.design === "image") {
-    return book.spine.background;
-  }
-  return book.coverColor;
-}

@@ -1,4 +1,5 @@
 import { STICKERS, type StickerDefinition } from "./sticker-data";
+import type { SavedStickers } from "./sticker-storage";
 
 type Rectangle = {
   left: number;
@@ -337,7 +338,43 @@ export function transformSticker(
   );
 }
 
-export function placeStickers(geometry: FieldGeometry, seed: number) {
+function restoreSavedStickers(geometry: FieldGeometry, saved: SavedStickers) {
+  const viewportScale = getScale(geometry.width);
+  const restored: StickerPlacement[] = [];
+
+  for (const sticker of STICKERS) {
+    const position = saved[sticker.id];
+    if (!position) continue;
+
+    const width = sticker.width * viewportScale;
+    const height = sticker.height * viewportScale;
+    const candidate: StickerPlacement = {
+      ...sticker,
+      width,
+      height,
+      left: geometry.width / 2 + position.x - width / 2,
+      offsetX: 0,
+      offsetY: 0,
+      scale: position.scale,
+      top: position.y - height / 2,
+      rotation: position.rotation,
+    };
+
+    // A saved spot that no longer fits (narrower window, shifted content)
+    // is skipped, not deleted, so it comes back when the room does.
+    if (isPlacementValid(candidate, restored, geometry)) {
+      restored.push(candidate);
+    }
+  }
+
+  return restored;
+}
+
+export function placeStickers(
+  geometry: FieldGeometry,
+  seed: number,
+  saved: SavedStickers = {},
+) {
   if (geometry.width < MINIMUM_VIEWPORT_WIDTH) return [];
 
   if (geometry.protectedRectangles.length === 0) return [];
@@ -356,8 +393,24 @@ export function placeStickers(geometry: FieldGeometry, seed: number) {
   const occupied: Rectangle[] = [];
   const placements: StickerPlacement[] = [];
   const firstStickerStartsOnLeft = random() < 0.5;
+  const restored = new Map(
+    restoreSavedStickers(geometry, saved).map((sticker) => [
+      sticker.id,
+      sticker,
+    ]),
+  );
+
+  for (const sticker of restored.values()) {
+    occupied.push(getStickerRectangle(sticker));
+  }
 
   for (const [index, sticker] of STICKERS.entries()) {
+    const restoredSticker = restored.get(sticker.id);
+    if (restoredSticker) {
+      placements.push(restoredSticker);
+      continue;
+    }
+
     const width = sticker.width * scale;
     const height = sticker.height * scale;
     const rotation = randomBetween(random, -15, 15);

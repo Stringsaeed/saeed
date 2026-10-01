@@ -5,6 +5,7 @@ import {
   type FieldGeometry,
   isPlacementValid,
   moveSticker,
+  placeStickers,
   type StickerPlacement,
   snapStickerToNearestSafe,
 } from "./sticker-placement";
@@ -98,5 +99,55 @@ describe("sticker drag through protected content", () => {
     assert.equal(snapped, outside);
     assert.equal(snapped[0]?.offsetX, 980);
     assert.equal(snapped[0]?.offsetY, 40);
+  });
+});
+
+describe("saved sticker positions", () => {
+  test("pins a saved sticker where it was left", () => {
+    const placements = placeStickers(geometry, 7, {
+      keyboard: {
+        rotation: 12,
+        scale: 1.2,
+        x: -500,
+        y: 400,
+      },
+    });
+    const keyboard = placements.find((item) => item.id === "keyboard");
+
+    assert.ok(keyboard);
+    assert.equal(keyboard.left + keyboard.width / 2, 200);
+    assert.equal(keyboard.top + keyboard.height / 2, 400);
+    assert.equal(keyboard.rotation, 12);
+    assert.equal(keyboard.scale, 1.2);
+  });
+
+  test("ignores a saved spot that sits on protected content", () => {
+    const placements = placeStickers(geometry, 7, {
+      keyboard: {
+        rotation: 0,
+        scale: 1,
+        x: 0,
+        y: 400,
+      },
+    });
+    const keyboard = placements.find((item) => item.id === "keyboard");
+
+    assert.ok(keyboard);
+    assert.equal(coversProtectedContent(keyboard, geometry), false);
+  });
+
+  test("keeps other stickers clear of a pinned one", () => {
+    const placements = placeStickers(geometry, 7, {
+      keyboard: {
+        rotation: 0,
+        scale: 1,
+        x: -500,
+        y: 400,
+      },
+    });
+
+    for (const item of placements) {
+      assert.equal(isPlacementValid(item, placements, geometry), true);
+    }
   });
 });

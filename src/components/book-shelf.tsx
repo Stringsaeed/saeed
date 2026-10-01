@@ -4,7 +4,6 @@ import { Dialog } from "@base-ui/react/dialog";
 import { RiCloseLine } from "@remixicon/react";
 import {
   animate,
-  type MotionValue,
   motion,
   useMotionValue,
   useReducedMotion,
@@ -21,18 +20,20 @@ import {
   useRef,
   useState,
 } from "react";
-import { BOOKS, type Book, spineColor } from "@/data/books";
+import { BOOKS, type Book } from "@/data/books";
+import { BOOK_MODELS } from "@/data/books-3d";
 import {
   type PulledBookSize,
   pulledBookSize,
-  roundSpineStrips,
   REST_ROTATE_X,
   REST_ROTATE_Y,
   rubberBand,
   SHELF_ROTATE_Y,
   shelfTransform,
 } from "@/lib/book-geometry";
+import type { BookModel } from "@/lib/books-3d/types";
 import { BookSpine } from "./book-spine";
+import { BookModelView } from "./books-3d/book-model-view";
 
 // The pull is a long, rare flight across the screen, so it gets its own
 // springs rather than the short UI tiers in lib/springs. Travel and turn run
@@ -85,8 +86,8 @@ const DRAG_SLOP = 6;
 const TURN_PER_PIXEL = 0.45;
 const TILT_PER_PIXEL = 0.2;
 const TURN_RANGE = [
-  -35,
-  95,
+  -185,
+  185,
 ] as const;
 const TILT_RANGE = [
   -28,
@@ -147,38 +148,9 @@ type Gesture = {
   mode: "pending" | "turn" | "dismiss";
 };
 
-// How much shade a spine face takes once it is turned fully away.
-const SPINE_SHADE = 0.55;
-
-// Shade for one strip of a rounded spine, from how squarely it faces the
-// viewer at the book's current turn. The strips nearest a cover brighten as
-// that cover comes round, which is what makes the curve read as a curve.
-function StripShade({
-  facing,
-  rotateY,
-}: {
-  facing: number;
-  rotateY: MotionValue<number>;
-}) {
-  const opacity = useTransform(
-    rotateY,
-    (turn) =>
-      SPINE_SHADE *
-      (1 - Math.max(0, Math.cos(((turn + facing) * Math.PI) / 180))),
-  );
-
-  return (
-    <motion.div
-      className="book-shade"
-      style={{
-        opacity,
-      }}
-    />
-  );
-}
-
 type PulledBookProps = {
   book: Book;
+  model: BookModel;
   onRequestClose: () => void;
   onReturned: () => void;
   onTaken: (id: string) => void;
@@ -190,6 +162,7 @@ type PulledBookProps = {
 
 function PulledBook({
   book,
+  model,
   onRequestClose,
   onReturned,
   onTaken,
@@ -199,6 +172,8 @@ function PulledBook({
   slot,
 }: PulledBookProps) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  const handleModelReady = useCallback(() => setReady(true), []);
   const placedRef = useRef(false);
   const gestureRef = useRef<Gesture | null>(null);
 
@@ -207,46 +182,10 @@ function PulledBook({
   const scale = useMotionValue(1);
   const rotateX = useMotionValue(0);
   const rotateY = useMotionValue(SHELF_ROTATE_Y);
-  const presence = useMotionValue(reduceMotion ? 0 : 1);
+  const presence = useMotionValue(0);
   const scrim = useMotionValue(0);
   const detail = useMotionValue(0);
 
-  // Light follows the turn: the cover is in shade while it is edge-on, the
-  // spine falls into shade as it swings away, and the cast shadow only shows
-  // once the book has left the row.
-  const coverShade = useTransform(
-    rotateY,
-    [
-      REST_ROTATE_Y,
-      SHELF_ROTATE_Y,
-    ],
-    [
-      0,
-      0.42,
-    ],
-  );
-  const spineShade = useTransform(
-    rotateY,
-    [
-      REST_ROTATE_Y,
-      SHELF_ROTATE_Y,
-    ],
-    [
-      0.3,
-      0,
-    ],
-  );
-  const castShadow = useTransform(
-    rotateY,
-    [
-      62,
-      SHELF_ROTATE_Y,
-    ],
-    [
-      1,
-      0,
-    ],
-  );
   const detailY = useTransform(
     detail,
     [
@@ -262,6 +201,10 @@ function PulledBook({
   useLayoutEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
+    if (!ready) {
+      if (!open) onReturned();
+      return;
+    }
 
     let cancelled = false;
     const home = () =>
@@ -273,6 +216,7 @@ function PulledBook({
 
     if (!placedRef.current) {
       placedRef.current = true;
+      if (!reduceMotion) presence.jump(1);
       if (reduceMotion) {
         rotateX.jump(REST_ROTATE_X);
         rotateY.jump(REST_ROTATE_Y);
@@ -366,6 +310,7 @@ function PulledBook({
     };
   }, [
     book.id,
+    ready,
     detail,
     onReturned,
     onTaken,
@@ -485,8 +430,6 @@ function PulledBook({
     ],
   );
 
-  const cover = coverImageProps(book);
-
   return (
     <>
       <Dialog.Backdrop
@@ -509,14 +452,6 @@ function PulledBook({
                 "--book-w": `${size.width}px`,
                 "--book-h": `${size.height}px`,
                 "--book-d": `${size.depth}px`,
-                "--spine-bulge": `${size.spineBulge}px`,
-                "--board-thickness": book.board
-                  ? `${(book.board / book.height) * size.height}px`
-                  : undefined,
-                "--pages": book.pages,
-                "--board-color": book.coverColor,
-                "--spine-color": spineColor(book),
-                "--headband": book.headband,
               } as CSSProperties
             }
           >
@@ -530,106 +465,30 @@ function PulledBook({
                 y,
                 scale,
                 opacity: presence,
-                perspective: `${size.perspective}px`,
               }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerEnd}
               onPointerCancel={handlePointerEnd}
             >
-              <motion.div
-                className="book"
-                data-binding={book.binding}
-                data-round={size.spineBulge > 0 ? "" : undefined}
-                style={{
-                  rotateX,
-                  rotateY,
-                }}
-              >
-                <motion.div
-                  className="book-cast-shadow"
-                  style={{
-                    opacity: castShadow,
-                  }}
-                />
-                <div
-                  className="book-face book-back"
-                  style={{
-                    background: book.coverColor,
-                  }}
-                />
-                <div className="book-face book-lining book-lining-back" />
-                <div className="book-face book-lining book-lining-front" />
-                <div className="book-face book-lining book-lining-spine" />
-                <div className="book-face book-pages book-fore" />
-                <div className="book-face book-pages book-top" />
-                <div className="book-face book-pages book-bottom" />
-                <div className="book-face book-boards book-fore-boards" />
-                <div className="book-face book-boards book-top-boards" />
-                <div className="book-face book-boards book-bottom-boards" />
-                {size.spineBulge > 0 ? (
-                  <>
-                    {roundSpineStrips(size).map((strip) => (
-                      <div
-                        key={strip.key}
-                        className="book-face book-spine-strip"
-                        style={{
-                          left: `calc(50% - ${strip.width / 2}px)`,
-                          width: strip.width,
-                          transform: `translate3d(${strip.x}px, 0, ${strip.z}px) rotateY(${strip.rotateY}deg)`,
-                        }}
-                      >
-                        <div
-                          className="book-spine-slice"
-                          style={{
-                            width: size.depth,
-                            transform: `translateX(${strip.sliceOffset}px) scaleX(${strip.sliceScale})`,
-                          }}
-                        >
-                          <BookSpine book={book} unlit />
-                        </div>
-                        <StripShade facing={strip.rotateY} rotateY={rotateY} />
-                      </div>
-                    ))}
-                    <div className="book-face book-spine-cap book-spine-cap-top" />
-                    <div className="book-face book-spine-cap book-spine-cap-bottom" />
-                  </>
-                ) : (
-                  <div className="book-face book-spine-face">
-                    <BookSpine book={book} />
-                    <motion.div
-                      className="book-shade"
-                      style={{
-                        opacity: spineShade,
-                      }}
-                    />
-                  </div>
-                )}
-                <div
-                  className="book-face book-front"
-                  style={{
-                    background: book.coverColor,
-                  }}
-                >
-                  {/* biome-ignore lint/performance/noImgElement: getImageProps keeps this cover on the same optimized URL that warmCover preloaded. */}
-                  <img
-                    {...cover}
-                    alt=""
-                    loading="eager"
-                    draggable={false}
-                    className="book-cover"
-                  />
-                  <motion.div
-                    className="book-shade"
-                    style={{
-                      opacity: coverShade,
-                    }}
-                  />
-                </div>
-              </motion.div>
+              <BookModelView
+                model={model}
+                fallback={book.cover}
+                width={size.width}
+                height={size.height}
+                perspective={size.perspective}
+                rotateX={rotateX}
+                rotateY={rotateY}
+                onReady={handleModelReady}
+              />
             </motion.div>
           </div>
 
+          {!ready && open && (
+            <p role="status" className="text-sm text-muted-foreground">
+              Loading book…
+            </p>
+          )}
           <motion.div
             className="max-w-72 text-center"
             style={{
@@ -668,6 +527,7 @@ function PulledBook({
 
 type PulledState = {
   book: Book;
+  model: BookModel;
   size: PulledBookSize;
   slot: HTMLElement;
 };
@@ -711,7 +571,7 @@ export function BookShelf() {
         current
           ? {
               ...current,
-              size: pulledBookSize(current.book, viewportSize()),
+              size: pulledBookSize(current.model.dimensionsMm, viewportSize()),
             }
           : null,
       );
@@ -726,11 +586,13 @@ export function BookShelf() {
   const pull = useCallback((event: MouseEvent<HTMLButtonElement>) => {
     const slot = event.currentTarget;
     const book = BOOKS.find((candidate) => candidate.id === slot.dataset.book);
-    if (!book) return;
+    const model = BOOK_MODELS.find((candidate) => candidate.id === book?.id);
+    if (!book || !model) return;
 
     setPulled({
       book,
-      size: pulledBookSize(book, viewportSize()),
+      model,
+      size: pulledBookSize(model.dimensionsMm, viewportSize()),
       slot,
     });
     setOpen(true);
@@ -801,6 +663,7 @@ export function BookShelf() {
             <PulledBook
               key={pulled.book.id}
               book={pulled.book}
+              model={pulled.model}
               onRequestClose={handleRequestClose}
               onReturned={handleReturned}
               onTaken={setTakenId}

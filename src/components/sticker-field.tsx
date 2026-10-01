@@ -1,7 +1,15 @@
 "use client";
 
 import { bind } from "cuelume";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  useVelocity,
+} from "framer-motion";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
@@ -9,6 +17,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -24,6 +33,11 @@ import {
   snapStickerToNearestSafe,
   transformSticker,
 } from "./sticker-placement";
+import {
+  loadSavedStickers,
+  persistSavedStickers,
+  type SavedStickers,
+} from "./sticker-storage";
 
 type DragState = {
   element: HTMLElement;
@@ -71,11 +85,26 @@ const DRAG_THRESHOLD = 8;
 const VELOCITY_SMOOTHING = 0.4;
 const MAX_RELEASE_VELOCITY = 1.25;
 const RELEASE_IDLE_CUTOFF = 80;
-const DECAY_TIME_CONSTANT = 280;
+const DECAY_TIME_CONSTANT = 380;
 const MAX_FRAME_DURATION = 32;
 const STOP_VELOCITY = 0.015;
 const MIN_STICKER_SCALE = 0.8;
 const MAX_STICKER_SCALE = 1.8;
+const SAVE_DELAY = 400;
+const SETTLE_DELAY = 800;
+const FOLLOW_SPRING = {
+  stiffness: 240,
+  damping: 22,
+  mass: 0.9,
+};
+const SWING_SPRING = {
+  stiffness: 160,
+  damping: 14,
+  mass: 1,
+};
+const SWING_VELOCITY = 1800;
+const MAX_SWING_DEGREES = 9;
+const LIFT_SCALE = 1.06;
 
 function clamp(value: number, minimum: number, maximum: number) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -115,6 +144,141 @@ function getPathSeed(pathname: string) {
   return value >>> 0;
 }
 
+type StickerItemProps = {
+  active: boolean;
+  dragging: boolean;
+  onKeyboardToggle: (event: ReactMouseEvent<HTMLButtonElement>) => void;
+  reduceMotion: boolean | null;
+  sticker: StickerPlacement;
+};
+
+function StickerItem({
+  active,
+  dragging,
+  onKeyboardToggle,
+  reduceMotion,
+  sticker,
+}: StickerItemProps) {
+  const x = useSpring(sticker.offsetX, FOLLOW_SPRING);
+  const y = useSpring(sticker.offsetY, FOLLOW_SPRING);
+  const scale = useSpring(sticker.scale, FOLLOW_SPRING);
+  const rotation = useMotionValue(sticker.rotation);
+  const velocityX = useVelocity(x);
+  const swingTarget = useTransform(
+    velocityX,
+    [
+      -SWING_VELOCITY,
+      SWING_VELOCITY,
+    ],
+    [
+      -MAX_SWING_DEGREES,
+      MAX_SWING_DEGREES,
+    ],
+  );
+  const swing = useSpring(swingTarget, SWING_SPRING);
+  const rotate = useTransform<number, number>(
+    [
+      rotation,
+      swing,
+    ],
+    ([base = 0, sway = 0]) => base + sway,
+  );
+  const originRef = useRef({
+    left: sticker.left,
+    top: sticker.top,
+  });
+
+  useLayoutEffect(() => {
+    // A new home (resize, route change) is a teleport, not something to chase.
+    const relocated =
+      originRef.current.left !== sticker.left ||
+      originRef.current.top !== sticker.top;
+    originRef.current = {
+      left: sticker.left,
+      top: sticker.top,
+    };
+    const apply = reduceMotion || relocated ? "jump" : "set";
+    x[apply](sticker.offsetX);
+    y[apply](sticker.offsetY);
+  }, [
+    reduceMotion,
+    sticker.left,
+    sticker.offsetX,
+    sticker.offsetY,
+    sticker.top,
+    x,
+    y,
+  ]);
+
+  useLayoutEffect(() => {
+    const lifted = dragging && !reduceMotion ? LIFT_SCALE : 1;
+    const target = sticker.scale * lifted;
+    if (reduceMotion) scale.jump(target);
+    else scale.set(target);
+    rotation.set(sticker.rotation);
+  }, [
+    dragging,
+    reduceMotion,
+    rotation,
+    scale,
+    sticker.rotation,
+    sticker.scale,
+  ]);
+
+  return (
+    <motion.div
+      className={cn("sticker", active && "z-10 opacity-100 drop-shadow-xl")}
+      data-cuelume-press={sticker.sound}
+      data-dragging={dragging}
+      data-sticker={sticker.id}
+      style={{
+        left: sticker.left,
+        top: sticker.top,
+        width: sticker.width,
+        x,
+        y,
+        rotate,
+        scale,
+      }}
+    >
+      <Tooltip
+        forceOpen={active}
+        side={sticker.top + sticker.offsetY < 260 ? "bottom" : "top"}
+        sideOffset={16}
+        className="w-76 rounded-4xl bg-popover p-5 text-popover-foreground shadow-surface-6"
+        content={
+          <div className="flex flex-col gap-2">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+              {sticker.label}
+            </p>
+            <p className="text-[15px] leading-6 font-normal text-pretty">
+              {sticker.story}
+            </p>
+          </div>
+        }
+      >
+        <button
+          type="button"
+          className="group/sticker block w-full cursor-[inherit] appearance-none border-0 bg-transparent p-0 text-inherit focus-visible:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-ring"
+          aria-label={`${active ? "Close" : "Open"} ${sticker.label.toLowerCase()} sticker story`}
+          onClick={onKeyboardToggle}
+        >
+          <Image
+            src={sticker.src}
+            alt=""
+            width={sticker.width}
+            height={sticker.height}
+            sizes={`${Math.ceil(sticker.width)}px`}
+            loading="eager"
+            className="block h-auto w-full transition-transform duration-150 ease-out group-active/sticker:scale-96"
+            draggable={false}
+          />
+        </button>
+      </Tooltip>
+    </motion.div>
+  );
+}
+
 export function StickerField() {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
@@ -126,6 +290,10 @@ export function StickerField() {
   const transformGestureRef = useRef<TransformGestureState | null>(null);
   const placementsRef = useRef<StickerPlacement[]>([]);
   const seedRef = useRef<number | null>(null);
+  const savedRef = useRef<SavedStickers>({});
+  const dirtyRef = useRef(new Set<StickerPlacement["id"]>());
+  const saveTimerRef = useRef(0);
+  const settleTimerRef = useRef(0);
   const [placements, setPlacements] = useState<StickerPlacement[]>([]);
   const [activeStoryId, setActiveStoryId] = useState<
     StickerPlacement["id"] | null
@@ -134,12 +302,54 @@ export function StickerField() {
     null,
   );
 
+  const flushSaves = useCallback(() => {
+    window.clearTimeout(saveTimerRef.current);
+    const geometry = geometryRef.current;
+    const dirty = dirtyRef.current;
+    if (!geometry || dirty.size === 0) return;
+
+    const saved = {
+      ...savedRef.current,
+    };
+    for (const id of dirty) {
+      const sticker = placementsRef.current.find((item) => item.id === id);
+      if (!sticker) continue;
+      saved[id] = {
+        rotation: sticker.rotation,
+        scale: sticker.scale,
+        x:
+          sticker.left +
+          sticker.offsetX +
+          sticker.width / 2 -
+          geometry.width / 2,
+        y: sticker.top + sticker.offsetY + sticker.height / 2,
+      };
+    }
+    dirty.clear();
+    savedRef.current = saved;
+    persistSavedStickers(saved);
+  }, []);
+
+  const scheduleSave = useCallback(
+    (id: StickerPlacement["id"]) => {
+      dirtyRef.current.add(id);
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = window.setTimeout(flushSaves, SAVE_DELAY);
+    },
+    [
+      flushSaves,
+    ],
+  );
+
   const cancelInertia = useCallback(() => {
     const inertia = inertiaRef.current;
     if (!inertia) return;
     cancelAnimationFrame(inertia.frame);
     inertiaRef.current = null;
-  }, []);
+    scheduleSave(inertia.id);
+  }, [
+    scheduleSave,
+  ]);
 
   const startInertia = useCallback(
     (
@@ -204,6 +414,7 @@ export function StickerField() {
 
         if (Math.hypot(inertia.velocityX, inertia.velocityY) <= STOP_VELOCITY) {
           inertiaRef.current = null;
+          scheduleSave(id);
           return;
         }
 
@@ -221,6 +432,7 @@ export function StickerField() {
     [
       cancelInertia,
       reduceMotion,
+      scheduleSave,
     ],
   );
 
@@ -229,6 +441,7 @@ export function StickerField() {
     if (!field) return;
 
     bind(field);
+    savedRef.current = loadSavedStickers();
     seedRef.current ??= getSeed();
     const routeSeed = seedRef.current ^ getPathSeed(pathname);
     let frame = 0;
@@ -238,13 +451,28 @@ export function StickerField() {
       frame = 0;
       if (!active || seedRef.current === null) return;
       const geometry = getFieldGeometry(field);
-      const nextPlacements = placeStickers(geometry, routeSeed);
+      const nextPlacements = placeStickers(
+        geometry,
+        routeSeed,
+        savedRef.current,
+      );
       geometryRef.current = geometry;
       placementsRef.current = nextPlacements;
       setPlacements(nextPlacements);
+
+      // Once the layout stops shifting, keep the whole arrangement, not just
+      // the stickers that were dragged, so every sticker keeps its spot.
+      window.clearTimeout(settleTimerRef.current);
+      settleTimerRef.current = window.setTimeout(() => {
+        for (const sticker of placementsRef.current) {
+          if (!savedRef.current[sticker.id]) dirtyRef.current.add(sticker.id);
+        }
+        flushSaves();
+      }, SETTLE_DELAY);
     };
     const scheduleUpdate = () => {
       cancelInertia();
+      flushSaves();
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(updatePlacements);
     };
@@ -263,19 +491,24 @@ export function StickerField() {
 
     window.addEventListener("resize", scheduleUpdate);
     window.addEventListener("load", scheduleUpdate);
+    window.addEventListener("pagehide", flushSaves);
 
     return () => {
       active = false;
+      window.clearTimeout(settleTimerRef.current);
       cancelInertia();
+      flushSaves();
       pointersRef.current.clear();
       transformGestureRef.current = null;
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       window.removeEventListener("resize", scheduleUpdate);
       window.removeEventListener("load", scheduleUpdate);
+      window.removeEventListener("pagehide", flushSaves);
     };
   }, [
     cancelInertia,
+    flushSaves,
     pathname,
   ]);
 
@@ -531,6 +764,7 @@ export function StickerField() {
       const transformGesture = transformGestureRef.current;
       if (transformGesture?.pointerIds.includes(event.pointerId)) {
         transformGestureRef.current = null;
+        scheduleSave(transformGesture.id);
         const element = dragRef.current?.element;
         if (element?.hasPointerCapture(event.pointerId)) {
           element.releasePointerCapture(event.pointerId);
@@ -591,6 +825,7 @@ export function StickerField() {
         dragState.element.releasePointerCapture(event.pointerId);
       }
       if (shouldToggleStory) toggleStory(dragState.id);
+      if (dragState.moved) scheduleSave(dragState.id);
       if (dragState.moved && releaseGeometry) {
         const sticker = placementsRef.current.find(
           (placement) => placement.id === dragState.id,
@@ -610,6 +845,7 @@ export function StickerField() {
       }
     },
     [
+      scheduleSave,
       startInertia,
       toggleStory,
     ],
@@ -628,57 +864,14 @@ export function StickerField() {
       onPointerUp={finishPointerInteraction}
     >
       {placements.map((sticker) => (
-        <div
+        <StickerItem
           key={sticker.id}
-          className={cn(
-            "sticker",
-            activeStoryId === sticker.id && "z-10 opacity-100 drop-shadow-xl",
-          )}
-          data-cuelume-press={sticker.sound}
-          data-dragging={draggingId === sticker.id}
-          data-sticker={sticker.id}
-          style={{
-            left: sticker.left,
-            top: sticker.top,
-            width: sticker.width,
-            transform: `translate3d(${sticker.offsetX}px, ${sticker.offsetY}px, 0) rotate(${sticker.rotation}deg) scale(${sticker.scale})`,
-          }}
-        >
-          <Tooltip
-            forceOpen={activeStoryId === sticker.id}
-            side={sticker.top + sticker.offsetY < 260 ? "bottom" : "top"}
-            sideOffset={16}
-            className="w-76 rounded-4xl bg-popover p-5 text-popover-foreground shadow-surface-6"
-            content={
-              <div className="flex flex-col gap-2">
-                <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-                  {sticker.label}
-                </p>
-                <p className="text-[15px] leading-6 font-normal text-pretty">
-                  {sticker.story}
-                </p>
-              </div>
-            }
-          >
-            <button
-              type="button"
-              className="group/sticker block w-full cursor-[inherit] appearance-none border-0 bg-transparent p-0 text-inherit focus-visible:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-ring"
-              aria-label={`${activeStoryId === sticker.id ? "Close" : "Open"} ${sticker.label.toLowerCase()} sticker story`}
-              onClick={toggleStoryFromKeyboard}
-            >
-              <Image
-                src={sticker.src}
-                alt=""
-                width={sticker.width}
-                height={sticker.height}
-                sizes={`${Math.ceil(sticker.width)}px`}
-                loading="eager"
-                className="block h-auto w-full transition-transform duration-150 ease-out group-active/sticker:scale-96"
-                draggable={false}
-              />
-            </button>
-          </Tooltip>
-        </div>
+          active={activeStoryId === sticker.id}
+          dragging={draggingId === sticker.id}
+          onKeyboardToggle={toggleStoryFromKeyboard}
+          reduceMotion={reduceMotion}
+          sticker={sticker}
+        />
       ))}
       <AnimatePresence initial={false}>
         {activeStoryId ? (

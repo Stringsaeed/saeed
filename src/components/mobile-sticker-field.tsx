@@ -30,6 +30,7 @@ const LAYOUT: Record<StickerDefinition["id"], string> = {
   bass: "left-6 bottom-1 w-24 rotate-3",
   controller: "right-3 bottom-3 w-36 -rotate-3",
   pencil: "left-1/2 top-20 w-28 -translate-x-1/2 rotate-2",
+  babylon: "left-1/2 bottom-2 w-16 -translate-x-1/2 -rotate-3",
 };
 const BACKDROP_PADDING = 24;
 const OPEN_DURATION = 0.55;

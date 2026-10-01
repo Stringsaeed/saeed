@@ -96,164 +96,115 @@ function StripePressSpineArt({ spine }: { spine: StripePressSpine }) {
   );
 }
 
-// Wiley's second-edition spine, on a 111 by 925 grid.
-const INSPIRED_STRIPES = [
-  [
-    0,
-    10,
-    "#ffd45e",
-  ],
-  [
-    10,
-    4,
-    "#f9b233",
-  ],
-  [
-    14,
-    12,
-    "#ffdb72",
-  ],
-  [
-    26,
-    4,
-    "#ffe9b0",
-  ],
-  [
-    30,
-    11,
-    "#fcc440",
-  ],
-  [
-    41,
-    6,
-    "#f7a826",
-  ],
-  [
-    47,
-    12,
-    "#ffd45e",
-  ],
-  [
-    59,
-    4,
-    "#ffe4a0",
-  ],
-  [
-    63,
-    11,
-    "#fbbb36",
-  ],
-] as const;
-
+// Inspired, Wiley second-edition hardcover, on a 190 by 1846 grid measured
+// from the printed spine. The striped wordmark and the publisher's mark are
+// the cover's own, cut from the cover art. The light type is printed finer
+// than any weight Futura ships with, so a hairline stroke in the colour
+// behind it trims the letters down; the bold italic is built up the same way,
+// with a stroke in its own colour.
 function InspiredSpineArt() {
-  const id = useId();
-  const bandId = `${id}-band`;
-  const stripesId = `${id}-stripes`;
+  const bandId = useId();
 
   return (
     <svg
       aria-hidden="true"
       className="book-spine-art book-spine-geometric"
       preserveAspectRatio="none"
-      viewBox="0 0 111 925"
+      viewBox="0 0 190 1846"
     >
       <defs>
-        <linearGradient id={bandId} x1="0" x2="1" y1="0" y2="0">
+        <linearGradient
+          id={bandId}
+          gradientUnits="userSpaceOnUse"
+          x1="0"
+          x2="190"
+          y1="0"
+          y2="0"
+        >
           <stop offset="0" stopColor="#fdb918" />
           <stop offset="1" stopColor="#f9971c" />
         </linearGradient>
-        <pattern
-          id={stripesId}
-          width="74"
-          height="140"
-          y="-70"
-          patternUnits="userSpaceOnUse"
-        >
-          {INSPIRED_STRIPES.map(([x, width, fill]) => (
-            <rect key={x} x={x} width={width} height="140" fill={fill} />
-          ))}
-        </pattern>
       </defs>
-      <rect width="111" height="925" fill="#ffffff" />
-      <rect width="111" height="83" fill={`url(#${bandId})`} />
+      <rect width="190" height="1846" fill="#ffffff" />
+      <rect width="190" height="166" fill={`url(#${bandId})`} />
       <g textAnchor="middle">
         <text
-          x="55.5"
-          y="63"
+          x="95"
+          y="119"
           fill="#ffffff"
-          fontSize="20"
-          textLength="73"
+          fontSize="33"
+          stroke={`url(#${bandId})`}
+          strokeWidth="0.8"
+          textLength="131"
           lengthAdjust="spacingAndGlyphs"
         >
           CAGAN
         </text>
-        <g fill="#f7b53a" fontSize="20" fontWeight="700">
+        <g fill="#f5cc62" fontSize="36" fontWeight="700">
           <text
-            x="55.5"
-            y="785"
-            textLength="81"
+            x="95"
+            y="1551"
+            textLength="152"
             lengthAdjust="spacingAndGlyphs"
           >
             SECOND
           </text>
           <text
-            x="55.5"
-            y="807"
-            textLength="81"
+            x="95"
+            y="1595.5"
+            textLength="152"
             lengthAdjust="spacingAndGlyphs"
           >
             EDITION
           </text>
         </g>
-        <text
-          x="55.5"
-          y="884"
-          fill="#3a3a3c"
-          fontSize="19"
-          fontWeight="500"
-          textLength="69"
-          lengthAdjust="spacingAndGlyphs"
-        >
-          WILEY
-        </text>
       </g>
-      <g transform="translate(55.5 0) rotate(90)">
-        <text
-          x="116"
-          y="38"
-          fill={`url(#${stripesId})`}
-          fontSize="101"
-          fontWeight="700"
-          textLength="370"
-          lengthAdjust="spacingAndGlyphs"
+      <image
+        href="/books/inspired-wiley.webp"
+        x="23.25"
+        y="1735.2"
+        width="143.5"
+        height="30.8"
+        preserveAspectRatio="none"
+      />
+      <circle cx="88.5" cy="1736.5" r="3.2" fill="#f0b343" />
+      <g transform="translate(95 0) rotate(90)">
+        <image
+          href="/books/inspired-wordmark.webp"
+          x="221"
+          y="-73"
+          width="723"
+          height="146"
+          preserveAspectRatio="none"
+        />
+        <g
+          fill="#5a5a5c"
+          fontSize="47"
+          fontWeight="300"
+          stroke="#ffffff"
+          strokeWidth="1.7"
         >
-          INSPIRED
-        </text>
-        <g fill="#5a5a5c" fontSize="25" fontWeight="300">
           <text
-            x="509"
-            y="-18.7"
-            textLength="222"
+            x="986"
+            y="-37"
+            textLength="445"
             lengthAdjust="spacingAndGlyphs"
           >
             HOW TO CREATE
           </text>
-          <text
-            x="509"
-            y="9.2"
-            textLength="213"
-            lengthAdjust="spacingAndGlyphs"
-          >
-            <tspan fill="#e8761c">TECH</tspan> PRODUCTS
+          <text x="986" y="18" textLength="433" lengthAdjust="spacingAndGlyphs">
+            <tspan fill="#e27a33">TECH</tspan> PRODUCTS
           </text>
-          <text
-            x="509"
-            y="36.6"
-            textLength="233"
-            lengthAdjust="spacingAndGlyphs"
-          >
+          <text x="982" y="73" textLength="469" lengthAdjust="spacingAndGlyphs">
             CUSTOMERS{" "}
-            <tspan fill="#444446" fontWeight="700">
+            <tspan
+              fill="#444446"
+              fontStyle="italic"
+              fontWeight="500"
+              stroke="#444446"
+              strokeLinejoin="round"
+              strokeWidth="1.6"
+            >
               LOVE
             </tspan>
           </text>
@@ -464,6 +415,7 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
     <span
       className="book-spine"
       data-round={book.spineRound && !unlit ? "" : undefined}
+      data-unlit={unlit ? "" : undefined}
       style={
         {
           "--round": book.spineRound,

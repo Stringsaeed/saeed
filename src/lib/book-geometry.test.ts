@@ -108,7 +108,7 @@ describe("roundSpineStrips", () => {
   const size = pulledBookSize(
     {
       ...book,
-      spineRound: 0.3,
+      spineRound: 0.2,
     },
     {
       width: 1280,
@@ -118,7 +118,7 @@ describe("roundSpineStrips", () => {
   const strips = roundSpineStrips(size);
 
   test("gives the spine a bulge of the requested share of its depth", () => {
-    assert.ok(Math.abs(size.spineBulge - size.depth * 0.3) < 1e-9);
+    assert.ok(Math.abs(size.spineBulge - size.depth * 0.2) < 1e-9);
   });
 
   test("covers the flat spine drawing edge to edge with no gaps", () => {
@@ -129,18 +129,33 @@ describe("roundSpineStrips", () => {
     assert.ok(Math.abs(total - size.depth) < 1e-6);
   });
 
-  test("keeps the middle strip flat and undistorted", () => {
-    const flat = strips[0];
+  test("keeps the middle strip flat, undistorted and widest", () => {
+    const flat = strips[(strips.length - 1) / 2];
 
     assert.equal(flat.rotateY, -90);
     assert.equal(flat.sliceScale, 1);
-    assert.equal(flat.x, -size.width / 2 - size.spineBulge);
+    assert.equal(flat.z, 0);
+    assert.ok(flat.x < -size.width / 2 - size.spineBulge * 0.9);
+    assert.ok(flat.x >= -size.width / 2 - size.spineBulge);
+    assert.equal(flat.width, Math.max(...strips.map((strip) => strip.width)));
   });
 
-  test("turns the outer strips most of the way to the covers", () => {
+  test("turns from the back cover round to the front in even steps", () => {
     const angles = strips.map((strip) => strip.rotateY);
+    const steps = angles.slice(1).map((angle, index) => angle - angles[index]);
 
-    assert.ok(Math.max(...angles) > -15 && Math.max(...angles) < 0);
-    assert.ok(Math.min(...angles) < -165 && Math.min(...angles) > -180);
+    assert.ok(angles[0] < -165 && angles[0] > -180);
+    assert.ok(angles[angles.length - 1] > -15 && angles[angles.length - 1] < 0);
+    assert.ok(
+      steps.every((step) => step > 0 && step < 180 / strips.length + 6),
+    );
+  });
+
+  test("stays within the bulge and the book's thickness", () => {
+    for (const strip of strips) {
+      assert.ok(strip.x <= -size.width / 2 + 1e-9);
+      assert.ok(strip.x >= -size.width / 2 - size.spineBulge);
+      assert.ok(Math.abs(strip.z) <= size.depth / 2);
+    }
   });
 });

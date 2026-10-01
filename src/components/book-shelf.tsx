@@ -510,6 +510,10 @@ function PulledBook({
                 "--book-h": `${size.height}px`,
                 "--book-d": `${size.depth}px`,
                 "--spine-bulge": `${size.spineBulge}px`,
+                "--board-thickness": book.board
+                  ? `${(book.board / book.height) * size.height}px`
+                  : undefined,
+                "--pages": book.pages,
                 "--board-color": book.coverColor,
                 "--spine-color": spineColor(book),
                 "--headband": book.headband,

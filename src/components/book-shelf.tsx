@@ -9,7 +9,6 @@ import {
   useReducedMotion,
   useTransform,
 } from "framer-motion";
-import { getImageProps } from "next/image";
 import {
   type CSSProperties,
   type MouseEvent,
@@ -32,6 +31,7 @@ import {
   shelfTransform,
 } from "@/lib/book-geometry";
 import type { BookModel } from "@/lib/books-3d/types";
+import type { BookLibrary } from "@/lib/books-3d/viewer";
 import { BookSpine } from "./book-spine";
 import { BookModelView } from "./books-3d/book-model-view";
 
@@ -96,40 +96,6 @@ const TILT_RANGE = [
 const DISMISS_DISTANCE = 96;
 const DISMISS_VELOCITY = 600;
 
-const COVER_SIZES = "(max-width: 40rem) 65vw, 320px";
-
-function coverImageProps(book: Book) {
-  return getImageProps({
-    src: book.cover,
-    alt: "",
-    width: book.width * 4,
-    height: book.height * 4,
-    sizes: COVER_SIZES,
-    quality: 90,
-  }).props;
-}
-
-// Covers are fetched and decoded ahead of the tap so the first frames of the
-// pull never wait on the network. The elements are kept so the decoded
-// bitmaps stay warm.
-const warmCovers = new Map<string, HTMLImageElement>();
-
-function warmCover(book: Book) {
-  if (warmCovers.has(book.id)) return;
-
-  const { src, srcSet, sizes } = coverImageProps(book);
-  const image = new Image();
-  image.decoding = "async";
-  image.fetchPriority = "low";
-  if (sizes) image.sizes = sizes;
-  if (srcSet) image.srcset = srcSet;
-  image.src = src;
-  warmCovers.set(book.id, image);
-  image.decode().catch(() => {
-    warmCovers.delete(book.id);
-  });
-}
-
 function viewportSize() {
   const viewport = window.visualViewport;
 
@@ -151,6 +117,7 @@ type Gesture = {
 type PulledBookProps = {
   book: Book;
   model: BookModel;
+  getLibrary: () => Promise<BookLibrary>;
   onRequestClose: () => void;
   onReturned: () => void;
   onTaken: (id: string) => void;
@@ -163,6 +130,7 @@ type PulledBookProps = {
 function PulledBook({
   book,
   model,
+  getLibrary,
   onRequestClose,
   onReturned,
   onTaken,
@@ -473,6 +441,7 @@ function PulledBook({
             >
               <BookModelView
                 model={model}
+                getLibrary={getLibrary}
                 fallback={book.cover}
                 width={size.width}
                 height={size.height}
@@ -533,6 +502,65 @@ type PulledState = {
 };
 
 export function BookShelf() {
+  const library = useRef<Promise<BookLibrary> | null>(null);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
+  const getLibrary = useCallback(() => {
+    if (!library.current) {
+      library.current = import("@/lib/books-3d/viewer").then(
+        ({ createBookLibrary }) => createBookLibrary(BOOK_MODELS),
+      );
+      const request = library.current;
+      request.catch(() => {
+        if (library.current === request) library.current = null;
+      });
+    }
+    return library.current;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    let idle: number | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const warm = () => {
+      void getLibrary()
+        .then((instance) => {
+          if (cancelled) return;
+          return instance.warm((id, preview) => {
+            if (!cancelled)
+              setPreviews((current) => ({
+                ...current,
+                [id]: preview,
+              }));
+          });
+        })
+        .catch(() => {
+          /* The shelf and dialog retain their accessible fallbacks. */
+        });
+    };
+    const schedule = () => {
+      if ("requestIdleCallback" in window)
+        idle = window.requestIdleCallback(warm, {
+          timeout: 1500,
+        });
+      else timer = setTimeout(warm, 100);
+    };
+    if (document.readyState === "complete") schedule();
+    else
+      window.addEventListener("load", schedule, {
+        once: true,
+      });
+    return () => {
+      cancelled = true;
+      window.removeEventListener("load", schedule);
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+      if (timer !== undefined) clearTimeout(timer);
+      const pending = library.current;
+      library.current = null;
+      void pending?.then((instance) => instance.dispose()).catch(() => {});
+    };
+  }, [
+    getLibrary,
+  ]);
   const shelfRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<Dialog.Root.Actions>(null);
   const reduceMotion = useReducedMotion() ?? false;
@@ -552,7 +580,6 @@ export function BookShelf() {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
         setRevealed(true);
-        for (const book of BOOKS) warmCover(book);
       },
       {
         rootMargin: "160px 0px",
@@ -625,31 +652,50 @@ export function BookShelf() {
       data-revealed={revealed || undefined}
     >
       <ul className="bookshelf-row">
-        {BOOKS.map((book, index) => (
-          <li key={book.id}>
-            <button
-              type="button"
-              className="shelf-book"
-              aria-haspopup="dialog"
-              aria-label={`${book.title} by ${book.author}`}
-              data-book={book.id}
-              data-taken={takenId === book.id || undefined}
-              data-analytics-event="Book Opened"
-              data-analytics-label={book.title}
-              data-analytics-location="Home"
-              style={
-                {
-                  "--book-d": book.depth,
-                  "--book-h": book.height,
-                  "--book-index": index,
-                } as CSSProperties
-              }
-              onClick={pull}
-            >
-              <BookSpine book={book} />
-            </button>
-          </li>
-        ))}
+        {BOOKS.map((book, index) => {
+          const dimensions = BOOK_MODELS.find(
+            (model) => model.id === book.id,
+          )?.dimensionsMm;
+          const depth = dimensions
+            ? (book.height * dimensions.depth) / dimensions.height
+            : book.depth;
+          return (
+            <li key={book.id}>
+              <button
+                type="button"
+                className="shelf-book"
+                aria-haspopup="dialog"
+                aria-label={`${book.title} by ${book.author}`}
+                data-book={book.id}
+                data-taken={takenId === book.id || undefined}
+                data-analytics-event="Book Opened"
+                data-analytics-label={book.title}
+                data-analytics-location="Home"
+                style={
+                  {
+                    "--book-d": depth,
+                    "--book-h": book.height,
+                    "--book-index": index,
+                  } as CSSProperties
+                }
+                onClick={pull}
+              >
+                {previews[book.id] ? (
+                  // biome-ignore lint/performance/noImgElement: locally rendered model snapshot, not a remote image.
+                  <img
+                    src={previews[book.id]}
+                    alt=""
+                    draggable={false}
+                    className="shelf-model-preview"
+                    data-model-preview={book.id}
+                  />
+                ) : (
+                  <BookSpine book={book} />
+                )}
+              </button>
+            </li>
+          );
+        })}
       </ul>
       <div aria-hidden className="bookshelf-board" />
 
@@ -664,6 +710,7 @@ export function BookShelf() {
               key={pulled.book.id}
               book={pulled.book}
               model={pulled.model}
+              getLibrary={getLibrary}
               onRequestClose={handleRequestClose}
               onReturned={handleReturned}
               onTaken={setTakenId}

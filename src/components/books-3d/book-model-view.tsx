@@ -1,13 +1,14 @@
 "use client";
 
 import { type MotionValue, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { BookModel } from "@/lib/books-3d/types";
-import type { mountBookViewer } from "@/lib/books-3d/viewer";
+import type { BookLibrary } from "@/lib/books-3d/viewer";
 
-type Viewer = ReturnType<typeof mountBookViewer>;
+type Viewer = ReturnType<BookLibrary["attach"]>;
 type Props = {
   model: BookModel;
+  getLibrary: () => Promise<BookLibrary>;
   fallback: string;
   width: number;
   height: number;
@@ -19,6 +20,7 @@ type Props = {
 
 export function BookModelView({
   model,
+  getLibrary,
   fallback,
   width,
   height,
@@ -47,7 +49,7 @@ export function BookModelView({
     height,
     perspective,
   ]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = host.current;
     if (!element) return;
     let cancelled = false;
@@ -55,10 +57,10 @@ export function BookModelView({
     const update = () => instance?.pose(rotateX.get(), rotateY.get());
     const stopX = rotateX.on("change", update),
       stopY = rotateY.on("change", update);
-    import("@/lib/books-3d/viewer")
-      .then(async ({ mountBookViewer }) => {
+    getLibrary()
+      .then(async (library) => {
         if (cancelled) return;
-        instance = mountBookViewer(element, model, dimensions.current);
+        instance = library.attach(element, model, dimensions.current);
         viewer.current = instance;
         update();
         await instance.ready;
@@ -80,6 +82,7 @@ export function BookModelView({
       if (viewer.current === instance) viewer.current = null;
     };
   }, [
+    getLibrary,
     model,
     rotateX,
     rotateY,

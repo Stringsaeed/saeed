@@ -21,6 +21,9 @@ export class BookAssets {
         throw new Error(`Could not load ${path}: ${response.status}`);
       return response.text();
     });
+    request.catch(() => {
+      this.textFiles.delete(path);
+    });
     this.textFiles.set(path, request);
     return request;
   }
@@ -38,6 +41,9 @@ export class BookAssets {
         else this.loaded.add(texture);
         return texture;
       });
+    request.catch(() => {
+      this.textures.delete(key);
+    });
     this.textures.set(key, request);
     return request;
   }

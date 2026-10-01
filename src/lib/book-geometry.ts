@@ -6,8 +6,7 @@ export type BookDimensions = {
 
 export type PulledBookSize = BookDimensions & {
   perspective: number;
-  // How far a rounded spine stands proud of the covers' spine-side edge; the
-  // radius of the curve that carries the spine round into each cover. Zero
+  // How far a rounded spine stands proud of the covers' spine-side edge. Zero
   // for a square back.
   spineBulge: number;
 };
@@ -96,85 +95,58 @@ export type SpineStrip = {
   sliceScale: number;
 };
 
-const CORNER_SEGMENTS = 6;
+const SPINE_STRIPS = 11;
 // Strips overlap their neighbours by this much so no seam shows between them.
 const STRIP_OVERLAP = 0.5;
 
-// A rounded spine as flat strips: one down the middle and a quarter-circle of
-// short chords curving into each cover. Every strip carries the slice of the
-// spine drawing that sits behind it when the book is seen spine-on, so the
-// rounded spine looks exactly like the flat drawing on the shelf and only
-// reveals its curve as the book turns.
+// A rounded spine as flat strips along half an ellipse: as deep as the book
+// is thick and standing proud by the bulge, so it is nearly flat across the
+// middle and turns tightly into each cover. The strips turn by equal angles,
+// which leaves a broad one down the middle and ever narrower ones towards
+// the shoulders. Every strip carries the slice of the spine drawing that sits
+// behind it when the book is seen spine-on, so the rounded spine looks
+// exactly like the flat drawing on the shelf and only reveals its curve as
+// the book turns.
 export function roundSpineStrips(size: PulledBookSize): SpineStrip[] {
-  const { depth, spineBulge: radius, width } = size;
-  const strip = (
-    key: string,
-    from: {
-      x: number;
-      z: number;
-    },
-    to: {
-      x: number;
-      z: number;
-    },
-    rotateY: number,
-  ): SpineStrip => {
-    const length = Math.hypot(to.x - from.x, to.z - from.z);
-    const start = Math.min(from.z, to.z) + depth / 2;
-    const sliceScale = length / Math.abs(to.z - from.z);
+  const { depth, spineBulge: bulge, width } = size;
+  const half = depth / 2;
+  // Where the curve has turned `step` strips of the way from the back cover
+  // round to the front one.
+  const point = (step: number) => {
+    // Measured from the middle, so the two sides mirror each other exactly.
+    const turn = ((step - SPINE_STRIPS / 2) / SPINE_STRIPS) * Math.PI;
+    const angle =
+      step === 0
+        ? -Math.PI / 2
+        : step === SPINE_STRIPS
+          ? Math.PI / 2
+          : Math.atan((half / bulge) * Math.tan(turn));
 
     return {
-      key,
-      width: length + STRIP_OVERLAP * 2,
-      x: (from.x + to.x) / 2,
-      z: (from.z + to.z) / 2,
-      rotateY,
-      sliceOffset: STRIP_OVERLAP - start * sliceScale,
-      sliceScale,
+      x: -width / 2 - bulge * Math.cos(angle),
+      z: half * Math.sin(angle),
     };
   };
 
-  const flat = depth / 2 - radius;
-  const strips = [
-    strip(
-      "flat",
-      {
-        x: -width / 2 - radius,
-        z: -flat,
-      },
-      {
-        x: -width / 2 - radius,
-        z: flat,
-      },
-      -SHELF_ROTATE_Y,
-    ),
-  ];
-
-  // side 1 curves into the front cover, side -1 into the back.
-  for (const side of [
-    1,
-    -1,
-  ]) {
-    const point = (step: number) => {
-      const angle = (step / CORNER_SEGMENTS) * (Math.PI / 2);
+  return Array.from(
+    {
+      length: SPINE_STRIPS,
+    },
+    (_, step) => {
+      const from = point(step);
+      const to = point(step + 1);
+      const length = Math.hypot(to.x - from.x, to.z - from.z);
+      const sliceScale = length / (to.z - from.z);
 
       return {
-        x: -width / 2 - radius * Math.cos(angle),
-        z: side * (flat + radius * Math.sin(angle)),
+        key: `strip-${step}`,
+        width: length + STRIP_OVERLAP * 2,
+        x: (from.x + to.x) / 2,
+        z: (from.z + to.z) / 2,
+        rotateY: (Math.atan2(from.z - to.z, to.x - from.x) * 180) / Math.PI,
+        sliceOffset: STRIP_OVERLAP - (from.z + half) * sliceScale,
+        sliceScale,
       };
-    };
-
-    for (let step = 0; step < CORNER_SEGMENTS; step++) {
-      strips.push(
-        strip(
-          `${side === 1 ? "front" : "back"}-${step}`,
-          point(step),
-          point(step + 1),
-          -SHELF_ROTATE_Y + (side * (step + 0.5) * 90) / CORNER_SEGMENTS,
-        ),
-      );
-    }
-  }
-
-  return strips;
+    },
+  );
 }

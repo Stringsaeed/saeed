@@ -554,6 +554,12 @@
     pointer-events: none;
   }
 
+  /* The pulled book shades its rounded back strip by strip, and each strip
+     magnifies its slice of this drawing, so the edge hairline has to go. */
+  .book-spine[data-unlit]::after {
+    box-shadow: none;
+  }
+
   /* A rounded back seen spine-on: the curve falls away into shade towards
      both covers, across the share of the thickness that --round gives it. */
   .book-spine[data-round]::after {
@@ -661,7 +667,7 @@
   /* Hardcover: boards with real thickness that overhang the page block by a
      small square on the three open edges. */
   .book[data-binding="hardcover"] {
-    --board: calc(var(--book-h) * 0.0065);
+    --board: var(--board-thickness, calc(var(--book-h) * 0.0065));
     --square: calc(var(--book-h) * 0.0095);
   }
 
@@ -759,14 +765,28 @@
     transform-origin: 0 0;
   }
 
-  /* The rounded back's own head and foot, closing the curve from above. */
+  /* The rounded back seen from the head or foot: a thin shell of cover
+     standing clear of the rounded page block, with the hollow between them
+     in shadow. */
   .book-spine-cap {
     top: calc(50% - var(--book-d) / 2);
     left: calc(var(--spine-bulge) * -1);
     width: calc(var(--spine-bulge) + 1px);
     height: var(--book-d);
-    border-radius: var(--spine-bulge) 0 0 var(--spine-bulge);
-    background: color-mix(in oklab, var(--spine-color) 84%, black);
+    border-radius: var(--spine-bulge) 0 0 var(--spine-bulge) / 50% 0 0 50%;
+    background-color: var(--pages, #f3eee2);
+    background-image:
+      radial-gradient(
+        ellipse 100% 50% at 100% 50%,
+        rgb(0 0 0 / 0) 66%,
+        color-mix(in oklab, var(--spine-color) 46%, black) 75% 84%,
+        color-mix(in oklab, var(--spine-color) 88%, black) 89%
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        rgb(0 0 0 / 0) 0 1px,
+        rgb(80 60 30 / 0.12) 1px 2px
+      );
   }
 
   .book-spine-cap-top {
@@ -779,7 +799,7 @@
 
   /* The page block: between the boards and set back by the square. */
   .book-pages {
-    background-color: #f3eee2;
+    background-color: var(--pages, #f3eee2);
   }
 
   .book-fore {
@@ -809,9 +829,17 @@
     );
   }
 
-  /* Headband: the striped cord across the page block at the spine. */
-  .book[data-binding="hardcover"] .book-top,
-  .book[data-binding="hardcover"] .book-bottom {
+  /* A rounded back has no board down the spine: the page block runs on into
+     the curve. */
+  .book[data-round] .book-top,
+  .book[data-round] .book-bottom {
+    left: 0;
+    width: calc(100% - var(--square));
+  }
+
+  /* Headband: the striped cord across the page block at a square spine. */
+  .book[data-binding="hardcover"]:not([data-round]) .book-top,
+  .book[data-binding="hardcover"]:not([data-round]) .book-bottom {
     background-image:
       repeating-linear-gradient(
         to bottom,
@@ -880,6 +908,16 @@
       );
   }
 
+  .book[data-round] .book-top-boards,
+  .book[data-round] .book-bottom-boards {
+    background: linear-gradient(
+      to bottom,
+      var(--edge) 0 var(--board),
+      rgb(0 0 0 / 0) var(--board) calc(100% - var(--board)),
+      var(--edge) calc(100% - var(--board))
+    );
+  }
+
   .book-top-boards {
     transform: rotateX(90deg) translateZ(calc(var(--book-h) / 2));
   }
@@ -891,7 +929,7 @@
   /* Inside faces of the boards, seen down the gap around the page block.
      Only the turned-in cover material shows there, in shadow. */
   .book-lining {
-    background: color-mix(in oklab, var(--board-color) 62%, black);
+    background: color-mix(in oklab, var(--board-color) 82%, black);
   }
 
   .book-lining-back {
@@ -912,6 +950,11 @@
     height: 100%;
     transform: rotateY(90deg)
       translateZ(calc(var(--book-w) / -2 + var(--board)));
+  }
+
+  /* Under a rounded back it closes the step down to the page block. */
+  .book[data-round] .book-lining-spine {
+    transform: rotateY(90deg) translateZ(calc(var(--book-w) / -2));
   }
 
   .book[data-binding="paperback"] .book-boards,

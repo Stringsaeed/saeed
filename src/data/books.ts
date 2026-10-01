@@ -58,9 +58,14 @@ export type Book = {
   coverColor: string;
   // Hardcovers get boards that overhang a recessed page block.
   binding: "hardcover" | "paperback";
-  // A rounded back: the share of the spine's thickness taken by the curve
-  // that carries it round into each cover. Omit for a square back.
+  // A rounded back: how far the spine stands proud of the covers, as a share
+  // of its thickness. Omit for a square back.
   spineRound?: number;
+  // Board thickness in shelf units, for a hardcover with heavier boards than
+  // the default.
+  board?: number;
+  // Colour of the page block; cream unless the paper is a bright white.
+  pages?: string;
   // Colour of the headband stitched across the head and foot of the page block.
   headband?: string;
   // Trim size in shelf units: cover width, cover height, spine thickness.
@@ -98,10 +103,12 @@ export const BOOKS: readonly Book[] = [
     cover: "/books/inspired-second-edition.jpg",
     coverColor: "#ffffff",
     binding: "hardcover",
-    spineRound: 0.34,
+    spineRound: 0.17,
+    board: 2.3,
+    pages: "#f6f5f1",
     width: 140,
     height: 208,
-    depth: 25,
+    depth: 21.4,
     spine: {
       design: "inspired",
     },

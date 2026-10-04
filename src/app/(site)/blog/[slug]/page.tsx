@@ -77,6 +77,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         data-analytics-event="Navigation Clicked"
         data-analytics-destination="Blog"
         data-analytics-location="Article"
+        data-sound="tap"
       >
         ← Blog
       </Link>

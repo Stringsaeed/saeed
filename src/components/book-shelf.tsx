@@ -32,6 +32,7 @@ import {
 } from "@/lib/book-geometry";
 import type { BookModel } from "@/lib/books-3d/types";
 import type { BookLibrary } from "@/lib/books-3d/viewer";
+import { playSound } from "@/lib/sound";
 import { BookSpine } from "./book-spine";
 import { BookModelView } from "./books-3d/book-model-view";
 
@@ -616,6 +617,7 @@ export function BookShelf() {
     const model = BOOK_MODELS.find((candidate) => candidate.id === book?.id);
     if (!book || !model) return;
 
+    playSound("bookOpen");
     setPulled({
       book,
       model,
@@ -635,13 +637,17 @@ export function BookShelf() {
   // has to hold the dialog mounted until handleReturned releases it.
   const handleOpenChange = useCallback(
     (nextOpen: boolean, details: Dialog.Root.ChangeEventDetails) => {
-      if (!nextOpen) details.preventUnmountOnClose();
+      if (!nextOpen) {
+        details.preventUnmountOnClose();
+        playSound("bookClose");
+      }
       setOpen(nextOpen);
     },
     [],
   );
 
   const handleRequestClose = useCallback(() => {
+    playSound("bookClose");
     actionsRef.current?.close();
   }, []);
 
@@ -671,6 +677,8 @@ export function BookShelf() {
                 data-analytics-event="Book Opened"
                 data-analytics-label={book.title}
                 data-analytics-location="Home"
+                data-sound="bookTap"
+                data-sound-hover="hover"
                 style={
                   {
                     "--book-d": depth,

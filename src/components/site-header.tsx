@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { AnimatedAvatar } from "./animated-avatar";
 import { SaeedName } from "./saeed-name";
+import { SoundToggle } from "./sound-toggle";
 import { ThemeSwitcher } from "./theme-switcher";
 import { Button } from "./ui/button";
 
@@ -59,6 +60,7 @@ export function SiteHeader() {
         data-analytics-event="Navigation Clicked"
         data-analytics-destination="Home"
         data-analytics-location="Header"
+        data-sound="tap"
       >
         <AnimatedAvatar />
         <SaeedName className="signature-name" />
@@ -71,6 +73,7 @@ export function SiteHeader() {
             data-analytics-event="Navigation Clicked"
             data-analytics-destination="Blog"
             data-analytics-location="Header"
+            data-sound="tap"
           >
             Blog
           </Link>
@@ -81,11 +84,13 @@ export function SiteHeader() {
             data-analytics-event="Navigation Clicked"
             data-analytics-destination="Links"
             data-analytics-location="Header"
+            data-sound="tap"
           >
             Links
           </Link>
         </Button>
         <ThemeSwitcher />
+        <SoundToggle />
       </nav>
     </header>
   );
@@ -94,16 +99,14 @@ export function SiteHeader() {
 export function SiteSocialLinks() {
   return (
     <footer className="mt-auto flex justify-end pb-6">
-      <nav className="flex flex-wrap items-center gap-1" aria-label="Social links">
+      <nav
+        className="flex flex-wrap items-center gap-1"
+        aria-label="Social links"
+      >
         {socialLinks.map((item) => {
           const Icon = item.icon;
           return (
-            <Button
-              key={item.label}
-              asChild
-              variant="tertiary"
-              size="icon"
-            >
+            <Button key={item.label} asChild variant="tertiary" size="icon">
               <a
                 href={item.href}
                 target={item.href.startsWith("http") ? "_blank" : undefined}
@@ -113,17 +116,15 @@ export function SiteSocialLinks() {
                 data-analytics-event="Social Link Clicked"
                 data-analytics-network={item.label}
                 data-analytics-location="Layout Bottom"
+                data-sound="tap"
+                data-sound-hover="hover"
               >
                 <Icon data-icon="inline-start" aria-hidden="true" />
               </a>
             </Button>
           );
         })}
-        <Button
-          asChild
-          variant="tertiary"
-          size="icon"
-        >
+        <Button asChild variant="tertiary" size="icon">
           <a
             href="/cv.pdf"
             download
@@ -131,6 +132,8 @@ export function SiteSocialLinks() {
             title="Download CV"
             data-analytics-event="CV Download Clicked"
             data-analytics-location="Layout Bottom"
+            data-sound="download"
+            data-sound-hover="hover"
           >
             <RiDownloadLine data-icon="inline-start" aria-hidden="true" />
           </a>

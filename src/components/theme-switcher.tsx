@@ -2,7 +2,7 @@
 
 import { RiComputerLine, RiMoonLine, RiSunLine } from "@remixicon/react";
 import { useTheme } from "next-themes";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownContent,
@@ -10,6 +10,7 @@ import {
   DropdownTrigger,
 } from "@/components/ui/dropdown";
 import { MenuItem } from "@/components/ui/menu-item";
+import { playSound } from "@/lib/sound";
 
 const themeOptions = [
   {
@@ -38,7 +39,10 @@ export function ThemeSwitcher() {
     () =>
       themeOptions.map((option) => ({
         ...option,
-        onSelect: () => setTheme(option.value),
+        onSelect: () => {
+          playSound("select");
+          setTheme(option.value);
+        },
       })),
     [
       setTheme,
@@ -52,8 +56,13 @@ export function ThemeSwitcher() {
 
   useEffect(() => setMounted(true), []);
 
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    if (nextOpen) playSound("menuOpen");
+    setOpen(nextOpen);
+  }, []);
+
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen} size="compact">
+    <DropdownMenu open={open} onOpenChange={handleOpenChange} size="compact">
       <DropdownTrigger
         render={
           <Button

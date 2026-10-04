@@ -50,6 +50,7 @@ export default async function BlogPage() {
               data-analytics-event="Blog Post Clicked"
               data-analytics-slug={post.slug}
               data-analytics-location="Blog Archive"
+              data-sound="tap"
             >
               <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
                 <h2 className="font-medium tracking-[-0.015em] underline-offset-4 group-hover:underline">

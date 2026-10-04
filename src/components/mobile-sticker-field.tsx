@@ -1,14 +1,13 @@
 "use client";
 
 import { RiCloseLine } from "@remixicon/react";
-import { bind } from "cuelume";
 import { useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import Image from "next/image";
 import {
   type MouseEvent,
+  type PointerEvent,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -23,6 +22,7 @@ import {
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
 import { STICKERS, type StickerDefinition } from "./sticker-data";
+import { playStickerSound } from "./sticker-sounds";
 
 const LAYOUT: Record<StickerDefinition["id"], string> = {
   keyboard: "left-2 top-3 w-36 -rotate-8",
@@ -174,7 +174,6 @@ function RaisedStickerOverlay({
 
 export function MobileStickerField() {
   const drawerRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLElement>(null);
   const shouldReduceMotion = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openId, setOpenId] = useState<StickerDefinition["id"] | null>(null);
@@ -186,10 +185,10 @@ export function MobileStickerField() {
     ? raisedSticker
     : null;
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    bind(section);
+  const pressSticker = useCallback((event: PointerEvent<HTMLButtonElement>) => {
+    const id = event.currentTarget.dataset.stickerId;
+    const sticker = STICKERS.find((candidate) => candidate.id === id);
+    if (sticker) playStickerSound(sticker.id);
   }, []);
 
   const selectSticker = useCallback((event: MouseEvent<HTMLButtonElement>) => {
@@ -276,11 +275,7 @@ export function MobileStickerField() {
   ]);
 
   return (
-    <section
-      ref={sectionRef}
-      aria-label="Sticker stories"
-      className="mt-8 min-[960px]:hidden"
-    >
+    <section aria-label="Sticker stories" className="mt-8 min-[960px]:hidden">
       <h2 className="list-heading">Desk</h2>
       <div className="relative mt-3 h-64 overflow-hidden rounded-3xl border border-border/60 bg-muted/40">
         <div
@@ -296,7 +291,7 @@ export function MobileStickerField() {
           <button
             key={sticker.id}
             type="button"
-            data-cuelume-press={sticker.sound}
+            onPointerDown={pressSticker}
             data-sticker-id={sticker.id}
             onClick={selectSticker}
             aria-label={`Open ${sticker.label.toLowerCase()} sticker story`}
@@ -340,6 +335,7 @@ export function MobileStickerField() {
                 </DrawerTitle>
                 <DrawerClose
                   aria-label="Close sticker story"
+                  data-sound="tap"
                   className="inline-flex size-9 items-center justify-center rounded-full bg-accent text-foreground transition-colors hover:bg-accent/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 >
                   <RiCloseLine aria-hidden="true" className="size-5" />

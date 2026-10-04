@@ -140,6 +140,7 @@ export function LinksTable({ entries }: LinksTableProps) {
                     data-analytics-label={entry.website}
                     data-analytics-type={entry.type}
                     data-analytics-location="Links Archive"
+                    data-sound="tap"
                   >
                     <Image
                       src={getFaviconUrl(entry.url)}
@@ -164,6 +165,7 @@ export function LinksTable({ entries }: LinksTableProps) {
                     data-analytics-label={entry.website}
                     data-analytics-type={entry.type}
                     data-analytics-location="Links Archive"
+                    data-sound="tap"
                   >
                     {entry.url}
                   </a>

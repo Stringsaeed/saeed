@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { AnalyticsEvents } from "@/components/analytics-events";
 import { JsonLd } from "@/components/json-ld";
 import { SiteHeader, SiteSocialLinks } from "@/components/site-header";
+import { SiteSounds } from "@/components/site-sounds";
 import { StickerField } from "@/components/sticker-field";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getRootStructuredData } from "@/lib/structured-data";
@@ -18,7 +19,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       disableTransitionOnChange
     >
       <JsonLd data={getRootStructuredData()} />
-      <div className="relative isolate min-h-screen overflow-x-hidden">
+      <div className="relative isolate min-h-screen overflow-x-clip">
         <InteractiveDots />
         <StickerField />
         <div
@@ -33,6 +34,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       <Analytics />
       <SpeedInsights />
       <AnalyticsEvents />
+      <SiteSounds />
     </ThemeProvider>
   );
 }

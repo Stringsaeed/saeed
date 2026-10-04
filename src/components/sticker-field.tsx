@@ -1,6 +1,5 @@
 "use client";
 
-import { bind } from "cuelume";
 import {
   AnimatePresence,
   motion,
@@ -33,6 +32,7 @@ import {
   snapStickerToNearestSafe,
   transformSticker,
 } from "./sticker-placement";
+import { playStickerSound } from "./sticker-sounds";
 import {
   loadSavedStickers,
   persistSavedStickers,
@@ -228,7 +228,6 @@ function StickerItem({
   return (
     <motion.div
       className={cn("sticker", active && "z-10 opacity-100 drop-shadow-xl")}
-      data-cuelume-press={sticker.sound}
       data-dragging={dragging}
       data-sticker={sticker.id}
       style={{
@@ -440,7 +439,6 @@ export function StickerField() {
     const field = fieldRef.current;
     if (!field) return;
 
-    bind(field);
     savedRef.current = loadSavedStickers();
     seedRef.current ??= getSeed();
     const routeSeed = seedRef.current ^ getPathSeed(pathname);
@@ -572,6 +570,7 @@ export function StickerField() {
       const id = element?.dataset.sticker as StickerPlacement["id"] | undefined;
       const sticker = placementsRef.current.find((item) => item.id === id);
       if (!element || !sticker) return;
+      playStickerSound(sticker.id);
 
       const pointers = pointersRef.current;
       const currentDrag = dragRef.current;

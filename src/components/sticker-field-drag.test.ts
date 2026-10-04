@@ -27,7 +27,12 @@ function sticker(offsetX: number, offsetY = 0): StickerPlacement {
   return {
     id: "keyboard",
     label: "Keyboard",
-    sound: "toggle",
+    sound: {
+      source: {
+        type: "sine",
+        frequency: 440,
+      },
+    },
     src: "/stickers/lofree-block.png",
     story: "A sticker.",
     width: 120,

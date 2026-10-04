@@ -16,7 +16,7 @@ export function createBookLibrary(specs: readonly BookModel[]) {
     alpha: true,
   });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.style.cssText =
     "display:block;width:100%;height:100%;pointer-events:none";
   renderer.domElement.dataset.bookContext = crypto.randomUUID();
@@ -29,11 +29,12 @@ export function createBookLibrary(specs: readonly BookModel[]) {
     draw: () => void;
     release: () => void;
   } | null = null;
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xb2a38a, 0.72));
-  const key = new THREE.DirectionalLight(0xfff8ef, 0.9);
+  // three r155+ dropped legacy light units; scale by PI to keep the r151 look.
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb2a38a, 0.72 * Math.PI));
+  const key = new THREE.DirectionalLight(0xfff8ef, 0.9 * Math.PI);
   key.position.set(-25, 45, 35);
   scene.add(key);
-  const fill = new THREE.DirectionalLight(0xd8e9ff, 0.35);
+  const fill = new THREE.DirectionalLight(0xd8e9ff, 0.35 * Math.PI);
   fill.position.set(20, 15, -5);
   scene.add(fill);
 

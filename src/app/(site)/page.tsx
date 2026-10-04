@@ -101,6 +101,8 @@ export default async function Home() {
               data-analytics-event="Work Link Clicked"
               data-analytics-company={item.company}
               data-analytics-location="Home"
+              data-sound="tap"
+              data-sound-hover="hover"
             >
               <CardMedia
                 logo={item.logo}
@@ -138,6 +140,7 @@ export default async function Home() {
             data-analytics-event="Navigation Clicked"
             data-analytics-destination="Blog"
             data-analytics-location="Home"
+            data-sound="tap"
           >
             All posts
           </Link>
@@ -151,6 +154,7 @@ export default async function Home() {
                 data-analytics-event="Blog Post Clicked"
                 data-analytics-slug={post.slug}
                 data-analytics-location="Home"
+                data-sound="tap"
               >
                 <span className="text-sm font-medium underline-offset-4 group-hover:underline">
                   {post.title}

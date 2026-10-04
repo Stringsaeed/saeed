@@ -36,7 +36,7 @@ export class BookAssets {
       .loadAsync(path)
       .then((texture) => {
         texture.anisotropy = 4;
-        if (color) texture.encoding = THREE.sRGBEncoding;
+        if (color) texture.colorSpace = THREE.SRGBColorSpace;
         if (this.disposed) texture.dispose();
         else this.loaded.add(texture);
         return texture;
@@ -76,7 +76,7 @@ function pageTexture(assets: BookAssets) {
     ctx.fillRect(0, y, 64, y % 5 === 0 ? 1.2 : 0.6);
   }
   const texture = new THREE.CanvasTexture(canvas);
-  texture.encoding = THREE.sRGBEncoding;
+  texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;
   return assets.keep(texture);
 }
@@ -107,7 +107,7 @@ export async function createBook(
       ),
     );
     black.needsUpdate = true;
-    const uniforms = THREE.UniformsUtils.clone(THREE.UniformsLib.lights);
+    const uniforms: Record<string, THREE.IUniform> = THREE.UniformsUtils.clone(THREE.UniformsLib.lights);
     const defaults: Record<
       string,
       number | number[] | THREE.Texture | THREE.Color
@@ -171,9 +171,6 @@ export async function createBook(
         USE_UV: "",
         USE_MAP: "",
         USE_BUMPMAP: "",
-      },
-      extensions: {
-        derivatives: true,
       },
     });
     material.userData.foilOpacity = spec.finish.foilOpacity;

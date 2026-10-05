@@ -3,6 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { ReactNode } from "react";
 import { AnalyticsEvents } from "@/components/analytics-events";
 import { JsonLd } from "@/components/json-ld";
+import { LayoutDebug } from "@/components/layout-debug";
 import { SiteHeader, SiteSocialLinks } from "@/components/site-header";
 import { SiteSounds } from "@/components/site-sounds";
 import { StickerField } from "@/components/sticker-field";
@@ -31,6 +32,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           <SiteSocialLinks />
         </div>
       </div>
+      <LayoutDebug />
       <Analytics />
       <SpeedInsights />
       <AnalyticsEvents />

@@ -10,7 +10,7 @@ export type BookFrame = {
 export type BookLibrary = ReturnType<typeof createBookLibrary>;
 
 /** One library owns the models and GPU context for the shelf's lifetime. */
-export function createBookLibrary(specs: readonly BookModel[]) {
+export function createBookLibrary() {
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
     alpha: true,
@@ -23,7 +23,6 @@ export function createBookLibrary(specs: readonly BookModel[]) {
   const scene = new THREE.Scene();
   const assets = new BookAssets();
   const models = new Map<string, Promise<THREE.Group>>();
-  const previews = new Map<string, string>();
   let disposed = false;
   let active: {
     draw: () => void;
@@ -57,63 +56,6 @@ export function createBookLibrary(specs: readonly BookModel[]) {
       });
     models.set(spec.id, request);
     return request;
-  }
-
-  function drawPreview(spec: BookModel, model: THREE.Group) {
-    const height = spec.dimensionsMm.height / 10;
-    const depth = spec.dimensionsMm.depth / 10;
-    const padding = 0.015;
-    const camera = new THREE.OrthographicCamera(
-      -depth / 2 - padding,
-      depth / 2 + padding,
-      height / 2 + padding,
-      -height / 2 - padding,
-      0.1,
-      200,
-    );
-    camera.position.z = 80;
-    renderer.setPixelRatio(1);
-    renderer.setSize(
-      Math.ceil((1024 * (depth + 2 * padding)) / (height + 2 * padding)),
-      1024,
-      false,
-    );
-    const visible: THREE.Object3D[] = [];
-    for (const child of scene.children)
-      if (child instanceof THREE.Group && child.visible) {
-        visible.push(child);
-        child.visible = false;
-      }
-    const rotation = model.rotation.clone();
-    model.visible = true;
-    model.rotation.set(0, Math.PI / 2, 0);
-    // A real render uploads textures and compiles the same materials used on opening.
-    renderer.render(scene, camera);
-    const preview = renderer.domElement.toDataURL("image/png");
-    model.rotation.copy(rotation);
-    model.visible = false;
-    for (const child of visible) child.visible = true;
-    active?.draw();
-    previews.set(spec.id, preview);
-    return preview;
-  }
-
-  async function warm(onPreview: (id: string, preview: string) => void) {
-    for (const spec of specs) {
-      if (disposed) return;
-      try {
-        const model = await load(spec);
-        if (disposed) return;
-        const preview = previews.get(spec.id) ?? drawPreview(spec, model);
-        onPreview(spec.id, preview);
-      } catch {
-        if (disposed) return;
-        // A failed title keeps its fallback; other books can still warm successfully.
-      }
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => resolve()),
-      );
-    }
   }
 
   function attach(host: HTMLElement, spec: BookModel, initialFrame: BookFrame) {
@@ -191,7 +133,6 @@ export function createBookLibrary(specs: readonly BookModel[]) {
   }
 
   return {
-    warm,
     attach,
     dispose() {
       if (disposed) return;
@@ -200,7 +141,6 @@ export function createBookLibrary(specs: readonly BookModel[]) {
       disposeModel(scene);
       assets.dispose();
       renderer.dispose();
-      previews.clear();
       models.clear();
     },
   };

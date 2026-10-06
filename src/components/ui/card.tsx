@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Children,
@@ -864,8 +865,7 @@ function CardMedia({
         {logos.map((src, i) => (
           <span key={src} className="inline-flex items-center gap-1.5">
             {i > 0 && <span aria-hidden className="w-2 h-px bg-border" />}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={src}
               alt={logoAlt ?? ""}
               width={size}

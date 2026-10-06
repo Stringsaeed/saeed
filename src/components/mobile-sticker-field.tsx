@@ -24,13 +24,37 @@ import { cn } from "@/lib/utils";
 import { STICKERS, type StickerDefinition } from "./sticker-data";
 import { playStickerSound } from "./sticker-sounds";
 
-const LAYOUT: Record<StickerDefinition["id"], string> = {
-  keyboard: "left-2 top-3 w-36 -rotate-8",
-  monstera: "right-2 top-1 w-28 rotate-6",
-  bass: "left-6 bottom-1 w-24 rotate-3",
-  controller: "right-3 bottom-3 w-36 -rotate-3",
-  pencil: "left-1/2 top-20 w-28 -translate-x-1/2 rotate-2",
-  babylon: "left-1/2 bottom-2 w-16 -translate-x-1/2 -rotate-3",
+const LAYOUT: Record<
+  StickerDefinition["id"],
+  {
+    className: string;
+    width: number;
+  }
+> = {
+  keyboard: {
+    className: "left-2 top-3 w-36 -rotate-8",
+    width: 144,
+  },
+  monstera: {
+    className: "right-2 top-1 w-28 rotate-6",
+    width: 112,
+  },
+  bass: {
+    className: "left-6 bottom-1 w-24 rotate-3",
+    width: 96,
+  },
+  controller: {
+    className: "right-3 bottom-3 w-36 -rotate-3",
+    width: 144,
+  },
+  pencil: {
+    className: "left-1/2 top-20 w-28 -translate-x-1/2 rotate-2",
+    width: 112,
+  },
+  babylon: {
+    className: "left-1/2 bottom-2 w-16 -translate-x-1/2 -rotate-3",
+    width: 64,
+  },
 };
 const BACKDROP_PADDING = 24;
 const OPEN_DURATION = 0.55;
@@ -164,7 +188,6 @@ function RaisedStickerOverlay({
         alt=""
         fill
         sizes="calc(100vw - 3rem)"
-        quality={90}
         className="object-contain"
         draggable={false}
       />
@@ -297,7 +320,7 @@ export function MobileStickerField() {
             aria-label={`Open ${sticker.label.toLowerCase()} sticker story`}
             className={cn(
               "absolute drop-shadow-xl transition-[scale,filter] duration-300 ease-out active:scale-95",
-              LAYOUT[sticker.id],
+              LAYOUT[sticker.id].className,
               openId === sticker.id &&
                 typeof raisedSticker?.targetScale === "number" &&
                 "opacity-0",
@@ -306,10 +329,12 @@ export function MobileStickerField() {
             <Image
               src={sticker.src}
               alt=""
-              width={160}
-              height={Math.round((160 * sticker.height) / sticker.width)}
-              sizes="calc(100vw - 3rem)"
-              quality={90}
+              width={LAYOUT[sticker.id].width}
+              height={Math.round(
+                (LAYOUT[sticker.id].width * sticker.height) / sticker.width,
+              )}
+              loading={sticker.id === "keyboard" ? "eager" : "lazy"}
+              fetchPriority={sticker.id === "keyboard" ? "high" : "auto"}
               className="h-auto w-full object-contain"
               draggable={false}
             />

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown";
 import { MenuItem } from "@/components/ui/menu-item";
 import { playSound } from "@/lib/sound";
+import { ThemeIcon } from "./theme-switcher-trigger";
 
 const themeOptions = [
   {
@@ -30,9 +31,14 @@ const themeOptions = [
   },
 ] as const;
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({
+  defaultOpen = false,
+}: {
+  /** Opens on mount, for a press that landed before this module loaded. */
+  defaultOpen?: boolean;
+}) {
   const [mounted, setMounted] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const { setTheme, theme } = useTheme();
   const selectedTheme = mounted ? (theme ?? "system") : "system";
   const options = useMemo(
@@ -73,13 +79,7 @@ export function ThemeSwitcher() {
             aria-label={`Choose theme, current: ${selectedLabel}`}
             title={`Theme: ${selectedLabel}`}
           >
-            <span
-              className="relative flex size-4 shrink-0 items-center justify-center"
-              aria-hidden="true"
-            >
-              <RiSunLine className="absolute inset-0 size-4 rotate-0 scale-100 transition-transform duration-200 dark:-rotate-90 dark:scale-0" />
-              <RiMoonLine className="absolute inset-0 size-4 rotate-90 scale-0 transition-transform duration-200 dark:rotate-0 dark:scale-100" />
-            </span>
+            <ThemeIcon />
           </Button>
         }
       />

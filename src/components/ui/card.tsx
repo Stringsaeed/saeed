@@ -1,13 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight as LucideArrowRight, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   Children,
+  type CSSProperties,
   cloneElement,
   createContext,
-  type CSSProperties,
   forwardRef,
   type HTMLAttributes,
   isValidElement,
@@ -20,7 +21,7 @@ import {
 } from "react";
 import { useProximityHover } from "@/hooks/use-proximity-hover";
 import { fontWeights } from "@/lib/font-weight";
-import { type IconComponent, useIcon } from "@/lib/icon-context";
+import { type IconComponent, useIconOverride } from "@/lib/icon-context-core";
 import { useShape } from "@/lib/shape-context";
 import { SizeProvider, type SizeVariant, useSize } from "@/lib/size-context";
 import { spring } from "@/lib/springs";
@@ -154,9 +155,7 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
     );
     // Which card is selected — so its neighbours can drop the divider that
     // would otherwise slice through the selection fill.
-    const selectedIndex = childArray.findIndex(
-      (child) => child.props.selected,
-    );
+    const selectedIndex = childArray.findIndex((child) => child.props.selected);
 
     useEffect(() => {
       measureItems();
@@ -345,7 +344,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     const sizeClasses = useSize(size);
     const compact = sizeClasses.variant === "compact";
     const group = useContext(CardGroupContext);
-    const XIcon = useIcon("x");
+    const XIcon = useIconOverride("x", X);
 
     const orientation = group?.orientation ?? "card";
     const columns = group?.columns ?? 1;
@@ -1058,7 +1057,7 @@ function CardButton({
   disabled = false,
 }: CardButtonProps) {
   const shape = useShape();
-  const ArrowRight = useIcon("arrow-right");
+  const ArrowRight = useIconOverride("arrow-right", LucideArrowRight);
   const sizeClasses = useSize();
   const compact = sizeClasses.variant === "compact";
   const position = iconPosition ?? (external ? "end" : "start");

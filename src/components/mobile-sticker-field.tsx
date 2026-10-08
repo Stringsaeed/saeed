@@ -1,28 +1,28 @@
 "use client";
 
-import { RiCloseLine } from "@remixicon/react";
-import { useReducedMotion } from "framer-motion";
-import gsap from "gsap";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import {
   type MouseEvent,
   type PointerEvent,
   useCallback,
-  useLayoutEffect,
-  useRef,
+  useEffect,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import { onIdle } from "@/lib/idle";
 import { cn } from "@/lib/utils";
+import type { RaisedSticker } from "./mobile-sticker-story";
 import { STICKERS, type StickerDefinition } from "./sticker-data";
 import { playStickerSound } from "./sticker-sounds";
+
+const loadStory = () => import("./mobile-sticker-story");
+
+const MobileStickerStory = dynamic(
+  () => loadStory().then((module) => module.MobileStickerStory),
+  {
+    ssr: false,
+  },
+);
 
 const LAYOUT: Record<
   StickerDefinition["id"],
@@ -56,162 +56,30 @@ const LAYOUT: Record<
     width: 64,
   },
 };
-const BACKDROP_PADDING = 24;
-const OPEN_DURATION = 0.55;
-const CLOSE_DURATION = 0.45;
-
-type RaisedSticker = {
-  boundsHeight: number;
-  boundsWidth: number;
-  height: number;
-  originX: number;
-  originY: number;
-  rotate: string;
-  targetCenterX: number | null;
-  targetCenterY: number | null;
-  targetScale: number | null;
-  width: number;
-};
-
-type ResolvedRaisedSticker = RaisedSticker & {
-  targetCenterX: number;
-  targetCenterY: number;
-  targetScale: number;
-};
-
-function isResolvedRaisedSticker(
-  sticker: RaisedSticker | null,
-): sticker is ResolvedRaisedSticker {
-  return (
-    sticker !== null &&
-    sticker.targetCenterX !== null &&
-    sticker.targetCenterY !== null &&
-    sticker.targetScale !== null
-  );
-}
-
-type RaisedStickerOverlayProps = {
-  geometry: ResolvedRaisedSticker;
-  onExitComplete: () => void;
-  open: boolean;
-  reduceMotion: boolean;
-  sticker: StickerDefinition;
-};
-
-function RaisedStickerOverlay({
-  geometry,
-  onExitComplete,
-  open,
-  reduceMotion,
-  sticker,
-}: RaisedStickerOverlayProps) {
-  const elementRef = useRef<HTMLDivElement>(null);
-  const targetWidth = geometry.width * geometry.targetScale;
-  const targetHeight = geometry.height * geometry.targetScale;
-  const targetLeft = geometry.targetCenterX - targetWidth / 2;
-  const targetTop = geometry.targetCenterY - targetHeight / 2;
-  const originOffsetX = geometry.originX - geometry.targetCenterX;
-  const originOffsetY = geometry.originY - geometry.targetCenterY;
-  const inverseScale = 1 / geometry.targetScale;
-  const rotation = Number.parseFloat(geometry.rotate) || 0;
-
-  useLayoutEffect(() => {
-    const element = elementRef.current;
-    if (!element) return;
-
-    gsap.killTweensOf(element);
-
-    if (open) {
-      gsap.fromTo(
-        element,
-        {
-          x: originOffsetX,
-          y: originOffsetY,
-          scale: inverseScale,
-          rotation,
-        },
-        {
-          x: 0,
-          y: 0,
-          scale: 1,
-          rotation,
-          duration: reduceMotion ? 0 : OPEN_DURATION,
-          ease: "power4.out",
-          force3D: true,
-          overwrite: true,
-        },
-      );
-    } else {
-      gsap.to(element, {
-        x: originOffsetX,
-        y: originOffsetY,
-        scale: inverseScale,
-        rotation,
-        duration: reduceMotion ? 0 : CLOSE_DURATION,
-        ease: "power3.inOut",
-        force3D: true,
-        overwrite: true,
-        onComplete: onExitComplete,
-      });
-    }
-
-    return () => {
-      gsap.killTweensOf(element);
-    };
-  }, [
-    inverseScale,
-    onExitComplete,
-    open,
-    originOffsetX,
-    originOffsetY,
-    reduceMotion,
-    rotation,
-  ]);
-
-  return (
-    <div
-      ref={elementRef}
-      aria-hidden
-      data-raised-sticker
-      className="pointer-events-none fixed z-[60] drop-shadow-2xl"
-      style={{
-        left: targetLeft,
-        top: targetTop,
-        width: targetWidth,
-        height: targetHeight,
-        transformOrigin: "center",
-        willChange: "transform",
-      }}
-    >
-      <Image
-        src={sticker.src}
-        alt=""
-        fill
-        sizes="calc(100vw - 3rem)"
-        className="object-contain"
-        draggable={false}
-      />
-    </div>
-  );
-}
 
 export function MobileStickerField() {
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const shouldReduceMotion = useReducedMotion();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openId, setOpenId] = useState<StickerDefinition["id"] | null>(null);
   const [raisedSticker, setRaisedSticker] = useState<RaisedSticker | null>(
     null,
   );
   const openSticker = STICKERS.find((sticker) => sticker.id === openId);
-  const resolvedRaisedSticker = isResolvedRaisedSticker(raisedSticker)
-    ? raisedSticker
-    : null;
+  const [storyRequested, setStoryRequested] = useState(false);
+
+  useEffect(
+    () =>
+      onIdle(() => {
+        void loadStory();
+        setStoryRequested(true);
+      }),
+    [],
+  );
 
   const pressSticker = useCallback((event: PointerEvent<HTMLButtonElement>) => {
     const id = event.currentTarget.dataset.stickerId;
     const sticker = STICKERS.find((candidate) => candidate.id === id);
     if (sticker) playStickerSound(sticker.id);
+    setStoryRequested(true);
   }, []);
 
   const selectSticker = useCallback((event: MouseEvent<HTMLButtonElement>) => {
@@ -237,6 +105,7 @@ export function MobileStickerField() {
     });
     setOpenId(sticker.id);
     setDrawerOpen(true);
+    setStoryRequested(true);
   }, []);
 
   const handleOpenChange = useCallback((isOpen: boolean) => {
@@ -247,55 +116,6 @@ export function MobileStickerField() {
     setOpenId(null);
     setRaisedSticker(null);
   }, []);
-
-  useLayoutEffect(() => {
-    if (!drawerOpen) return;
-
-    const centerSticker = () => {
-      const drawer = drawerRef.current;
-      if (!drawer) return;
-
-      const viewport = window.visualViewport;
-      const viewportLeft = viewport?.offsetLeft ?? 0;
-      const viewportTop = viewport?.offsetTop ?? 0;
-      const viewportWidth = viewport?.width ?? window.innerWidth;
-      const viewportHeight = viewport?.height ?? window.innerHeight;
-      const drawerBottomInset =
-        Number.parseFloat(getComputedStyle(drawer).marginBottom) || 0;
-      const backdropBottom =
-        viewportTop + viewportHeight - drawer.offsetHeight - drawerBottomInset;
-      const availableWidth = Math.max(0, viewportWidth - BACKDROP_PADDING * 2);
-      const availableHeight = Math.max(
-        0,
-        backdropBottom - viewportTop - BACKDROP_PADDING * 2,
-      );
-
-      setRaisedSticker((current) =>
-        current
-          ? {
-              ...current,
-              targetCenterX: viewportLeft + viewportWidth / 2,
-              targetCenterY: viewportTop + (backdropBottom - viewportTop) / 2,
-              targetScale: Math.max(
-                0.1,
-                Math.min(
-                  availableWidth / current.boundsWidth,
-                  availableHeight / current.boundsHeight,
-                ),
-              ),
-            }
-          : null,
-      );
-    };
-
-    const frame = requestAnimationFrame(centerSticker);
-
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  }, [
-    drawerOpen,
-  ]);
 
   return (
     <section aria-label="Sticker stories" className="mt-8 min-[960px]:hidden">
@@ -333,6 +153,9 @@ export function MobileStickerField() {
               height={Math.round(
                 (LAYOUT[sticker.id].width * sticker.height) / sticker.width,
               )}
+              // A width-based srcset lets each screen density take the
+              // smallest file that is still sharp.
+              sizes={`${LAYOUT[sticker.id].width}px`}
               loading={sticker.id === "keyboard" ? "eager" : "lazy"}
               fetchPriority={sticker.id === "keyboard" ? "high" : "auto"}
               className="h-auto w-full object-contain"
@@ -342,50 +165,16 @@ export function MobileStickerField() {
         ))}
       </div>
 
-      <Drawer
-        open={drawerOpen}
-        onOpenChange={handleOpenChange}
-        modal
-        showSwipeHandle
-      >
-        <DrawerContent
-          ref={drawerRef}
-          className="[--bleed:0px] [--drawer-inset:0.75rem] rounded-[28px] border"
-        >
-          {openSticker ? (
-            <div className="px-5 pt-2 pb-5">
-              <div className="flex justify-end">
-                <DrawerTitle className="sr-only">
-                  {openSticker.label} sticker story
-                </DrawerTitle>
-                <DrawerClose
-                  aria-label="Close sticker story"
-                  data-sound="tap"
-                  className="inline-flex size-9 items-center justify-center rounded-full bg-accent text-foreground transition-colors hover:bg-accent/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                >
-                  <RiCloseLine aria-hidden="true" className="size-5" />
-                </DrawerClose>
-              </div>
-              <DrawerDescription className="mt-1 text-[15px] leading-6 text-pretty text-foreground">
-                {openSticker.story}
-              </DrawerDescription>
-            </div>
-          ) : null}
-        </DrawerContent>
-      </Drawer>
-
-      {openSticker && resolvedRaisedSticker
-        ? createPortal(
-            <RaisedStickerOverlay
-              geometry={resolvedRaisedSticker}
-              onExitComplete={handleRaisedExitComplete}
-              open={drawerOpen}
-              reduceMotion={shouldReduceMotion ?? false}
-              sticker={openSticker}
-            />,
-            document.body,
-          )
-        : null}
+      {storyRequested ? (
+        <MobileStickerStory
+          onOpenChange={handleOpenChange}
+          onRaisedExitComplete={handleRaisedExitComplete}
+          open={drawerOpen}
+          raisedSticker={raisedSticker}
+          setRaisedSticker={setRaisedSticker}
+          sticker={openSticker}
+        />
+      ) : null}
     </section>
   );
 }

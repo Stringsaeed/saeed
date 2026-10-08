@@ -1,4 +1,4 @@
-import { defineSound, type SoundDefinition } from "@web-kits/audio";
+import type { defineSound, SoundDefinition } from "@web-kits/audio";
 
 // Every interface sound on the site. They stay short and quiet: the ones that
 // fire on hover or on every tap sit well under the stickers and books, which
@@ -351,12 +351,48 @@ const definitions = {
 
 export type SoundName = keyof typeof definitions;
 
-const players = Object.fromEntries(
-  Object.entries(definitions).map(([name, definition]) => [
-    name,
-    defineSound(definition),
-  ]),
-) as Record<SoundName, ReturnType<typeof defineSound>>;
+type Player = ReturnType<typeof defineSound>;
+
+// The synth engine isn't needed to paint anything, so it loads once the page
+// settles (see SiteSounds) instead of shipping with the first bundle.
+let define: typeof defineSound | null = null;
+let engine: Promise<void> | null = null;
+const players = new Map<SoundDefinition, Player>();
+
+export function loadSoundEngine() {
+  engine ??= import("@web-kits/audio").then((module) => {
+    define = module.defineSound;
+  });
+  return engine;
+}
+
+// A cue asked for before the engine arrives still plays if it can land close
+// enough to the gesture to read as its sound; otherwise it is dropped.
+const LATE_CUE_MS = 120;
+
+function withPlayer(
+  definition: SoundDefinition,
+  play: (player: Player) => void,
+) {
+  const ready = () => {
+    let player = players.get(definition);
+    if (!player) {
+      player = (define as typeof defineSound)(definition);
+      players.set(definition, player);
+    }
+    play(player);
+  };
+
+  if (define) {
+    ready();
+    return;
+  }
+
+  const requested = performance.now();
+  void loadSoundEngine().then(() => {
+    if (performance.now() - requested <= LATE_CUE_MS) ready();
+  });
+}
 
 // The same cue can't restart faster than this, so a burst of events (a quick
 // sweep across the shelf, a double click) plays once instead of stuttering.
@@ -388,14 +424,14 @@ export function isSoundEnabled() {
 
 export function setSoundEnabled(next: boolean) {
   // The off cue has to play before the switch flips, the on cue after.
-  if (!next) players.soundOff();
+  if (!next) withPlayer(definitions.soundOff, (play) => play());
   enabled = next;
   try {
     localStorage.setItem(STORAGE_KEY, String(next));
   } catch {
     /* Private mode: the choice still holds for this visit. */
   }
-  if (next) players.soundOn();
+  if (next) withPlayer(definitions.soundOn, (play) => play());
   for (const listener of listeners) listener();
 }
 
@@ -409,12 +445,14 @@ export function subscribeSound(listener: () => void) {
 /** Plays a cue unless sound is off or the same cue just played. */
 export function playSound(name: SoundName) {
   if (!isSoundEnabled() || throttled(name, MIN_GAP_MS)) return;
-  players[name]({
-    jitter: {
-      detune: 20,
-      volume: 0.06,
-    },
-  });
+  withPlayer(definitions[name], (play) =>
+    play({
+      jitter: {
+        detune: 20,
+        volume: 0.06,
+      },
+    }),
+  );
 }
 
 /** Hover cues share one throttle so sweeping across a row can't rattle. */
@@ -424,17 +462,16 @@ export function playHoverSound(name: SoundName) {
 }
 
 /** Plays any definition (the stickers bring their own) behind the same gate. */
-export function playDefinition(
-  key: string,
-  play: ReturnType<typeof defineSound>,
-) {
+export function playDefinition(key: string, definition: SoundDefinition) {
   if (!isSoundEnabled() || throttled(key, MIN_GAP_MS)) return;
-  play({
-    jitter: {
-      detune: 25,
-      volume: 0.08,
-    },
-  });
+  withPlayer(definition, (play) =>
+    play({
+      jitter: {
+        detune: 25,
+        volume: 0.08,
+      },
+    }),
+  );
 }
 
 export function isSoundName(name: string | undefined): name is SoundName {

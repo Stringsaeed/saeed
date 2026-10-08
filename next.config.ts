@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     "192.168.1.123",
   ],
   images: {
+    // AVIF first: the stickers are transparent PNGs, where it saves the most.
+    formats: [
+      "image/avif",
+      "image/webp",
+    ],
     qualities: [
       75,
       90,

@@ -225,6 +225,19 @@ function StickerItem({
     sticker.scale,
   ]);
 
+  const image = (
+    <Image
+      src={sticker.src}
+      alt=""
+      width={sticker.width}
+      height={sticker.height}
+      sizes={`${Math.ceil(sticker.width)}px`}
+      loading="eager"
+      className="block h-auto w-full transition-transform duration-150 ease-out group-active/sticker:scale-96"
+      draggable={false}
+    />
+  );
+
   return (
     <motion.div
       className={cn("sticker", active && "z-10 opacity-100 drop-shadow-xl")}
@@ -240,40 +253,35 @@ function StickerItem({
         scale,
       }}
     >
-      <Tooltip
-        forceOpen={active}
-        side={sticker.top + sticker.offsetY < 260 ? "bottom" : "top"}
-        sideOffset={16}
-        className="w-76 rounded-4xl bg-popover p-5 text-popover-foreground shadow-surface-6"
-        content={
-          <div className="flex flex-col gap-2">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-              {sticker.label}
-            </p>
-            <p className="text-[15px] leading-6 font-normal text-pretty">
-              {sticker.story}
-            </p>
-          </div>
-        }
-      >
-        <button
-          type="button"
-          className="group/sticker block w-full cursor-[inherit] appearance-none border-0 bg-transparent p-0 text-inherit focus-visible:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-ring"
-          aria-label={`${active ? "Close" : "Open"} ${sticker.label.toLowerCase()} sticker story`}
-          onClick={onKeyboardToggle}
+      {sticker.story ? (
+        <Tooltip
+          forceOpen={active}
+          side={sticker.top + sticker.offsetY < 260 ? "bottom" : "top"}
+          sideOffset={16}
+          className="w-76 rounded-4xl bg-popover p-5 text-popover-foreground shadow-surface-6"
+          content={
+            <div className="flex flex-col gap-2">
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                {sticker.label}
+              </p>
+              <p className="text-[15px] leading-6 font-normal text-pretty">
+                {sticker.story}
+              </p>
+            </div>
+          }
         >
-          <Image
-            src={sticker.src}
-            alt=""
-            width={sticker.width}
-            height={sticker.height}
-            sizes={`${Math.ceil(sticker.width)}px`}
-            loading="eager"
-            className="block h-auto w-full transition-transform duration-150 ease-out group-active/sticker:scale-96"
-            draggable={false}
-          />
-        </button>
-      </Tooltip>
+          <button
+            type="button"
+            className="group/sticker block w-full cursor-[inherit] appearance-none border-0 bg-transparent p-0 text-inherit focus-visible:rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-ring"
+            aria-label={`${active ? "Close" : "Open"} ${sticker.label.toLowerCase()} sticker story`}
+            onClick={onKeyboardToggle}
+          >
+            {image}
+          </button>
+        </Tooltip>
+      ) : (
+        <div className="group/sticker block w-full">{image}</div>
+      )}
     </motion.div>
   );
 }
@@ -539,6 +547,8 @@ export function StickerField() {
   ]);
 
   const toggleStory = useCallback((id: StickerPlacement["id"]) => {
+    const sticker = placementsRef.current.find((item) => item.id === id);
+    if (!sticker?.story) return;
     setActiveStoryId((current) => (current === id ? null : id));
   }, []);
 

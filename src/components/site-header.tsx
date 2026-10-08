@@ -15,7 +15,7 @@ import Link from "next/link";
 import { AnimatedAvatar } from "./animated-avatar";
 import { SaeedName } from "./saeed-name";
 import { SoundToggle } from "./sound-toggle";
-import { ThemeSwitcher } from "./theme-switcher";
+import { ThemeSwitcher } from "./theme-switcher-trigger";
 import { Button } from "./ui/button";
 
 const socialLinks = [

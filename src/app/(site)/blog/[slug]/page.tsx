@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 import { PostBody } from "@/components/content/post-body";
 import { JsonLd } from "@/components/json-ld";
 import { formatPostDate, getPost, getPosts } from "@/lib/content";
@@ -69,53 +70,55 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) notFound();
 
   return (
-    <main className="pb-24 pt-8 sm:pt-12">
-      <JsonLd data={getBlogPostStructuredData(post)} />
-      <Link
-        className="text-link text-sm text-muted-foreground"
-        href="/blog"
-        data-analytics-event="Navigation Clicked"
-        data-analytics-destination="Blog"
-        data-analytics-location="Article"
-        data-sound="tap"
-      >
-        ← Blog
-      </Link>
+    <ViewTransition enter="page-enter" exit="page-exit" default="none">
+      <main className="pb-24 pt-8 sm:pt-12">
+        <JsonLd data={getBlogPostStructuredData(post)} />
+        <Link
+          className="text-link text-sm text-muted-foreground"
+          href="/blog"
+          data-analytics-event="Navigation Clicked"
+          data-analytics-destination="Blog"
+          data-analytics-location="Article"
+          data-sound="tap"
+        >
+          ← Blog
+        </Link>
 
-      <article
-        className="mt-8"
-        data-analytics-article={post.slug}
-        data-analytics-slug={post.slug}
-      >
-        <header
-          data-analytics-view="Article Viewed"
+        <article
+          className="mt-8"
+          data-analytics-article={post.slug}
           data-analytics-slug={post.slug}
         >
-          <p className="font-mono text-xs text-muted-foreground">
-            <time dateTime={post.date}>
-              {formatPostDate(post.date, "full")}
-            </time>
-            <span aria-hidden="true"> · </span>
-            {post.tags.join(", ")}
-          </p>
-          <h1 className="mt-3 max-w-[18ch] text-balance text-3xl leading-tight font-semibold tracking-[-0.045em] sm:text-4xl">
-            {post.title}
-          </h1>
-          <p className="mt-4 max-w-[38rem] text-base leading-7 text-muted-foreground">
-            {post.description}
-          </p>
-        </header>
+          <header
+            data-analytics-view="Article Viewed"
+            data-analytics-slug={post.slug}
+          >
+            <p className="font-mono text-xs text-muted-foreground">
+              <time dateTime={post.date}>
+                {formatPostDate(post.date, "full")}
+              </time>
+              <span aria-hidden="true"> · </span>
+              {post.tags.join(", ")}
+            </p>
+            <h1 className="mt-3 max-w-[18ch] text-balance text-3xl leading-tight font-semibold tracking-[-0.045em] sm:text-4xl">
+              {post.title}
+            </h1>
+            <p className="mt-4 max-w-[38rem] text-base leading-7 text-muted-foreground">
+              {post.description}
+            </p>
+          </header>
 
-        <div className="article-body mt-10">
-          <PostBody value={post.body} />
-        </div>
-        <span
-          className="block h-px"
-          data-analytics-view="Article Completed"
-          data-analytics-slug={post.slug}
-          aria-hidden="true"
-        />
-      </article>
-    </main>
+          <div className="article-body mt-10">
+            <PostBody value={post.body} />
+          </div>
+          <span
+            className="block h-px"
+            data-analytics-view="Article Completed"
+            data-analytics-slug={post.slug}
+            aria-hidden="true"
+          />
+        </article>
+      </main>
+    </ViewTransition>
   );
 }

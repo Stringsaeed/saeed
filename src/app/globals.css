@@ -99,7 +99,47 @@
   --color-shadow-color: var(--shadow-color);
 }
 
+/* Arial sized to each face's metrics while it loads, so the swap barely
+   moves text. Values match what next/font/google generates for these fonts. */
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial");
+  ascent-override: 95.94%;
+  descent-override: 28.16%;
+  line-gap-override: 0%;
+  size-adjust: 104.76%;
+}
+
+@font-face {
+  font-family: "Geist Mono Fallback";
+  src: local("Arial");
+  ascent-override: 74.67%;
+  descent-override: 21.92%;
+  line-gap-override: 0%;
+  size-adjust: 134.59%;
+}
+
+@font-face {
+  font-family: "Lavishly Yours Fallback";
+  src: local("Arial");
+  ascent-override: 161.31%;
+  descent-override: 73.32%;
+  line-gap-override: 0%;
+  size-adjust: 68.19%;
+}
+
 :root {
+  /* Core face, then the full font for any other Latin character (see the
+     root layout), then its metric-matched fallback. */
+  --font-geist-sans:
+    var(--font-geist-sans-core), var(--font-geist-sans-extended),
+    "Geist Fallback";
+  --font-geist-mono:
+    var(--font-geist-mono-core), var(--font-geist-mono-extended),
+    "Geist Mono Fallback";
+  --font-lavishly-yours:
+    var(--font-lavishly-yours-core), var(--font-lavishly-yours-extended),
+    "Lavishly Yours Fallback";
   color-scheme: light;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -380,7 +420,9 @@
     border-radius: 2px;
     background: var(--debug-color);
     color: white;
-    font: 10px/1.4 var(--font-geist-mono), monospace;
+    font:
+      10px / 1.4 var(--font-geist-mono),
+      monospace;
     white-space: nowrap;
   }
 
@@ -428,7 +470,7 @@
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--background);
-    font: 11px/1.4 monospace;
+    font: 11px / 1.4 monospace;
   }
 
   .layout-debug-legend span:first-child {
@@ -771,6 +813,38 @@
 @keyframes signature-write {
   to {
     clip-path: inset(0 0 0 0);
+  }
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(.page-exit) {
+  animation: 180ms cubic-bezier(0.32, 0, 0.67, 0) both page-fade-out;
+}
+
+::view-transition-new(.page-enter) {
+  animation: 340ms cubic-bezier(0.23, 1, 0.32, 1) both page-fade-in;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.page-exit),
+  ::view-transition-new(.page-enter) {
+    animation-duration: 0.01ms;
   }
 }
 

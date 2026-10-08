@@ -144,7 +144,7 @@ export const BOOKS: readonly Book[] = [
     spine: {
       design: "image",
       src: "/books/scaling-people-spine.jpg",
-      width: 166,
+      width: 183,
       height: 1277,
       background: "#99724b",
     },
@@ -200,7 +200,7 @@ export const BOOKS: readonly Book[] = [
     spine: {
       design: "image",
       src: "/books/where-is-my-flying-car-spine.png",
-      width: 138,
+      width: 154,
       height: 1277,
       background: "#787777",
       texture: "cloth",

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { BookShelf } from "@/components/book-shelf";
 import { MobileStickerField } from "@/components/mobile-sticker-field";
 import { SaeedName } from "@/components/saeed-name";
@@ -64,123 +65,125 @@ const work = [
 export default async function Home() {
   const posts = await getPosts();
   return (
-    <main className="pb-20 pt-10 sm:pt-14">
-      <h1
-        className="max-w-136 text-xl leading-8 font-semibold tracking-tight sm:text-2xl sm:leading-9"
-        data-analytics-view="Content Viewed"
-        data-analytics-label="Intro"
-      >
-        I’m <SaeedName />, a software engineer.
-      </h1>
-      <p className="mt-3 max-w-152 text-base leading-7 text-muted-foreground">
-        I work on React Native, TypeScript, performance, accessibility, native
-        code, and agent-assisted engineering.
-      </p>
-
-      <MobileStickerField />
-
-      <div
-        className="mt-12"
-        data-analytics-view="Content Viewed"
-        data-analytics-label="Work"
-      >
-        <h2 className="list-heading">Work</h2>
-        <CardGroup
-          className="mt-4 smooth-shadow-ring shadow-black smooth-ring-neutral-300/30 bg-background"
-          orientation="inline"
-          border="outlined"
+    <ViewTransition enter="page-enter" exit="page-exit" default="none">
+      <main className="pb-20 pt-10 sm:pt-14">
+        <h1
+          className="max-w-136 text-xl leading-8 font-semibold tracking-tight sm:text-2xl sm:leading-9"
+          data-analytics-view="Content Viewed"
+          data-analytics-label="Intro"
         >
-          {work.map((item) => (
-            <Card
-              key={item.company}
-              href={item.href}
-              external
-              label={`${item.company}, ${item.period}`}
-              size="compact"
-              highlightColor={`color-mix(in oklab, ${item.brand} 12%, var(--background))`}
-              data-analytics-event="Work Link Clicked"
-              data-analytics-company={item.company}
-              data-analytics-location="Home"
-              data-sound="tap"
-              data-sound-hover="hover"
-            >
-              <CardMedia
-                logo={item.logo}
-                className="grayscale opacity-70 transition-[filter,opacity] duration-150 group-hover/card:grayscale-0 group-hover/card:opacity-100 group-focus-within/card:grayscale-0 group-focus-within/card:opacity-100"
-              />
-              <CardHeader>
-                <CardTitle>{item.company}</CardTitle>
-                <CardDescription
-                  className="truncate leading-5"
-                  title={item.description}
-                >
-                  {item.description}
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <span className="shrink-0 font-mono text-[11px] text-muted-foreground tabular-nums">
-                  {item.period}
-                </span>
-              </CardFooter>
-            </Card>
-          ))}
-        </CardGroup>
-      </div>
+          I’m <SaeedName />, a software engineer.
+        </h1>
+        <p className="mt-3 max-w-152 text-base leading-7 text-muted-foreground">
+          I work on React Native, TypeScript, performance, accessibility, native
+          code, and agent-assisted engineering.
+        </p>
 
-      <div
-        className="mt-12"
-        data-analytics-view="Content Viewed"
-        data-analytics-label="Writing"
-      >
-        <div className="flex items-baseline justify-between gap-5">
-          <h2 className="list-heading">Writing</h2>
-          <Link
-            className="text-link text-sm text-muted-foreground"
-            href="/blog"
-            data-analytics-event="Navigation Clicked"
-            data-analytics-destination="Blog"
-            data-analytics-location="Home"
-            data-sound="tap"
+        <MobileStickerField />
+
+        <div
+          className="mt-12"
+          data-analytics-view="Content Viewed"
+          data-analytics-label="Work"
+        >
+          <h2 className="list-heading">Work</h2>
+          <CardGroup
+            className="mt-4 smooth-shadow-ring shadow-black smooth-ring-neutral-300/30 bg-background"
+            orientation="inline"
+            border="outlined"
           >
-            All posts
-          </Link>
-        </div>
-        <ul className="mt-5 space-y-4">
-          {posts.slice(0, 5).map((post) => (
-            <li key={post.slug}>
-              <Link
-                className="group flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
-                href={`/blog/${post.slug}`}
-                data-analytics-event="Blog Post Clicked"
-                data-analytics-slug={post.slug}
+            {work.map((item) => (
+              <Card
+                key={item.company}
+                href={item.href}
+                external
+                label={`${item.company}, ${item.period}`}
+                size="compact"
+                highlightColor={`color-mix(in oklab, ${item.brand} 12%, var(--background))`}
+                data-analytics-event="Work Link Clicked"
+                data-analytics-company={item.company}
                 data-analytics-location="Home"
                 data-sound="tap"
+                data-sound-hover="hover"
               >
-                <span className="text-sm font-medium underline-offset-4 group-hover:underline">
-                  {post.title}
-                </span>
-                <time
-                  className="shrink-0 font-mono text-xs text-muted-foreground"
-                  dateTime={post.date}
-                >
-                  {formatPostDate(post.date)}
-                </time>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div
-        className="mt-12"
-        data-analytics-view="Content Viewed"
-        data-analytics-label="Library"
-      >
-        <h2 className="list-heading">Library</h2>
-        <div className="mt-5">
-          <BookShelf />
+                <CardMedia
+                  logo={item.logo}
+                  className="grayscale opacity-70 transition-[filter,opacity] duration-150 group-hover/card:grayscale-0 group-hover/card:opacity-100 group-focus-within/card:grayscale-0 group-focus-within/card:opacity-100"
+                />
+                <CardHeader>
+                  <CardTitle>{item.company}</CardTitle>
+                  <CardDescription
+                    className="truncate leading-5"
+                    title={item.description}
+                  >
+                    {item.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <span className="shrink-0 font-mono text-[11px] text-muted-foreground tabular-nums">
+                    {item.period}
+                  </span>
+                </CardFooter>
+              </Card>
+            ))}
+          </CardGroup>
         </div>
-      </div>
-    </main>
+
+        <div
+          className="mt-12"
+          data-analytics-view="Content Viewed"
+          data-analytics-label="Writing"
+        >
+          <div className="flex items-baseline justify-between gap-5">
+            <h2 className="list-heading">Writing</h2>
+            <Link
+              className="text-link text-sm text-muted-foreground"
+              href="/blog"
+              data-analytics-event="Navigation Clicked"
+              data-analytics-destination="Blog"
+              data-analytics-location="Home"
+              data-sound="tap"
+            >
+              All posts
+            </Link>
+          </div>
+          <ul className="mt-5 space-y-4">
+            {posts.slice(0, 5).map((post) => (
+              <li key={post.slug}>
+                <Link
+                  className="group flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
+                  href={`/blog/${post.slug}`}
+                  data-analytics-event="Blog Post Clicked"
+                  data-analytics-slug={post.slug}
+                  data-analytics-location="Home"
+                  data-sound="tap"
+                >
+                  <span className="text-sm font-medium underline-offset-4 group-hover:underline">
+                    {post.title}
+                  </span>
+                  <time
+                    className="shrink-0 font-mono text-xs text-muted-foreground"
+                    dateTime={post.date}
+                  >
+                    {formatPostDate(post.date)}
+                  </time>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div
+          className="mt-12"
+          data-analytics-view="Content Viewed"
+          data-analytics-label="Library"
+        >
+          <h2 className="list-heading">Library</h2>
+          <div className="mt-5">
+            <BookShelf />
+          </div>
+        </div>
+      </main>
+    </ViewTransition>
   );
 }

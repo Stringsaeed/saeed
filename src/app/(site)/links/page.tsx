@@ -57,10 +57,7 @@ export default async function LinksPage() {
           </p>
         </div>
 
-        <div
-          className="relative left-1/2 mt-6 min-h-0 w-[min(56rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-1 overflow-hidden rounded-lg bg-background ring-1 ring-border  smooth-shadow-ring shadow-black smooth-ring-neutral-300/30"
-          data-sticker-protected
-        >
+        <div className="relative left-1/2 mt-6 min-h-0 w-[min(56rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-1 overflow-hidden rounded-lg bg-background ring-1 ring-border  smooth-shadow-ring shadow-black smooth-ring-neutral-300/30">
           <LinksTable entries={entries} />
         </div>
       </main>

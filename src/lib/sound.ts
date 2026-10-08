@@ -66,7 +66,7 @@ const definitions = {
       },
     ],
   },
-  // A fingernail on a hardback: a dry paper snap over a short board knock.
+  // A fingernail on a hardback: one dry paper snap with a tiny board knock.
   bookTap: {
     layers: [
       {
@@ -75,68 +75,47 @@ const definitions = {
           color: "white",
         },
         filter: {
-          type: "highpass",
-          frequency: 7000,
+          type: "bandpass",
+          frequency: 4200,
+          resonance: 2.5,
         },
         envelope: {
           decay: 0.004,
         },
-        gain: 0.14,
-      },
-      {
-        source: {
-          type: "noise",
-          color: "white",
-        },
-        filter: {
-          type: "bandpass",
-          frequency: 3000,
-          resonance: 1.5,
-        },
-        envelope: {
-          decay: 0.01,
-        },
-        gain: 0.22,
+        gain: 0.24,
       },
       {
         source: {
           type: "triangle",
           frequency: {
-            start: 620,
-            end: 300,
+            start: 700,
+            end: 420,
           },
         },
         envelope: {
-          decay: 0.022,
+          decay: 0.01,
         },
-        gain: 0.1,
+        gain: 0.08,
       },
     ],
   },
-  // The book sliding off the shelf with its pages riffling as it turns.
+  // Two quick ticks: the book leaving its slot, then the cover flicking open.
   bookOpen: {
     layers: [
       {
         source: {
           type: "noise",
-          color: "pink",
+          color: "white",
         },
         filter: {
           type: "bandpass",
-          frequency: 1200,
-          resonance: 0.9,
-          envelope: {
-            attack: 0.08,
-            peak: 4200,
-            decay: 0.24,
-          },
+          frequency: 3400,
+          resonance: 2.5,
         },
         envelope: {
-          attack: 0.06,
-          decay: 0.26,
+          decay: 0.005,
         },
-        gain: 0.09,
-        delay: 0.03,
+        gain: 0.2,
       },
       {
         source: {
@@ -145,77 +124,61 @@ const definitions = {
         },
         filter: {
           type: "bandpass",
-          frequency: 5200,
-          resonance: 1.2,
+          frequency: 5600,
+          resonance: 3,
         },
         envelope: {
-          attack: 0.05,
-          decay: 0.2,
+          decay: 0.004,
         },
-        lfo: {
-          type: "square",
-          frequency: 26,
-          depth: 0.04,
-          target: "gain",
+        gain: 0.18,
+        delay: 0.045,
+      },
+      {
+        source: {
+          type: "sine",
+          frequency: {
+            start: 1500,
+            end: 1100,
+          },
+        },
+        envelope: {
+          decay: 0.008,
         },
         gain: 0.05,
-        delay: 0.12,
+        delay: 0.045,
       },
     ],
   },
-  // A short slide back, then the spine knocking into its slot.
+  // The spine knocking back into its slot: one firm, short click.
   bookClose: {
     layers: [
       {
         source: {
           type: "noise",
-          color: "pink",
+          color: "white",
         },
         filter: {
           type: "bandpass",
-          frequency: 3200,
-          resonance: 0.9,
-          envelope: {
-            peak: 1100,
-            decay: 0.18,
-          },
+          frequency: 2600,
+          resonance: 2,
         },
         envelope: {
-          attack: 0.03,
-          decay: 0.16,
+          decay: 0.005,
         },
-        gain: 0.07,
+        gain: 0.2,
       },
       {
         source: {
           type: "triangle",
           frequency: {
-            start: 220,
-            end: 120,
+            start: 340,
+            end: 180,
           },
         },
         envelope: {
-          attack: 0.002,
-          decay: 0.05,
+          decay: 0.018,
         },
-        gain: 0.16,
-        delay: 0.32,
-      },
-      {
-        source: {
-          type: "noise",
-          color: "white",
-        },
-        filter: {
-          type: "bandpass",
-          frequency: 900,
-          resonance: 1.4,
-        },
-        envelope: {
-          decay: 0.02,
-        },
-        gain: 0.1,
-        delay: 0.32,
+        gain: 0.14,
       },
     ],
   },

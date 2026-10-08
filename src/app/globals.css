@@ -173,8 +173,6 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
-  --dot-color: rgb(61 58 53 / 0.14);
-  --dot-active-color: rgb(166 61 31 / 0.68);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --hover: color-mix(in oklab, var(--foreground) 6%, var(--background));
@@ -251,8 +249,6 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
-  --dot-color: rgb(226 225 223 / 0.13);
-  --dot-active-color: rgb(94 146 103 / 0.48);
   --overlay: 255 255 255;
   --surface-1: #171717;
   --surface-2: #1e1e1e;
@@ -357,38 +353,6 @@
     letter-spacing: 0;
     line-height: 1;
     color: var(--muted-foreground);
-  }
-
-  .sticker-field {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .sticker {
-    position: absolute;
-    z-index: 0;
-    cursor: grab;
-    pointer-events: auto;
-    touch-action: none;
-    filter: drop-shadow(0 0.5rem 0.8rem rgb(20 20 18 / 0.12));
-    opacity: 0.94;
-    transform-origin: center;
-    transition:
-      filter 160ms ease,
-      opacity 160ms ease;
-    -webkit-user-drag: none;
-    will-change: transform;
-  }
-
-  .sticker[data-dragging="true"] {
-    z-index: 1;
-    cursor: grabbing;
-    filter: drop-shadow(0 0.8rem 1rem rgb(20 20 18 / 0.18));
-    opacity: 1;
   }
 
   .layout-debug-overlay {
@@ -821,7 +785,7 @@
 }
 
 ::view-transition-old(.page-exit) {
-  animation: 180ms cubic-bezier(0.32, 0, 0.67, 0) both page-fade-out;
+  animation: 60ms cubic-bezier(0.32, 0, 0.67, 0) both page-fade-out;
 }
 
 ::view-transition-new(.page-enter) {
@@ -841,9 +805,44 @@
   }
 }
 
+::view-transition-group(.sticker-morph) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-image-pair(.sticker-morph) {
+  animation: 520ms cubic-bezier(0.22, 1, 0.36, 1) sticker-morph-blur;
+}
+
+.sticker-backdrop {
+  animation: 360ms cubic-bezier(0.23, 1, 0.32, 1) both page-fade-out reverse;
+}
+
+.sticker-panel {
+  animation: 460ms cubic-bezier(0.22, 1, 0.36, 1) both sticker-panel-in;
+}
+
+@keyframes sticker-morph-blur {
+  35% {
+    filter: blur(1.5px);
+  }
+}
+
+@keyframes sticker-panel-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+    translate: 0 12px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(.page-exit),
-  ::view-transition-new(.page-enter) {
+  ::view-transition-new(.page-enter),
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
     animation-duration: 0.01ms;
   }
 }
@@ -865,31 +864,6 @@
   .signature-name {
     clip-path: inset(0 0 0 0);
     animation: none;
-  }
-}
-
-@media (max-width: 959px) {
-  .sticker-field {
-    display: none;
-  }
-}
-
-@media (min-width: 960px) and (max-width: 1119px) {
-  .sticker {
-    opacity: 0.86;
-  }
-}
-
-@media print {
-  .sticker-field {
-    display: none;
-  }
-}
-
-@media (forced-colors: active) {
-  .interactive-dots,
-  .sticker-field {
-    display: none;
   }
 }
 

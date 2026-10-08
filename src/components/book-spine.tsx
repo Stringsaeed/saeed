@@ -102,7 +102,7 @@ function StripePressSpineArt({ spine }: { spine: StripePressSpine }) {
 // than any weight Futura ships with, so a hairline stroke in the colour
 // behind it trims the letters down; the bold italic is built up the same way,
 // with a stroke in its own colour.
-function InspiredSpineArt() {
+function InspiredSpineArt({ showArt }: { showArt: boolean }) {
   const bandId = useId();
 
   return (
@@ -160,7 +160,7 @@ function InspiredSpineArt() {
         </g>
       </g>
       <image
-        href="/books/inspired-wiley.webp"
+        href={showArt ? "/books/inspired-wiley.webp" : undefined}
         x="23.25"
         y="1735.2"
         width="143.5"
@@ -170,7 +170,7 @@ function InspiredSpineArt() {
       <circle cx="88.5" cy="1736.5" r="3.2" fill="#f0b343" />
       <g transform="translate(95 0) rotate(90)">
         <image
-          href="/books/inspired-wordmark.webp"
+          href={showArt ? "/books/inspired-wordmark.webp" : undefined}
           x="221"
           y="-73"
           width="723"
@@ -217,7 +217,7 @@ function InspiredSpineArt() {
 // The Design of Everyday Things, Basic Books paperback, on a 170 by 1728
 // grid measured from the printed spine. The pot is cut from a photograph of
 // the spine itself.
-function EverydayThingsSpineArt() {
+function EverydayThingsSpineArt({ showArt }: { showArt: boolean }) {
   return (
     <svg
       aria-hidden="true"
@@ -228,7 +228,9 @@ function EverydayThingsSpineArt() {
       <rect width="170" height="1728" fill="#ffe136" />
       <rect y="1553" width="170" height="175" fill="#1b1b1a" />
       <image
-        href="/books/the-design-of-everyday-things-pot.webp"
+        href={
+          showArt ? "/books/the-design-of-everyday-things-pot.webp" : undefined
+        }
         x="7.6"
         y="1314"
         width="151"
@@ -294,7 +296,7 @@ function EverydayThingsSpineArt() {
 // The Staff Engineer's Path, O'Reilly paperback, on a 153 by 1890 grid
 // measured from the printed spine. The panel of cover art at the head is cut
 // from a photograph of the spine, with the bare paper keyed out.
-function StaffEngineersPathSpineArt() {
+function StaffEngineersPathSpineArt({ showArt }: { showArt: boolean }) {
   return (
     <svg
       aria-hidden="true"
@@ -304,7 +306,11 @@ function StaffEngineersPathSpineArt() {
     >
       <rect width="153" height="1890" fill="#f2f3f5" />
       <image
-        href="/books/the-staff-engineers-path-spine-head.webp"
+        href={
+          showArt
+            ? "/books/the-staff-engineers-path-spine-head.webp"
+            : undefined
+        }
         width="153"
         height="279"
         preserveAspectRatio="none"
@@ -352,7 +358,16 @@ function StaffEngineersPathSpineArt() {
 
 // `unlit` drops the painted-on curve shading: the pulled book lights its
 // rounded spine strip by strip instead.
-export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
+export function BookSpine({
+  book,
+  showArt = true,
+  unlit,
+}: {
+  book: Book;
+  /** False until the shelf nears the viewport, so printed art waits too. */
+  showArt?: boolean;
+  unlit?: boolean;
+}) {
   const { spine } = book;
 
   if (spine.design === "stripe-press") {
@@ -378,16 +393,17 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
         }}
       >
         {/* Unoptimized so the shelf and the pulled book share one cached file. */}
-        <Image
-          alt=""
-          className="book-spine-art"
-          draggable={false}
-          height={spine.height}
-          loading="eager"
-          src={spine.src}
-          unoptimized
-          width={spine.width}
-        />
+        {showArt ? (
+          <Image
+            alt=""
+            className="book-spine-art"
+            draggable={false}
+            height={spine.height}
+            src={spine.src}
+            unoptimized
+            width={spine.width}
+          />
+        ) : null}
         {spine.texture ? (
           <span className="book-spine-texture" data-texture={spine.texture} />
         ) : null}
@@ -398,7 +414,7 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
   if (spine.design === "everyday-things") {
     return (
       <span className="book-spine">
-        <EverydayThingsSpineArt />
+        <EverydayThingsSpineArt showArt={showArt} />
       </span>
     );
   }
@@ -406,7 +422,7 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
   if (spine.design === "staff-engineers-path") {
     return (
       <span className="book-spine">
-        <StaffEngineersPathSpineArt />
+        <StaffEngineersPathSpineArt showArt={showArt} />
       </span>
     );
   }
@@ -422,7 +438,7 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
         } as CSSProperties
       }
     >
-      <InspiredSpineArt />
+      <InspiredSpineArt showArt={showArt} />
     </span>
   );
 }

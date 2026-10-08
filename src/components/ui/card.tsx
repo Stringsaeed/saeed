@@ -1,13 +1,14 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight as LucideArrowRight, X } from "lucide-react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import {
   Children,
+  type CSSProperties,
   cloneElement,
   createContext,
-  type CSSProperties,
   forwardRef,
   type HTMLAttributes,
   isValidElement,
@@ -17,14 +18,27 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { useProximityHover } from "@/hooks/use-proximity-hover";
 import { fontWeights } from "@/lib/font-weight";
-import { type IconComponent, useIcon } from "@/lib/icon-context";
+import { type IconComponent, useIconOverride } from "@/lib/icon-context-core";
+import { onIdle } from "@/lib/idle";
 import { useShape } from "@/lib/shape-context";
 import { SizeProvider, type SizeVariant, useSize } from "@/lib/size-context";
-import { spring } from "@/lib/springs";
 import { cn } from "@/lib/utils";
+
+// The highlight is the only part that needs Motion, and it only shows under a
+// pointer, so it loads once the page settles instead of before first paint.
+const CardGroupHighlight = dynamic(
+  () =>
+    import("./card-group-highlight").then(
+      (module) => module.CardGroupHighlight,
+    ),
+  {
+    ssr: false,
+  },
+);
 
 // ---------------------------------------------------------------------------
 // Card is shadcn/ui's compositional card — the same parts and `data-slot`
@@ -125,6 +139,14 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
   ) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const shape = useShape();
+    const [highlightReady, setHighlightReady] = useState(false);
+
+    useEffect(() => {
+      if (!proximityHover) return;
+      return onIdle(() => setHighlightReady(true));
+    }, [
+      proximityHover,
+    ]);
 
     // >1 column wraps into a grid, where nearest-item must be resolved in two
     // dimensions; a single column is a plain vertical list.
@@ -154,9 +176,7 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
     );
     // Which card is selected — so its neighbours can drop the divider that
     // would otherwise slice through the selection fill.
-    const selectedIndex = childArray.findIndex(
-      (child) => child.props.selected,
-    );
+    const selectedIndex = childArray.findIndex((child) => child.props.selected);
 
     useEffect(() => {
       measureItems();
@@ -228,53 +248,27 @@ const CardGroup = forwardRef<HTMLDivElement, CardGroupProps>(
           style={{
             gridTemplateColumns: `repeat(${Math.max(1, columns)}, minmax(0, 1fr))`,
           }}
-          onMouseEnter={proximityHover ? handlers.onMouseEnter : undefined}
+          onMouseEnter={
+            proximityHover
+              ? () => {
+                  setHighlightReady(true);
+                  handlers.onMouseEnter();
+                }
+              : undefined
+          }
           onMouseMove={proximityHover ? handlers.onMouseMove : undefined}
           onMouseLeave={proximityHover ? handlers.onMouseLeave : undefined}
         >
           {/* Proximity highlight — a single magnetic layer that springs to the
               card nearest the cursor, previewing where a click will land. */}
-          <AnimatePresence>
-            {activeRect && (
-              <motion.div
-                key={sessionRef.current}
-                aria-hidden
-                data-slot="card-group-highlight"
-                className={cn(
-                  "absolute pointer-events-none z-0 transition-colors duration-150",
-                  !activeColor && "bg-hover",
-                  shape.container,
-                )}
-                style={{
-                  backgroundColor: activeColor,
-                }}
-                initial={{
-                  opacity: 0,
-                  top: activeRect.top,
-                  left: activeRect.left,
-                  width: activeRect.width,
-                  height: activeRect.height,
-                }}
-                animate={{
-                  opacity: 1,
-                  top: activeRect.top,
-                  left: activeRect.left,
-                  width: activeRect.width,
-                  height: activeRect.height,
-                }}
-                exit={{
-                  opacity: 0,
-                  transition: spring.fast.exit,
-                }}
-                transition={{
-                  ...spring.fast,
-                  opacity: {
-                    duration: 0.08,
-                  },
-                }}
-              />
-            )}
-          </AnimatePresence>
+          {highlightReady ? (
+            <CardGroupHighlight
+              className={shape.container}
+              color={activeColor}
+              rect={activeRect ?? null}
+              session={sessionRef.current}
+            />
+          ) : null}
 
           {indexed}
         </div>
@@ -345,7 +339,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     const sizeClasses = useSize(size);
     const compact = sizeClasses.variant === "compact";
     const group = useContext(CardGroupContext);
-    const XIcon = useIcon("x");
+    const XIcon = useIconOverride("x", X);
 
     const orientation = group?.orientation ?? "card";
     const columns = group?.columns ?? 1;
@@ -1058,7 +1052,7 @@ function CardButton({
   disabled = false,
 }: CardButtonProps) {
   const shape = useShape();
-  const ArrowRight = useIcon("arrow-right");
+  const ArrowRight = useIconOverride("arrow-right", LucideArrowRight);
   const sizeClasses = useSize();
   const compact = sizeClasses.variant === "compact";
   const position = iconPosition ?? (external ? "end" : "start");

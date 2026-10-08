@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { onIdle } from "@/lib/idle";
 
 // `pupil` is the eye colour drawn on top of each SVG; the PNG has no eye.
 const avatars = [
@@ -26,7 +27,12 @@ const reach = 240;
 
 export function AnimatedAvatar() {
 	const [activeIndex, setActiveIndex] = useState(0);
+	// Only the first face shows at load; the rest arrive once the page
+	// settles, well before the first swap.
+	const [allFaces, setAllFaces] = useState(false);
 	const containerRef = useRef<HTMLSpanElement>(null);
+
+	useEffect(() => onIdle(() => setAllFaces(true)), []);
 
 	useEffect(() => {
 		const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -140,14 +146,16 @@ export function AnimatedAvatar() {
 						index === activeIndex ? "opacity-100" : "opacity-0"
 					}`}
 				>
-					<Image
-						src={src}
-						alt=""
-						width={32}
-						height={32}
-						className="absolute inset-0"
-						priority={index === 0}
-					/>
+					{index === 0 || allFaces ? (
+						<Image
+							src={src}
+							alt=""
+							width={32}
+							height={32}
+							className="absolute inset-0"
+							priority={index === 0}
+						/>
+					) : null}
 					{pupil ? (
 						<svg
 							aria-hidden="true"

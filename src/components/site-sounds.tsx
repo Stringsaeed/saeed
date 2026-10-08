@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { isSoundName, playHoverSound, playSound } from "@/lib/sound";
+import { onIdle } from "@/lib/idle";
+import {
+  isSoundName,
+  loadSoundEngine,
+  playHoverSound,
+  playSound,
+} from "@/lib/sound";
 
 /**
  * Plays the cue named by `data-sound` when an element is pressed, and
@@ -10,6 +16,8 @@ import { isSoundName, playHoverSound, playSound } from "@/lib/sound";
  * click with no pointer behind it.
  */
 export function SiteSounds() {
+  useEffect(() => onIdle(loadSoundEngine), []);
+
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
       if (event.button !== 0 || !(event.target instanceof Element)) return;

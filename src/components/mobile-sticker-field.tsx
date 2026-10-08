@@ -55,6 +55,14 @@ const LAYOUT: Record<
     className: "left-1/2 bottom-2 w-16 -translate-x-1/2 -rotate-3",
     width: 64,
   },
+  pyramids: {
+    className: "left-1/2 top-2 w-32 -translate-x-1/2 -rotate-2",
+    width: 128,
+  },
+  burj: {
+    className: "right-[30%] bottom-4 w-10 rotate-6",
+    width: 40,
+  },
 };
 
 export function MobileStickerField() {

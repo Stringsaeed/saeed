@@ -20,6 +20,217 @@ export type StickerDefinition = {
 
 export const STICKERS: StickerDefinition[] = [
   {
+    id: "pyramids",
+    label: "Giza pyramids",
+    sound: {
+      // A gust of desert wind carrying a short Hijaz phrase: the flat second
+      // leaning on the tonic, the sound of a Cairo afternoon.
+      layers: [
+        {
+          source: {
+            type: "noise",
+            color: "pink",
+          },
+          filter: {
+            type: "bandpass",
+            frequency: 500,
+            resonance: 0.7,
+            envelope: {
+              attack: 0.12,
+              peak: 1400,
+              decay: 0.3,
+            },
+          },
+          envelope: {
+            attack: 0.1,
+            decay: 0.35,
+          },
+          gain: 0.12,
+        },
+        {
+          source: {
+            type: "triangle",
+            frequency: 311,
+          },
+          filter: {
+            type: "lowpass",
+            frequency: 2200,
+          },
+          envelope: {
+            attack: 0.004,
+            decay: 0.16,
+          },
+          gain: 0.16,
+          delay: 0.05,
+        },
+        {
+          source: {
+            type: "triangle",
+            frequency: 294,
+          },
+          filter: {
+            type: "lowpass",
+            frequency: 2200,
+          },
+          envelope: {
+            attack: 0.004,
+            decay: 0.4,
+          },
+          gain: 0.18,
+          delay: 0.17,
+        },
+      ],
+      effects: [
+        {
+          type: "reverb",
+          decay: 1.2,
+          damping: 0.5,
+          mix: 0.3,
+        },
+      ],
+    },
+    src: "/stickers/pyramids.png",
+    story:
+      "Growing up beside the pyramids gave me a little more pride in who I am. I'm very proud of who I am and what I am. Knowing you're walking on the same land that built such a civilization is something else. I know Egypt hasn't been good for the last decade and a half, but some things can't die in us. We're good, generous, very, very funny people, and we welcome you like family.\n\nBeing raised beside the longest river in the world made me proud of where I was born, too. Like I said, Egypt isn't the best place on earth to live, but no one can steal my identity or my love for this country. I can't fit all my feelings in one place, and I'm sure a lot of people have already said it.",
+    width: 240,
+    height: 135,
+  },
+  {
+    id: "burj",
+    label: "Burj Khalifa",
+    sound: {
+      // The express elevator arriving at the top: a soft two-tone chime.
+      layers: [
+        {
+          source: {
+            type: "sine",
+            frequency: 1047,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.5,
+          },
+          gain: 0.14,
+        },
+        {
+          source: {
+            type: "sine",
+            frequency: 2094,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.18,
+          },
+          gain: 0.04,
+        },
+        {
+          source: {
+            type: "sine",
+            frequency: 1319,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.7,
+          },
+          gain: 0.14,
+          delay: 0.16,
+        },
+        {
+          source: {
+            type: "sine",
+            frequency: 2638,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.22,
+          },
+          gain: 0.035,
+          delay: 0.16,
+        },
+      ],
+      effects: [
+        {
+          type: "reverb",
+          decay: 1,
+          damping: 0.3,
+          mix: 0.25,
+        },
+      ],
+    },
+    src: "/stickers/burj-khalifa.png",
+    story:
+      "My aunt moved to Dubai 30 years ago, and my cousins were born and raised there. Every time they visited Egypt, they told me about everything they'd experienced. Long before the Burj Khalifa, Dubai and the UAE always had a place in my heart. Emirati people are the most wholesome people on earth: caring, loving, and warm. They greet you even as you walk down the street, and most of what they say is a prayer for you. I can't describe how much I love Emirati people. Beyond that, I've never felt as safe anywhere as I have in the UAE. You could literally leave millions of dollars in a public place and no one would go near them. Here you feel a kind of safety the rest of the world can't even describe. This is my second home, and I'll always be grateful for this place and these people.",
+    width: 80,
+    height: 218,
+  },
+  {
+    id: "bass",
+    label: "Bass guitar",
+    sound: {
+      // A fingerstyle pluck on the open E string.
+      layers: [
+        {
+          source: {
+            type: "sawtooth",
+            frequency: 82.4,
+          },
+          filter: {
+            type: "lowpass",
+            frequency: 320,
+            resonance: 2,
+            envelope: {
+              peak: 1500,
+              decay: 0.22,
+            },
+          },
+          envelope: {
+            attack: 0.003,
+            decay: 0.5,
+          },
+          gain: 0.34,
+        },
+        {
+          source: {
+            type: "sine",
+            frequency: 164.8,
+          },
+          envelope: {
+            attack: 0.003,
+            decay: 0.32,
+          },
+          gain: 0.2,
+        },
+        {
+          source: {
+            type: "noise",
+            color: "white",
+          },
+          filter: {
+            type: "bandpass",
+            frequency: 900,
+            resonance: 1.5,
+          },
+          envelope: {
+            decay: 0.01,
+          },
+          gain: 0.12,
+        },
+      ],
+      effects: [
+        {
+          type: "distortion",
+          amount: 6,
+          mix: 0.2,
+        },
+      ],
+    },
+    src: "/stickers/bass.png",
+    story:
+      "I started noticing bass in 2013. Someone was playing and I thought they weren't doing anything. Then I listened properly and realized bass is what makes a song move. Arctic Monkeys' bass lines are what actually hooked me.",
+    width: 160,
+    height: 191,
+  },
+  {
     id: "keyboard",
     label: "Keyboard",
     sound: {
@@ -124,6 +335,56 @@ export const STICKERS: StickerDefinition[] = [
     height: 160,
   },
   {
+    id: "controller",
+    label: "PlayStation",
+    sound: {
+      // A two-note menu confirm, straight out of the PS1 era.
+      layers: [
+        {
+          source: {
+            type: "square",
+            frequency: 988,
+          },
+          filter: {
+            type: "lowpass",
+            frequency: 4000,
+          },
+          envelope: {
+            decay: 0.07,
+          },
+          gain: 0.1,
+        },
+        {
+          source: {
+            type: "square",
+            frequency: 1319,
+          },
+          filter: {
+            type: "lowpass",
+            frequency: 4000,
+          },
+          envelope: {
+            decay: 0.16,
+          },
+          gain: 0.1,
+          delay: 0.07,
+        },
+      ],
+      effects: [
+        {
+          type: "bitcrusher",
+          bits: 6,
+          mix: 0.4,
+        },
+      ],
+    },
+    src: "/stickers/controller.png",
+    story:
+      "I've played PlayStation since the first one. We used to go to the end of the street to play Winning Eleven 3. We called it japanese, يابانية. The Konami code still lives in my head. After covid I bought a PS4. Last birthday my wife got me a PS5.",
+    width: 240,
+    height: 160,
+  },
+  {
     id: "monstera",
     label: "Monstera",
     sound: {
@@ -194,123 +455,6 @@ export const STICKERS: StickerDefinition[] = [
       "I have a monkey monstera and a Thai one at home. They grow like crazy. Seeing them in the morning is a boost.",
     width: 184,
     height: 184,
-  },
-  {
-    id: "bass",
-    label: "Bass guitar",
-    sound: {
-      // A fingerstyle pluck on the open E string.
-      layers: [
-        {
-          source: {
-            type: "sawtooth",
-            frequency: 82.4,
-          },
-          filter: {
-            type: "lowpass",
-            frequency: 320,
-            resonance: 2,
-            envelope: {
-              peak: 1500,
-              decay: 0.22,
-            },
-          },
-          envelope: {
-            attack: 0.003,
-            decay: 0.5,
-          },
-          gain: 0.34,
-        },
-        {
-          source: {
-            type: "sine",
-            frequency: 164.8,
-          },
-          envelope: {
-            attack: 0.003,
-            decay: 0.32,
-          },
-          gain: 0.2,
-        },
-        {
-          source: {
-            type: "noise",
-            color: "white",
-          },
-          filter: {
-            type: "bandpass",
-            frequency: 900,
-            resonance: 1.5,
-          },
-          envelope: {
-            decay: 0.01,
-          },
-          gain: 0.12,
-        },
-      ],
-      effects: [
-        {
-          type: "distortion",
-          amount: 6,
-          mix: 0.2,
-        },
-      ],
-    },
-    src: "/stickers/bass.png",
-    story:
-      "I started noticing bass in 2013. Someone was playing and I thought they weren't doing anything. Then I listened properly and realized bass is what makes a song move. Arctic Monkeys' bass lines are what actually hooked me.",
-    width: 160,
-    height: 191,
-  },
-  {
-    id: "controller",
-    label: "PlayStation",
-    sound: {
-      // A two-note menu confirm, straight out of the PS1 era.
-      layers: [
-        {
-          source: {
-            type: "square",
-            frequency: 988,
-          },
-          filter: {
-            type: "lowpass",
-            frequency: 4000,
-          },
-          envelope: {
-            decay: 0.07,
-          },
-          gain: 0.1,
-        },
-        {
-          source: {
-            type: "square",
-            frequency: 1319,
-          },
-          filter: {
-            type: "lowpass",
-            frequency: 4000,
-          },
-          envelope: {
-            decay: 0.16,
-          },
-          gain: 0.1,
-          delay: 0.07,
-        },
-      ],
-      effects: [
-        {
-          type: "bitcrusher",
-          bits: 6,
-          mix: 0.4,
-        },
-      ],
-    },
-    src: "/stickers/controller.png",
-    story:
-      "I've played PlayStation since the first one. We used to go to the end of the street to play Winning Eleven 3. We called it japanese, يابانية. The Konami code still lives in my head. After covid I bought a PS4. Last birthday my wife got me a PS5.",
-    width: 240,
-    height: 160,
   },
   {
     id: "pencil",
@@ -467,148 +611,8 @@ export const STICKERS: StickerDefinition[] = [
     width: 120,
     height: 180,
   },
-  {
-    id: "pyramids",
-    label: "Giza pyramids",
-    sound: {
-      // A gust of desert wind carrying a short Hijaz phrase: the flat second
-      // leaning on the tonic, the sound of a Cairo afternoon.
-      layers: [
-        {
-          source: {
-            type: "noise",
-            color: "pink",
-          },
-          filter: {
-            type: "bandpass",
-            frequency: 500,
-            resonance: 0.7,
-            envelope: {
-              attack: 0.12,
-              peak: 1400,
-              decay: 0.3,
-            },
-          },
-          envelope: {
-            attack: 0.1,
-            decay: 0.35,
-          },
-          gain: 0.12,
-        },
-        {
-          source: {
-            type: "triangle",
-            frequency: 311,
-          },
-          filter: {
-            type: "lowpass",
-            frequency: 2200,
-          },
-          envelope: {
-            attack: 0.004,
-            decay: 0.16,
-          },
-          gain: 0.16,
-          delay: 0.05,
-        },
-        {
-          source: {
-            type: "triangle",
-            frequency: 294,
-          },
-          filter: {
-            type: "lowpass",
-            frequency: 2200,
-          },
-          envelope: {
-            attack: 0.004,
-            decay: 0.4,
-          },
-          gain: 0.18,
-          delay: 0.17,
-        },
-      ],
-      effects: [
-        {
-          type: "reverb",
-          decay: 1.2,
-          damping: 0.5,
-          mix: 0.3,
-        },
-      ],
-    },
-    src: "/stickers/pyramids.png",
-    story:
-      "Growing up beside the pyramids gave me a little more pride in who I am. I'm very proud of who I am and what I am. Knowing you're walking on the same land that built such a civilization is something else. I know Egypt hasn't been good for the last decade and a half, but some things can't die in us. We're good, generous, very, very funny people, and we welcome you like family.\n\nBeing raised beside the longest river in the world made me proud of where I was born, too. Like I said, Egypt isn't the best place on earth to live, but no one can steal my identity or my love for this country. I can't fit all my feelings in one place, and I'm sure a lot of people have already said it.",
-    width: 240,
-    height: 135,
-  },
-  {
-    id: "burj",
-    label: "Burj Khalifa",
-    sound: {
-      // The express elevator arriving at the top: a soft two-tone chime.
-      layers: [
-        {
-          source: {
-            type: "sine",
-            frequency: 1047,
-          },
-          envelope: {
-            attack: 0.002,
-            decay: 0.5,
-          },
-          gain: 0.14,
-        },
-        {
-          source: {
-            type: "sine",
-            frequency: 2094,
-          },
-          envelope: {
-            attack: 0.002,
-            decay: 0.18,
-          },
-          gain: 0.04,
-        },
-        {
-          source: {
-            type: "sine",
-            frequency: 1319,
-          },
-          envelope: {
-            attack: 0.002,
-            decay: 0.7,
-          },
-          gain: 0.14,
-          delay: 0.16,
-        },
-        {
-          source: {
-            type: "sine",
-            frequency: 2638,
-          },
-          envelope: {
-            attack: 0.002,
-            decay: 0.22,
-          },
-          gain: 0.035,
-          delay: 0.16,
-        },
-      ],
-      effects: [
-        {
-          type: "reverb",
-          decay: 1,
-          damping: 0.3,
-          mix: 0.25,
-        },
-      ],
-    },
-    src: "/stickers/burj-khalifa.png",
-    story:
-      "My aunt moved to Dubai 30 years ago, and my cousins were born and raised there. Every time they visited Egypt, they told me about everything they'd experienced. Long before the Burj Khalifa, Dubai and the UAE always had a place in my heart. Emirati people are the most wholesome people on earth: caring, loving, and warm. They greet you even as you walk down the street, and most of what they say is a prayer for you. I can't describe how much I love Emirati people. Beyond that, I've never felt as safe anywhere as I have in the UAE. You could literally leave millions of dollars in a public place and no one would go near them. Here you feel a kind of safety the rest of the world can't even describe. This is my second home, and I'll always be grateful for this place and these people.",
-    width: 80,
-    height: 218,
-  },
 ];
+
+export function stickerTransitionName(id: StickerDefinition["id"]) {
+  return `sticker-${id}`;
+}

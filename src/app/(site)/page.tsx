@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { BookShelf } from "@/components/book-shelf";
-import { MobileStickerField } from "@/components/mobile-sticker-field";
 import { SaeedName } from "@/components/saeed-name";
 import {
   Card,
@@ -78,8 +77,6 @@ export default async function Home() {
           I work on React Native, TypeScript, performance, accessibility, native
           code, and agent-assisted engineering.
         </p>
-
-        <MobileStickerField />
 
         <div
           className="mt-12"

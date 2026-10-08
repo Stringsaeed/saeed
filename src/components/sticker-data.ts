@@ -1,7 +1,15 @@
 import type { SoundDefinition } from "@web-kits/audio";
 
 export type StickerDefinition = {
-  id: "babylon" | "bass" | "controller" | "keyboard" | "monstera" | "pencil";
+  id:
+    | "babylon"
+    | "bass"
+    | "burj"
+    | "controller"
+    | "keyboard"
+    | "monstera"
+    | "pencil"
+    | "pyramids";
   label: string;
   sound: SoundDefinition;
   src: string;
@@ -458,5 +466,148 @@ export const STICKERS: StickerDefinition[] = [
       "I like earthy and woody notes, and I couldn't resist this one. I love leaving a woody, earthy impression when I walk in or walk out. It's too good.",
     width: 120,
     height: 180,
+  },  {
+    id: "pyramids",
+    label: "Giza pyramids",
+    sound: {
+      // A gust of desert wind carrying a short Hijaz phrase: the flat second
+      // leaning on the tonic, the sound of a Cairo afternoon.
+      layers: [
+        {
+          source: {
+            type: "noise",
+            color: "pink",
+          },
+          filter: {
+            type: "bandpass",
+            frequency: 500,
+            resonance: 0.7,
+            envelope: {
+              attack: 0.12,
+              peak: 1400,
+              decay: 0.3,
+            },
+          },
+          envelope: {
+            attack: 0.1,
+            decay: 0.35,
+          },
+          gain: 0.12,
+        },
+        {
+          source: {
+            type: "triangle",
+            frequency: 311,
+          },
+          filter: {
+            type: "lowpass",
+            frequency: 2200,
+          },
+          envelope: {
+            attack: 0.004,
+            decay: 0.16,
+          },
+          gain: 0.16,
+          delay: 0.05,
+        },
+        {
+          source: {
+            type: "triangle",
+            frequency: 294,
+          },
+          filter: {
+            type: "lowpass",
+            frequency: 2200,
+          },
+          envelope: {
+            attack: 0.004,
+            decay: 0.4,
+          },
+          gain: 0.18,
+          delay: 0.17,
+        },
+      ],
+      effects: [
+        {
+          type: "reverb",
+          decay: 1.2,
+          damping: 0.5,
+          mix: 0.3,
+        },
+      ],
+    },
+    src: "/stickers/pyramids.png",
+    // TODO: Born and raised in Cairo.
+    story: "",
+    width: 240,
+    height: 135,
+  },
+  {
+    id: "burj",
+    label: "Burj Khalifa",
+    sound: {
+      // The express elevator arriving at the top: a soft two-tone chime.
+      layers: [
+        {
+          source: {
+            type: "sine",
+            frequency: 1047,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.5,
+          },
+          gain: 0.14,
+        },
+        {
+          source: {
+            type: "sine",
+            frequency: 2094,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.18,
+          },
+          gain: 0.04,
+        },
+        {
+          source: {
+            type: "sine",
+            frequency: 1319,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.7,
+          },
+          gain: 0.14,
+          delay: 0.16,
+        },
+        {
+          source: {
+            type: "sine",
+            frequency: 2638,
+          },
+          envelope: {
+            attack: 0.002,
+            decay: 0.22,
+          },
+          gain: 0.035,
+          delay: 0.16,
+        },
+      ],
+      effects: [
+        {
+          type: "reverb",
+          decay: 1,
+          damping: 0.3,
+          mix: 0.25,
+        },
+      ],
+    },
+    src: "/stickers/burj-khalifa.png",
+    // TODO: Working in Dubai, my second home.
+    story: "",
+    width: 80,
+    height: 218,
   },
 ];

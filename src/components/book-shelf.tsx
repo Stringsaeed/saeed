@@ -504,10 +504,11 @@ type PulledState = {
 
 export function BookShelf() {
   const library = useRef<Promise<BookLibrary> | null>(null);
+  const [previews, setPreviews] = useState<Record<string, string>>({});
   const getLibrary = useCallback(() => {
     if (!library.current) {
       library.current = import("@/lib/books-3d/viewer").then(
-        ({ createBookLibrary }) => createBookLibrary(),
+        ({ createBookLibrary }) => createBookLibrary(BOOK_MODELS),
       );
       const request = library.current;
       request.catch(() => {
@@ -518,12 +519,49 @@ export function BookShelf() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    let idle: number | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const warm = () => {
+      void getLibrary()
+        .then((instance) => {
+          if (cancelled) return;
+          return instance.warm((id, preview) => {
+            if (!cancelled)
+              setPreviews((current) => ({
+                ...current,
+                [id]: preview,
+              }));
+          });
+        })
+        .catch(() => {
+          /* The shelf and dialog retain their accessible fallbacks. */
+        });
+    };
+    const schedule = () => {
+      if ("requestIdleCallback" in window)
+        idle = window.requestIdleCallback(warm, {
+          timeout: 1500,
+        });
+      else timer = setTimeout(warm, 100);
+    };
+    if (document.readyState === "complete") schedule();
+    else
+      window.addEventListener("load", schedule, {
+        once: true,
+      });
     return () => {
+      cancelled = true;
+      window.removeEventListener("load", schedule);
+      if (idle !== undefined) window.cancelIdleCallback(idle);
+      if (timer !== undefined) clearTimeout(timer);
       const pending = library.current;
       library.current = null;
       void pending?.then((instance) => instance.dispose()).catch(() => {});
     };
-  }, []);
+  }, [
+    getLibrary,
+  ]);
   const shelfRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<Dialog.Root.Actions>(null);
   const reduceMotion = useReducedMotion() ?? false;
@@ -650,7 +688,18 @@ export function BookShelf() {
                 }
                 onClick={pull}
               >
-                <BookSpine book={book} />
+                {previews[book.id] ? (
+                  // biome-ignore lint/performance/noImgElement: locally rendered model snapshot, not a remote image.
+                  <img
+                    src={previews[book.id]}
+                    alt=""
+                    draggable={false}
+                    className="shelf-model-preview"
+                    data-model-preview={book.id}
+                  />
+                ) : (
+                  <BookSpine book={book} />
+                )}
               </button>
             </li>
           );

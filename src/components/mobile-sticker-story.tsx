@@ -267,7 +267,7 @@ export function MobileStickerStory({
                   <RiCloseLine aria-hidden="true" className="size-5" />
                 </DrawerClose>
               </div>
-              <DrawerDescription className="mt-1 text-[15px] leading-6 text-pretty text-foreground">
+              <DrawerDescription className="mt-1 text-[15px] leading-6 text-pretty whitespace-pre-line text-foreground">
                 {sticker.story}
               </DrawerDescription>
             </div>

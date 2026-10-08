@@ -264,7 +264,7 @@ function StickerItem({
               <p className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 {sticker.label}
               </p>
-              <p className="text-[15px] leading-6 font-normal text-pretty">
+              <p className="text-[15px] leading-6 font-normal text-pretty whitespace-pre-line">
                 {sticker.story}
               </p>
             </div>

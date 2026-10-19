@@ -39,11 +39,8 @@ export default async function LinksPage() {
   const entries = (await getLinks()).filter((entry) => isHttpsUrl(entry.url));
   return (
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
-      <main
-        className="flex min-h-0 flex-1 flex-col pb-4 pt-6 sm:pb-6 sm:pt-8"
-        data-layout-fill
-      >
-        <div className="shrink-0">
+      <main className="flex flex-1 flex-col pb-12 pt-6 sm:pb-16 sm:pt-8">
+        <div>
           <h1
             className="backdrop-plate text-2xl font-semibold tracking-[-0.035em]"
             data-analytics-view="Content Viewed"
@@ -57,9 +54,7 @@ export default async function LinksPage() {
           </p>
         </div>
 
-        <div className="relative left-1/2 mt-6 min-h-0 w-[min(56rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-1 overflow-hidden rounded-lg bg-background ring-1 ring-border  smooth-shadow-ring shadow-black smooth-ring-neutral-300/30">
-          <LinksTable entries={entries} />
-        </div>
+        <LinksTable entries={entries} />
       </main>
     </ViewTransition>
   );

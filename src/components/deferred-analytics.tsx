@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { loadPostHog } from "@/lib/analytics";
 import { onIdle } from "@/lib/idle";
 
 // The same queue @vercel/analytics sets up on inject, installed up front so
@@ -35,14 +36,22 @@ const SpeedInsights = dynamic(
 );
 
 /**
- * Mounts Vercel Analytics and Speed Insights once the page settles. Both only
- * inject a script on mount, and Speed Insights reads buffered performance
- * entries, so starting late loses nothing but keeps them off the first paint.
+ * Mounts Vercel Analytics and Speed Insights, and starts PostHog, once the
+ * page settles. Each only injects a script when started, and Speed Insights
+ * and PostHog's web vitals read buffered performance entries, so starting
+ * late loses nothing but keeps them off the first paint.
  */
 export function DeferredAnalytics() {
   const [ready, setReady] = useState(false);
 
-  useEffect(() => onIdle(() => setReady(true)), []);
+  useEffect(
+    () =>
+      onIdle(() => {
+        setReady(true);
+        void loadPostHog();
+      }),
+    [],
+  );
 
   if (!ready) return null;
 

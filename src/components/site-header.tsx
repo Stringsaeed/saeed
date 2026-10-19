@@ -69,7 +69,7 @@ export function SiteHeader() {
   return (
     <header className="flex items-center justify-between gap-3 py-6">
       <Link
-        className="flex shrink-0 items-center gap-3"
+        className="backdrop-plate flex shrink-0 items-center gap-3"
         href="/"
         data-analytics-event="Navigation Clicked"
         data-analytics-destination="Home"
@@ -80,8 +80,8 @@ export function SiteHeader() {
         <SaeedName className="signature-name" />
       </Link>
 
-      <nav className="ml-auto flex items-center gap-1" aria-label="Site links">
-        <Button asChild variant="ghost" leadingIcon={RiArticleLine}>
+      <nav className="ml-auto flex items-center gap-2" aria-label="Site links">
+        <Button asChild variant="surface" leadingIcon={RiArticleLine}>
           <Link
             href="/blog"
             data-analytics-event="Navigation Clicked"
@@ -92,7 +92,7 @@ export function SiteHeader() {
             Blog
           </Link>
         </Button>
-        <Button asChild variant="ghost" leadingIcon={RiLinksLine}>
+        <Button asChild variant="surface" leadingIcon={RiLinksLine}>
           <Link
             href="/links"
             data-analytics-event="Navigation Clicked"

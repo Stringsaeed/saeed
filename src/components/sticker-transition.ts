@@ -48,14 +48,14 @@ function waitForPile() {
   });
 }
 
-// Back navigations commit synchronously in React, so they never get a React
-// view transition; run one by hand to fly the stickers back onto the pile.
-export function closeDeskWithTransition(desk: HTMLElement, goBack: () => void) {
+// Closing commits synchronously (flushSync), so React never runs a view
+// transition for it; run one by hand to fly the stickers back onto the pile.
+export function closeDeskWithTransition(desk: HTMLElement, close: () => void) {
   if (
     typeof document.startViewTransition !== "function" ||
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
   ) {
-    goBack();
+    close();
     return;
   }
 
@@ -63,7 +63,7 @@ export function closeDeskWithTransition(desk: HTMLElement, goBack: () => void) {
   let pile: Element | null = null;
   const transition = document.startViewTransition(async () => {
     nameArt(desk, false);
-    goBack();
+    close();
     pile = await waitForPile();
     if (pile) nameArt(pile, true);
   });

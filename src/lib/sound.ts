@@ -1,8 +1,8 @@
 import type { defineSound, SoundDefinition } from "@web-kits/audio";
 
 // Every interface sound on the site. They stay short and quiet: the ones that
-// fire on hover or on every tap sit well under the stickers and books, which
-// are the moments meant to be heard.
+// fire on hover or on every tap sit well under the sticker desk and books,
+// which are the moments meant to be heard.
 const definitions = {
   // A soft, crisp click for links and buttons.
   tap: {
@@ -260,6 +260,165 @@ const definitions = {
       },
     ],
   },
+  // The sticker desk sliding out: a paper sheet drawn across the table, then
+  // a soft rising note as it settles open.
+  deskOpen: {
+    layers: [
+      {
+        source: {
+          type: "noise",
+          color: "pink",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 900,
+          resonance: 1.2,
+          envelope: {
+            attack: 0.06,
+            peak: 2600,
+            decay: 0.16,
+          },
+        },
+        envelope: {
+          attack: 0.03,
+          decay: 0.16,
+        },
+        gain: 0.1,
+      },
+      {
+        source: {
+          type: "sine",
+          frequency: {
+            start: 440,
+            end: 660,
+          },
+        },
+        envelope: {
+          attack: 0.01,
+          decay: 0.14,
+        },
+        gain: 0.045,
+        delay: 0.07,
+      },
+    ],
+  },
+  // The desk put away: the sheet sliding back, then a soft knock as the
+  // stickers land on the pile.
+  deskClose: {
+    layers: [
+      {
+        source: {
+          type: "noise",
+          color: "pink",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 2400,
+          resonance: 1.2,
+          envelope: {
+            attack: 0.04,
+            peak: 900,
+            decay: 0.14,
+          },
+        },
+        envelope: {
+          attack: 0.02,
+          decay: 0.14,
+        },
+        gain: 0.09,
+      },
+      {
+        source: {
+          type: "triangle",
+          frequency: {
+            start: 300,
+            end: 170,
+          },
+        },
+        envelope: {
+          decay: 0.05,
+        },
+        gain: 0.1,
+        delay: 0.12,
+      },
+    ],
+  },
+  // A sticker peeled off the paper: a short rising crackle of adhesive, then
+  // the tiny snap of the last edge letting go.
+  stickerLift: {
+    layers: [
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 2800,
+          resonance: 1.6,
+          envelope: {
+            attack: 0.05,
+            peak: 6200,
+            decay: 0.06,
+          },
+        },
+        envelope: {
+          attack: 0.015,
+          decay: 0.08,
+        },
+        gain: 0.08,
+      },
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 5200,
+          resonance: 3,
+        },
+        envelope: {
+          decay: 0.004,
+        },
+        gain: 0.1,
+        delay: 0.075,
+      },
+    ],
+  },
+  // A sticker pressed back onto the paper: a soft, padded pat.
+  stickerPlace: {
+    layers: [
+      {
+        source: {
+          type: "noise",
+          color: "pink",
+        },
+        filter: {
+          type: "lowpass",
+          frequency: 1400,
+        },
+        envelope: {
+          attack: 0.002,
+          decay: 0.03,
+        },
+        gain: 0.14,
+      },
+      {
+        source: {
+          type: "triangle",
+          frequency: {
+            start: 230,
+            end: 150,
+          },
+        },
+        envelope: {
+          decay: 0.035,
+        },
+        gain: 0.08,
+      },
+    ],
+  },
   soundOn: {
     layers: [
       {
@@ -422,19 +581,6 @@ export function playSound(name: SoundName) {
 export function playHoverSound(name: SoundName) {
   if (!isSoundEnabled() || throttled("hover", HOVER_GAP_MS)) return;
   playSound(name);
-}
-
-/** Plays any definition (the stickers bring their own) behind the same gate. */
-export function playDefinition(key: string, definition: SoundDefinition) {
-  if (!isSoundEnabled() || throttled(key, MIN_GAP_MS)) return;
-  withPlayer(definition, (play) =>
-    play({
-      jitter: {
-        detune: 25,
-        volume: 0.08,
-      },
-    }),
-  );
 }
 
 export function isSoundName(name: string | undefined): name is SoundName {

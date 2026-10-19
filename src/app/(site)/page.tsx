@@ -67,13 +67,13 @@ export default async function Home() {
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
       <main className="pb-20 pt-10 sm:pt-14">
         <h1
-          className="max-w-136 text-xl leading-8 font-semibold tracking-tight sm:text-2xl sm:leading-9"
+          className="backdrop-plate max-w-136 text-xl leading-8 font-semibold tracking-tight sm:text-2xl sm:leading-9"
           data-analytics-view="Content Viewed"
           data-analytics-label="Intro"
         >
           I’m <SaeedName />, a software engineer.
         </h1>
-        <p className="mt-3 max-w-152 text-base leading-7 text-muted-foreground">
+        <p className="backdrop-plate mt-3 max-w-152 text-base leading-7 text-muted-foreground">
           I work on React Native, TypeScript, performance, accessibility, native
           code, and agent-assisted engineering.
         </p>
@@ -83,7 +83,7 @@ export default async function Home() {
           data-analytics-view="Content Viewed"
           data-analytics-label="Work"
         >
-          <h2 className="list-heading">Work</h2>
+          <h2 className="list-heading backdrop-plate">Work</h2>
           <CardGroup
             className="mt-4 smooth-shadow-ring shadow-black smooth-ring-neutral-300/30 bg-background"
             orientation="inline"
@@ -132,7 +132,7 @@ export default async function Home() {
           data-analytics-label="Writing"
         >
           <div className="flex items-baseline justify-between gap-5">
-            <h2 className="list-heading">Writing</h2>
+            <h2 className="list-heading backdrop-plate">Writing</h2>
             <Link
               className="text-link text-sm text-muted-foreground"
               href="/blog"
@@ -175,7 +175,7 @@ export default async function Home() {
           data-analytics-view="Content Viewed"
           data-analytics-label="Library"
         >
-          <h2 className="list-heading">Library</h2>
+          <h2 className="list-heading backdrop-plate">Library</h2>
           <div className="mt-5">
             <BookShelf />
           </div>

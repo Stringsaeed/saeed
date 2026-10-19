@@ -29,7 +29,7 @@ function ThemeTriggerPlaceholder({ onActivate, onIntent }: PlaceholderProps) {
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="surface"
       size="icon"
       aria-label="Choose theme, current: System"
       title="Theme: System"

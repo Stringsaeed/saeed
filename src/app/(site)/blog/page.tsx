@@ -33,13 +33,13 @@ export default async function BlogPage() {
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
       <main className="pb-20 pt-10 sm:pt-14">
         <h1
-          className="text-2xl font-semibold tracking-[-0.035em]"
+          className="backdrop-plate text-2xl font-semibold tracking-[-0.035em]"
           data-analytics-view="Content Viewed"
           data-analytics-label="Blog Archive"
         >
           Blog
         </h1>
-        <p className="mt-3 max-w-[36rem] text-sm leading-6 text-muted-foreground">
+        <p className="backdrop-plate mt-3 max-w-[36rem] text-sm leading-6 text-muted-foreground">
           Notes on React Native, software engineering, and working with agents.
         </p>
 

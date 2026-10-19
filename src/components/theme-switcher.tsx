@@ -73,7 +73,7 @@ export function ThemeSwitcher({
         render={
           <Button
             type="button"
-            variant="ghost"
+            variant="surface"
             size="icon"
             active={open}
             aria-label={`Choose theme, current: ${selectedLabel}`}

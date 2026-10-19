@@ -40,9 +40,9 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   /* Arabic face first: unicode-range limits it to Arabic code points only. */
-  --font-sans: var(--font-arabic), var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-arabic), var(--font-geist-sans);
+  --font-sans: var(--font-arabic), var(--font-atkinson);
+  --font-mono: var(--font-paper-mono);
+  --font-heading: var(--font-arabic), var(--font-atkinson);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -101,22 +101,16 @@
 
 /* Arial sized to each face's metrics while it loads, so the swap barely
    moves text. Values match what next/font/google generates for these fonts. */
+/* next/font/google has no override values for Atkinson, so these were
+   measured from the font file against Arial; the same method lands within
+   0.01% of next/font's numbers for Geist, the face it replaced. */
 @font-face {
-  font-family: "Geist Fallback";
+  font-family: "Atkinson Hyperlegible Next Fallback";
   src: local("Arial");
-  ascent-override: 95.94%;
-  descent-override: 28.16%;
+  ascent-override: 99.01%;
+  descent-override: 31.8%;
   line-gap-override: 0%;
-  size-adjust: 104.76%;
-}
-
-@font-face {
-  font-family: "Geist Mono Fallback";
-  src: local("Arial");
-  ascent-override: 74.67%;
-  descent-override: 21.92%;
-  line-gap-override: 0%;
-  size-adjust: 134.59%;
+  size-adjust: 99.39%;
 }
 
 @font-face {
@@ -129,14 +123,9 @@
 }
 
 :root {
-  /* Core face, then the full font for any other Latin character (see the
-     root layout), then its metric-matched fallback. */
-  --font-geist-sans:
-    var(--font-geist-sans-core), var(--font-geist-sans-extended),
-    "Geist Fallback";
-  --font-geist-mono:
-    var(--font-geist-mono-core), var(--font-geist-mono-extended),
-    "Geist Mono Fallback";
+  /* Lavishly Yours: core face, then the full font for any other Latin
+     character (see the root layout), then its metric-matched fallback.
+     --font-atkinson comes straight from next/font/google. */
   --font-lavishly-yours:
     var(--font-lavishly-yours-core), var(--font-lavishly-yours-extended),
     "Lavishly Yours Fallback";
@@ -302,6 +291,16 @@
     0 48px 48px -24px var(--dm-drop), 0 96px 96px -48px var(--dm-drop);
 }
 
+/* Text over the dithered backdrop sits on a plate of page color with a
+   feathered edge, so the dither fades out around it instead of running
+   through the letters. Follows the theme through --background. */
+@utility backdrop-plate {
+  width: fit-content;
+  border-radius: 0.5rem;
+  background-color: var(--background);
+  box-shadow: 0 0 0.75rem 0.5rem var(--background);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -353,96 +352,6 @@
     letter-spacing: 0;
     line-height: 1;
     color: var(--muted-foreground);
-  }
-
-  .layout-debug-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    overflow: hidden;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .layout-debug-boundary {
-    --debug-color: #0369a1;
-    position: absolute;
-    outline: 1px dashed var(--debug-color);
-    background: rgb(3 105 161 / 0.035);
-  }
-
-  .layout-debug-boundary[data-debug-kind="sticker"] {
-    --debug-color: #c2410c;
-    outline-style: solid;
-    background: rgb(194 65 12 / 0.08);
-  }
-
-  .layout-debug-label {
-    position: absolute;
-    padding: 3px 5px;
-    overflow: hidden;
-    border-radius: 2px;
-    background: var(--debug-color);
-    color: white;
-    font:
-      10px / 1.4 var(--font-geist-mono),
-      monospace;
-    white-space: nowrap;
-  }
-
-  .layout-debug-controls {
-    position: fixed;
-    bottom: max(1rem, env(safe-area-inset-bottom));
-    left: max(1rem, env(safe-area-inset-left));
-    z-index: 101;
-  }
-
-  .layout-debug-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: 44px;
-    padding: 0.625rem 0.875rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--background);
-    color: var(--foreground);
-    box-shadow: 0 2px 12px rgb(0 0 0 / 0.08);
-    font-size: 12px;
-    cursor: pointer;
-  }
-
-  .layout-debug-toggle:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 3px;
-  }
-
-  .layout-debug-toggle > span {
-    color: var(--muted-foreground);
-    font-family: monospace;
-  }
-
-  .layout-debug-toggle[aria-pressed="true"] {
-    border-color: #c2410c;
-  }
-
-  .layout-debug-legend {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-    padding: 0.375rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--background);
-    font: 11px / 1.4 monospace;
-  }
-
-  .layout-debug-legend span:first-child {
-    color: #c2410c;
-  }
-
-  .layout-debug-legend span:last-child {
-    color: #0369a1;
   }
 
   .saeed-name {
@@ -541,7 +450,7 @@
   }
 
   .article-body code {
-    font-family: var(--font-geist-mono);
+    font-family: var(--font-paper-mono);
   }
 
   .article-body :not(pre) > code {
@@ -691,13 +600,12 @@
 
   .book-spine-geometric {
     font-family:
-      Futura, "Century Gothic", "Avenir Next", var(--font-geist-sans),
-      sans-serif;
+      Futura, "Century Gothic", "Avenir Next", var(--font-atkinson), sans-serif;
   }
 
   .book-spine-humanist {
     font-family:
-      "Gill Sans", "Gill Sans MT", "Gill Sans Nova", var(--font-geist-sans),
+      "Gill Sans", "Gill Sans MT", "Gill Sans Nova", var(--font-atkinson),
       sans-serif;
   }
 
@@ -814,25 +722,9 @@
   animation: 520ms cubic-bezier(0.22, 1, 0.36, 1) sticker-morph-blur;
 }
 
-.sticker-backdrop {
-  animation: 360ms cubic-bezier(0.23, 1, 0.32, 1) both page-fade-out reverse;
-}
-
-.sticker-panel {
-  animation: 460ms cubic-bezier(0.22, 1, 0.36, 1) both sticker-panel-in;
-}
-
 @keyframes sticker-morph-blur {
   35% {
     filter: blur(1.5px);
-  }
-}
-
-@keyframes sticker-panel-in {
-  from {
-    opacity: 0;
-    scale: 0.96;
-    translate: 0 12px;
   }
 }
 

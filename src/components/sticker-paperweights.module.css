@@ -325,42 +325,52 @@
   }
 
   .hit {
+    --lifted-w: min(calc(62px * var(--ar)), 100px);
     grid-column: 1;
     position: absolute;
     top: var(--narrow-top);
     left: var(--narrow-left);
-    right: auto;
     width: var(--narrow-w);
-    max-width: var(--narrow-w);
+    max-width: none;
     --tx: 0px;
     --ty: 0px;
     --rot: var(--narrow-rot);
+    transition:
+      transform 280ms var(--ease-out),
+      top 320ms var(--ease-out),
+      left 320ms var(--ease-out),
+      width 320ms var(--ease-out),
+      opacity 280ms var(--ease-out);
   }
 
+  /* No margin lane to park in, so a lifted weight settles beside its own
+     title, where the index was, and stays with its story. Offsets are from
+     the heading: grid row 1 is this weight's containing block. */
   .chapter[data-lifted] .hit {
-    position: fixed;
-    top: max(10px, env(safe-area-inset-top));
-    right: max(12px, env(safe-area-inset-right));
-    left: auto;
-    width: 76px;
-    max-width: 76px;
+    position: absolute;
+    top: -0.85rem;
+    left: calc(100% - var(--lifted-w));
+    width: var(--lifted-w);
     --tx: 0px;
     --ty: 0px;
-    --rot: -6deg;
+    --rot: var(--park-rot);
     --scale: 1;
-    z-index: 5;
   }
 
-  .desk[data-open] .sheet {
-    padding-top: 4.5rem;
+  .index {
+    transition: opacity 200ms var(--ease-out);
   }
 
-  .desk[data-open] .close {
-    position: fixed;
-    z-index: 6;
-    top: max(8px, env(safe-area-inset-top));
-    left: max(12px, env(safe-area-inset-left));
-    background: var(--background);
+  .chapter[data-lifted] .index {
+    opacity: 0;
+  }
+
+  /* The weights still down step back so a neighbour's sticker never reads
+     as the open story's. */
+  .desk[data-open]
+    .chapter:not([data-lifted])
+    .hit:not(:hover, :focus-visible) {
+    opacity: 0.4;
   }
 }
 

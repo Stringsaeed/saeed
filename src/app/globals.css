@@ -718,8 +718,11 @@
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* `both` matters: the old and new images inherit this fill mode, so a sticker
+   with no partner on screen fades out and stays out instead of blinking back
+   for a frame before the transition ends. */
 ::view-transition-image-pair(.sticker-morph) {
-  animation: 520ms cubic-bezier(0.22, 1, 0.36, 1) sticker-morph-blur;
+  animation: 520ms cubic-bezier(0.22, 1, 0.36, 1) both sticker-morph-blur;
 }
 
 @keyframes sticker-morph-blur {

@@ -627,7 +627,15 @@ export default function Variant({ onClose }: StickerDisplayProps) {
           ORDER.length;
       const nextId = ORDER[next];
       if (handId) {
-        if (nextId !== handId) show(nextId, false);
+        // The story remounts per sticker, so focus inside it moves to the new
+        // heading rather than dropping to the page.
+        const inPanel =
+          !focused &&
+          (rootRef.current
+            ?.querySelector("[data-panel]")
+            ?.contains(document.activeElement) ??
+            false);
+        if (nextId !== handId) show(nextId, inPanel);
         // Reading the story keeps the keyboard there; browsing the mobile
         // follows the sticker that just came down.
         if (focused) {

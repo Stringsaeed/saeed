@@ -280,6 +280,31 @@ export function StickerPaperweights({ onClose }: StickerPaperweightsProps) {
         return;
       }
 
+      // Tab stays inside the modal desk, wrapping between its first and last
+      // stops instead of walking into the page behind.
+      if (event.key === "Tab") {
+        const root = rootRef.current;
+        if (!root) return;
+        const stops = Array.from(
+          root.querySelectorAll<HTMLElement>(
+            "a[href], button:not(:disabled), [tabindex]",
+          ),
+        ).filter((element) => element.tabIndex >= 0);
+        const first = stops[0];
+        const last = stops.at(-1);
+        if (!first || !last) return;
+        const active = document.activeElement;
+        const outside = active === root || !root.contains(active);
+        if (event.shiftKey && (active === first || outside)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && (active === last || outside)) {
+          event.preventDefault();
+          first.focus();
+        }
+        return;
+      }
+
       const arrows = [
         "ArrowLeft",
         "ArrowRight",
@@ -352,13 +377,10 @@ export function StickerPaperweights({ onClose }: StickerPaperweightsProps) {
       data-open={lifted ? "" : undefined}
       onKeyDown={onDeskKeyDown}
     >
-      <button
-        type="button"
-        tabIndex={-1}
-        aria-label="Close the sticker desk"
-        className={styles.backdrop}
-        onClick={stepBack}
-      />
+      {/* Pointer-only dismissal: keyboard and screen reader users have Escape
+          and the Close button, so the backdrop stays out of the a11y tree. */}
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer-only twin of Escape and Close. */}
+      <div role="presentation" className={styles.backdrop} onClick={stepBack} />
       <div className={styles.sheet}>
         <header className={`${styles.mast} ${styles.frame}`}>
           <div>

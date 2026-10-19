@@ -28,8 +28,8 @@ import {
   stickerTransitionName,
 } from "@/components/sticker-data";
 import { STICKER_ART_SIZES } from "@/components/sticker-transition";
+import { useStoryReadTracking } from "@/lib/desk-experiment";
 import { cn } from "@/lib/utils";
-import type { StickerDisplayProps } from "../types";
 import {
   CODA,
   floorPath,
@@ -47,10 +47,9 @@ import {
 } from "./geometry";
 import styles from "./long-take.module.css";
 
-// Set to "top" if the variant puts anything at the bottom centre of the screen,
-// so the prototype picker moves out of its way.
-// biome-ignore lint/style/useComponentExportOnlyModules: read by the prototype registry.
-export const pickerPosition: "top" | "bottom" = "bottom";
+type StickerLongTakeProps = {
+  onClose: () => void;
+};
 
 const BY_ID = Object.fromEntries(
   STICKERS.map((sticker) => [
@@ -113,7 +112,7 @@ type Drag = {
   velocity: number;
 };
 
-export default function LongTake({ onClose }: StickerDisplayProps) {
+export function StickerLongTake({ onClose }: StickerLongTakeProps) {
   const reduced = useReducedMotionPreference();
   const storyId = useId();
   // Nearest step on the walk (0–7 the stops, 8 the end); the step itself
@@ -709,6 +708,7 @@ export default function LongTake({ onClose }: StickerDisplayProps) {
   const shownIndex = reduced ? (atEnd ? storyIndex : current) : storyIndex;
   const shownId = WALK[shownIndex];
   const shown = BY_ID[shownId];
+  useStoryReadTracking(storyOpen ? shownId : null);
 
   // Reduced motion remembers the last story so the panel never empties.
   useEffect(() => {

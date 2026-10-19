@@ -48,6 +48,26 @@ const nextConfig: NextConfig = {
     ],
   },
   reactCompiler: true,
+  // PostHog's API paths end in a slash; redirecting them would drop events.
+  skipTrailingSlashRedirect: true,
+  // PostHog through our own domain, so blockers that drop requests to
+  // posthog.com keep the analytics and the sticker desk experiment.
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/array/:path*",
+        destination: "https://us-assets.i.posthog.com/array/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
+  },
   // The sticker desk used to have its own page; it now opens over any page
   // from the corner pile, so old links land on the home page.
   async redirects() {

@@ -11,6 +11,13 @@ import {
   ViewTransition,
 } from "react";
 import { flushSync } from "react-dom";
+import {
+  chooseDeskVariant,
+  type DeskVariant,
+  endDeskSession,
+  peekDeskVariant,
+  startDeskSession,
+} from "@/lib/desk-experiment";
 import { playSound } from "@/lib/sound";
 import { STICKERS, stickerTransitionName } from "./sticker-data";
 import { StickerPaperweights } from "./sticker-paperweights";
@@ -88,25 +95,59 @@ const SCATTER = [
   },
 ];
 
+type LongTakeDesk = typeof import("./sticker-long-take").StickerLongTake;
+
+// Long Take is the experiment's challenger, so only its visitors load it.
+let LongTake: LongTakeDesk | undefined;
+function loadLongTake() {
+  return import("./sticker-long-take").then((module) => {
+    LongTake = module.StickerLongTake;
+  });
+}
+
+function loadDesk(variant: DeskVariant) {
+  return variant === "long-take" ? loadLongTake() : Promise.resolve();
+}
+
 // The corner pile and the desk it opens, as a plain modal on whatever page
-// is showing: no route of its own. Opening runs inside a transition so React
-// morphs each sticker from the pile into the desk; closing flies them back.
+// is showing: no route of its own. Which desk opens is the `sticker-desk`
+// experiment. Opening runs inside a transition so React morphs each sticker
+// from the pile into the desk; closing flies them back.
 export function StickerPile() {
-  const [open, setOpen] = useState(false);
+  const [desk, setDesk] = useState<DeskVariant | null>(null);
+  const open = desk !== null;
   const deskRef = useRef<HTMLDivElement>(null);
   const pileRef = useRef<HTMLButtonElement>(null);
   const reopenFocus = useRef(false);
+  const opening = useRef(false);
 
-  const openDesk = useCallback(() => {
-    startTransition(() => setOpen(true));
+  // Reaching for the pile warms up the desk it will open.
+  const preloadDesk = useCallback(() => {
+    void peekDeskVariant().then(loadDesk);
+  }, []);
+
+  const openDesk = useCallback(async () => {
+    if (opening.current) return;
+    opening.current = true;
+    try {
+      const variant = await chooseDeskVariant();
+      await loadDesk(variant).catch(() => undefined);
+      const shown =
+        variant === "long-take" && !LongTake ? "paperweights" : variant;
+      startDeskSession(shown);
+      startTransition(() => setDesk(shown));
+    } finally {
+      opening.current = false;
+    }
   }, []);
 
   const closeDesk = useCallback(() => {
     playSound("deskClose");
+    endDeskSession();
     reopenFocus.current = true;
-    const desk = deskRef.current;
-    const done = () => flushSync(() => setOpen(false));
-    if (desk) closeDeskWithTransition(desk, done);
+    const element = deskRef.current;
+    const done = () => flushSync(() => setDesk(null));
+    if (element) closeDeskWithTransition(element, done);
     else done();
   }, []);
 
@@ -134,9 +175,11 @@ export function StickerPile() {
 
   // The desk owns the shared transition names while it is open.
   if (open) {
+    const Desk =
+      desk === "long-take" && LongTake ? LongTake : StickerPaperweights;
     return (
       <div ref={deskRef} className="contents">
-        <StickerPaperweights onClose={closeDesk} />
+        <Desk onClose={closeDesk} />
       </div>
     );
   }
@@ -146,6 +189,8 @@ export function StickerPile() {
       ref={pileRef}
       type="button"
       onClick={openDesk}
+      onPointerEnter={preloadDesk}
+      onFocus={preloadDesk}
       aria-label="Open the sticker desk"
       aria-haspopup="dialog"
       className="group/pile fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 block size-(--pile-size) cursor-pointer scale-75 origin-bottom-right rounded-3xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring active:scale-[0.72] min-[960px]:scale-100 min-[960px]:active:scale-95 print:hidden forced-colors:hidden"
@@ -155,7 +200,6 @@ export function StickerPile() {
         } as CSSProperties
       }
       data-sticker-pile
-      data-analytics-event="Sticker Desk Opened"
       data-sound="deskOpen"
     >
       {STICKERS.map((sticker, index) => {

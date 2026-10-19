@@ -14,6 +14,7 @@ import {
   ViewTransition,
 } from "react";
 import { flushSync } from "react-dom";
+import { useStoryReadTracking } from "@/lib/desk-experiment";
 import { playSound } from "@/lib/sound";
 import {
   STICKERS,
@@ -193,6 +194,7 @@ export function StickerPaperweights({ onClose }: StickerPaperweightsProps) {
   const reduced = useReducedMotion() === true;
   const [lifted, setLifted] = useState<StickerId | null>(null);
   const [cursor, setCursor] = useState(0);
+  useStoryReadTracking(lifted);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const liftedRef = useRef(lifted);

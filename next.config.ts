@@ -48,6 +48,17 @@ const nextConfig: NextConfig = {
     ],
   },
   reactCompiler: true,
+  // The sticker desk used to have its own page; it now opens over any page
+  // from the corner pile, so old links land on the home page.
+  async redirects() {
+    return [
+      {
+        source: "/stickers",
+        destination: "/",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

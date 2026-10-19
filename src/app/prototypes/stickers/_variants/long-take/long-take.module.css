@@ -1,0 +1,524 @@
+/* Long take: one native scroll drives the camera. The stage is sticky; the
+   runway below it gives the scroll its length and its resting points. */
+
+.root {
+  --pool: oklch(0.86 0.11 75 / 0.6);
+  --dusk: oklch(0.95 0.02 70 / 0.7);
+  --veil: oklch(0.25 0.03 55);
+  --veil-strength: 0.14;
+  --ink: oklch(0.27 0.02 60);
+  --ink-light: oklch(0.8 0.15 70);
+  --grain-blend: multiply;
+  --grain-opacity: 0.22;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.root::-webkit-scrollbar {
+  display: none;
+}
+
+:global(.dark) .root {
+  --pool: oklch(0.62 0.13 62 / 0.32);
+  --dusk: oklch(0.22 0.025 50 / 0.6);
+  --veil: oklch(0.05 0 0);
+  --veil-strength: 0.42;
+  --ink: oklch(0.95 0.035 80);
+  --ink-light: oklch(0.86 0.14 75);
+  --grain-blend: screen;
+  --grain-opacity: 0.1;
+}
+
+/* Lifted while a drag or sideways swipe moves the camera by hand. */
+.root[data-free] {
+  scroll-snap-type: none;
+}
+
+.root[data-reduced] {
+  overflow: hidden;
+  scroll-snap-type: none;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: clip;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (min-width: 768px) and (pointer: fine) {
+  .root:not([data-reduced]) .stage {
+    cursor: grab;
+  }
+
+  .root[data-dragging] .stage {
+    cursor: grabbing;
+  }
+}
+
+.runway {
+  height: calc(var(--seg, 60vh) * 8);
+}
+
+.snap {
+  position: absolute;
+  top: calc(var(--seg, 60vh) * var(--i));
+  left: 0;
+  width: 1px;
+  height: 1px;
+  scroll-snap-align: start;
+}
+
+.backdrop {
+  animation: fade-in 360ms var(--ease-out) both;
+}
+
+/* The corridor: a long dusk ribbon with paper grain and a fine dither. */
+.ribbon {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(var(--focus-y, 50vh) - 36vh);
+  height: 72vh;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--dusk) 28%,
+    var(--dusk) 72%,
+    transparent
+  );
+  animation: fade-in 600ms var(--ease-out) 80ms both;
+}
+
+.ribbon::before,
+.ribbon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 30%,
+    black 70%,
+    transparent
+  );
+}
+
+.ribbon::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: var(--grain-blend);
+  opacity: var(--grain-opacity);
+}
+
+.ribbon::after {
+  background-image: radial-gradient(
+    circle,
+    var(--foreground) 0.6px,
+    transparent 0.9px
+  );
+  background-size: 4px 4px;
+  opacity: 0.05;
+}
+
+@media (max-width: 767px) {
+  .ribbon {
+    inset-block: 0;
+    inset-inline: 4vw;
+    top: 0;
+    height: auto;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--dusk) 22%,
+      var(--dusk) 78%,
+      transparent
+    );
+  }
+
+  .ribbon::before,
+  .ribbon::after {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 25%,
+      black 75%,
+      transparent
+    );
+  }
+}
+
+/* At the end the corridor dims, so only the pools and the ink stay lit. */
+.veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--veil);
+  opacity: calc(var(--t, 0) * var(--veil-strength));
+}
+
+.floor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  will-change: transform;
+  color: var(--muted-foreground);
+}
+
+.floor path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+.stops {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--box, 200px);
+  height: var(--box, 200px);
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+.stopInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition:
+    opacity 260ms var(--ease-out),
+    scale 320ms var(--ease-out);
+}
+
+/* Reading: the parked stop steps forward and everything else falls back. */
+.root[data-reading] .stop:not([data-current]) .stopInner {
+  opacity: 0.12;
+}
+
+.root[data-reading] .stop[data-current] .stopInner {
+  scale: 1.06;
+}
+
+.pool {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 190%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--pool), transparent);
+  opacity: var(--glow, 0);
+  pointer-events: none;
+}
+
+.stopButton {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  cursor: pointer;
+  pointer-events: auto;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stopButton:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+
+.art {
+  position: relative;
+  display: block;
+  width: calc(var(--box, 200px) * var(--aw));
+  height: calc(var(--box, 200px) * var(--ah));
+  filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.16));
+}
+
+.hiRes {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+
+.hiRes[data-loaded] {
+  opacity: 1;
+}
+
+.marker {
+  position: absolute;
+  top: calc(50% + var(--box, 200px) * var(--ah) / 2 + 14px);
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  opacity: calc(1 - var(--t, 0) * 4);
+  animation: fade-in 400ms var(--ease-out) 260ms both;
+}
+
+.root[data-reduced] .marker {
+  display: none;
+}
+
+.root[data-reduced] .stop {
+  transition: opacity 320ms var(--ease-out);
+}
+
+/* The ink: one thin stroke written from the pencil's tip, a bead of light
+   leading it, then the two dots. */
+.ink {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+}
+
+.root[data-writing] .ink,
+.root[data-end] .ink {
+  opacity: 1;
+}
+
+.inkStroke,
+.inkHead,
+.inkDot {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.inkStroke {
+  stroke: var(--ink);
+  stroke-width: var(--ink-w, 2);
+  stroke-dasharray: 1 1.02;
+  stroke-dashoffset: 1.01;
+}
+
+.inkHead {
+  stroke: var(--ink-light);
+  stroke-width: calc(var(--ink-w, 2) * 2.6);
+  stroke-dasharray: 0.006 2;
+  stroke-dashoffset: 0.006;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px var(--ink-light))
+    drop-shadow(0 0 9px var(--ink-light));
+}
+
+.inkDot {
+  stroke: var(--ink);
+  stroke-width: calc(var(--ink-w, 2) * 3.6);
+  opacity: 0;
+}
+
+.root[data-writing] .inkStroke {
+  animation: write 2600ms cubic-bezier(0.3, 0.1, 0.25, 1) 450ms forwards;
+}
+
+.root[data-writing] .inkHead {
+  animation:
+    head 2600ms cubic-bezier(0.3, 0.1, 0.25, 1) 450ms forwards,
+    fade-out 360ms var(--ease-out) 3050ms forwards;
+}
+
+.root[data-writing] .inkDot {
+  animation: dot 200ms var(--ease-out) calc(3150ms + var(--dot) * 160ms)
+    forwards;
+}
+
+.root[data-end] .inkStroke {
+  stroke-dashoffset: 0;
+}
+
+.root[data-end] .inkDot {
+  opacity: 1;
+}
+
+@keyframes write {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes head {
+  from {
+    opacity: 1;
+    stroke-dashoffset: 0.006;
+  }
+
+  to {
+    opacity: 1;
+    stroke-dashoffset: -0.994;
+  }
+}
+
+@keyframes dot {
+  to {
+    opacity: 1;
+  }
+}
+
+.chrome {
+  z-index: 3;
+  animation: fade-in 360ms var(--ease-out) 120ms both;
+}
+
+/* Stories set in still body type, beside the stop (below it on phones). */
+.storyRegion {
+  position: absolute;
+  top: var(--story-top, 112px);
+  right: var(--story-right, 48px);
+  bottom: var(--story-bottom, 92px);
+  left: var(--story-left, 56%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .storyRegion {
+    justify-content: flex-start;
+  }
+}
+
+.panel {
+  width: 100%;
+  max-width: 34rem;
+  max-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.5rem 1.625rem 1.625rem;
+  border-radius: 1.25rem;
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--foreground) 8%, transparent),
+    0 18px 40px -24px rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: auto;
+  outline: none;
+}
+
+.panel:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.story {
+  opacity: 0;
+  translate: 0 8px;
+  pointer-events: none;
+  transition:
+    opacity 160ms var(--ease-out),
+    translate 160ms var(--ease-out);
+}
+
+.story[data-open] {
+  opacity: 1;
+  translate: 0 0;
+  pointer-events: auto;
+  transition-duration: 300ms;
+}
+
+.root[data-reduced] .story {
+  translate: none;
+}
+
+@media (max-width: 767px) {
+  .panel {
+    max-width: none;
+    padding: 1.25rem 1.25rem 1.375rem;
+  }
+}
+
+/* The end card, set below the written word once the ink has landed. */
+.coda {
+  position: absolute;
+  top: var(--coda-top, 70vh);
+  left: 1rem;
+  right: 1rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.root[data-writing] .coda {
+  pointer-events: auto;
+  animation: rise-in 500ms var(--ease-out) 3400ms both;
+}
+
+.coda:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+  animation: none !important;
+}
+
+/* Closing: every sticker goes home whole and lit. */
+.root[data-closing] .stop {
+  opacity: 1 !important;
+}
+
+.root[data-closing] .stopInner {
+  opacity: 1 !important;
+  scale: 1 !important;
+  transition: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}

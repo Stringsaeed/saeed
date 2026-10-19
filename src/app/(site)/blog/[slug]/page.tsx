@@ -74,7 +74,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <main className="pb-24 pt-8 sm:pt-12">
         <JsonLd data={getBlogPostStructuredData(post)} />
         <Link
-          className="text-link text-sm text-muted-foreground"
+          className="text-link backdrop-plate text-sm text-muted-foreground"
           href="/blog"
           data-analytics-event="Navigation Clicked"
           data-analytics-destination="Blog"
@@ -93,17 +93,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             data-analytics-view="Article Viewed"
             data-analytics-slug={post.slug}
           >
-            <p className="font-mono text-xs text-muted-foreground">
+            <p className="backdrop-plate font-mono text-xs text-muted-foreground">
               <time dateTime={post.date}>
                 {formatPostDate(post.date, "full")}
               </time>
               <span aria-hidden="true"> · </span>
               {post.tags.join(", ")}
             </p>
-            <h1 className="mt-3 max-w-[18ch] text-balance text-3xl leading-tight font-semibold tracking-[-0.045em] sm:text-4xl">
+            <h1 className="backdrop-plate mt-3 max-w-[18ch] text-balance text-3xl leading-tight font-semibold tracking-[-0.045em] sm:text-4xl">
               {post.title}
             </h1>
-            <p className="mt-4 max-w-[38rem] text-base leading-7 text-muted-foreground">
+            <p className="backdrop-plate mt-4 max-w-[38rem] text-base leading-7 text-muted-foreground">
               {post.description}
             </p>
           </header>

@@ -19,7 +19,7 @@ export function SoundToggle() {
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="surface"
       size="icon"
       aria-label="Sound"
       aria-pressed={enabled}

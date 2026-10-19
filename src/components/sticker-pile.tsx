@@ -1,11 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { type CSSProperties, ViewTransition } from "react";
+import {
+  type CSSProperties,
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  ViewTransition,
+} from "react";
+import { flushSync } from "react-dom";
+import { playSound } from "@/lib/sound";
 import { STICKERS, stickerTransitionName } from "./sticker-data";
-import { STICKER_ART_SIZES } from "./sticker-transition";
+import { StickerPaperweights } from "./sticker-paperweights";
+import {
+  closeDeskWithTransition,
+  STICKER_ART_SIZES,
+} from "./sticker-transition";
 
 const PILE_SIZE = 112;
 // Hand-placed scatter so the pile reads as tossed, not stacked in a column.
@@ -76,16 +88,67 @@ const SCATTER = [
   },
 ];
 
+// The corner pile and the desk it opens, as a plain modal on whatever page
+// is showing: no route of its own. Opening runs inside a transition so React
+// morphs each sticker from the pile into the desk; closing flies them back.
 export function StickerPile() {
-  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const deskRef = useRef<HTMLDivElement>(null);
+  const pileRef = useRef<HTMLButtonElement>(null);
+  const reopenFocus = useRef(false);
+
+  const openDesk = useCallback(() => {
+    startTransition(() => setOpen(true));
+  }, []);
+
+  const closeDesk = useCallback(() => {
+    playSound("deskClose");
+    reopenFocus.current = true;
+    const desk = deskRef.current;
+    const done = () => flushSync(() => setOpen(false));
+    if (desk) closeDeskWithTransition(desk, done);
+    else done();
+  }, []);
+
+  // The desk moves focus into itself; it comes back to the pile on close.
+  // The page behind stays put while the desk is up.
+  useEffect(() => {
+    if (!open) {
+      if (reopenFocus.current) {
+        reopenFocus.current = false;
+        pileRef.current?.focus({
+          preventScroll: true,
+        });
+      }
+      return;
+    }
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      root.style.overflow = previousOverflow;
+    };
+  }, [
+    open,
+  ]);
+
   // The desk owns the shared transition names while it is open.
-  if (pathname === "/stickers") return null;
+  if (open) {
+    return (
+      <div ref={deskRef} className="contents">
+        <StickerPaperweights onClose={closeDesk} />
+      </div>
+    );
+  }
 
   return (
-    <Link
-      href="/stickers"
+    <button
+      ref={pileRef}
+      type="button"
+      onClick={openDesk}
       aria-label="Open the sticker desk"
-      className="group/pile fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 block size-(--pile-size) scale-75 origin-bottom-right rounded-3xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring active:scale-[0.72] min-[960px]:scale-100 min-[960px]:active:scale-95 print:hidden forced-colors:hidden"
+      aria-haspopup="dialog"
+      className="group/pile fixed right-[max(1rem,env(safe-area-inset-right))] bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 block size-(--pile-size) cursor-pointer scale-75 origin-bottom-right rounded-3xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring active:scale-[0.72] min-[960px]:scale-100 min-[960px]:active:scale-95 print:hidden forced-colors:hidden"
       style={
         {
           "--pile-size": `${PILE_SIZE}px`,
@@ -93,8 +156,7 @@ export function StickerPile() {
       }
       data-sticker-pile
       data-analytics-event="Sticker Desk Opened"
-      data-sound="tap"
-      data-sound-hover="hover"
+      data-sound="deskOpen"
     >
       {STICKERS.map((sticker, index) => {
         const scatter = SCATTER[index % SCATTER.length];
@@ -149,6 +211,6 @@ export function StickerPile() {
           </span>
         );
       })}
-    </Link>
+    </button>
   );
 }

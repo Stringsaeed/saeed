@@ -29,6 +29,7 @@ const buttonVariants = cva(
         secondary: "text-foreground",
         tertiary: "text-muted-foreground hover:text-foreground",
         ghost: "text-muted-foreground hover:text-foreground",
+        surface: "text-muted-foreground hover:text-foreground",
       },
       // The two-step size ladder shared by every control — see /docs/sizes.
       // default = 36px control height, compact = 28px for dense surfaces.
@@ -113,6 +114,12 @@ const bgVariants: Record<string, string> = {
   // render only outside the surface box.
   ghost:
     "bg-transparent shadow-[0_0_0_1px_transparent] group-hover:bg-hover group-hover:shadow-[0_0_0_1px_var(--hover)] group-active:bg-active group-active:shadow-[0_0_0_0px_var(--active)]",
+  // For controls sitting over the dithered backdrop: an opaque page-colored
+  // fill, a light 1px border, a soft ring of page color that clears the
+  // dither around it, and a subtle drop shadow. Pressing hands the border
+  // inward like tertiary and lets the shadow settle.
+  surface:
+    "[--btn-bg:var(--background)] group-hover:[--btn-bg:color-mix(in_oklab,var(--foreground)_4%,var(--background))] group-active:[--btn-bg:color-mix(in_oklab,var(--foreground)_7%,var(--background))] bg-[var(--btn-bg)] shadow-[0_0_0_1px_var(--border),0_0_0_4px_color-mix(in_oklab,var(--background)_70%,transparent),0_1px_2px_oklch(0_0_0/0.05),0_3px_10px_-3px_oklch(0_0_0/0.12),inset_0_0_0_0px_var(--border)] group-active:shadow-[0_0_0_0px_var(--border),0_0_0_4px_color-mix(in_oklab,var(--background)_70%,transparent),0_1px_1px_oklch(0_0_0/0.04),0_0_0_0_transparent,inset_0_0_0_1px_var(--border)]",
 };
 
 /* Forced-active (`active` prop): pressed colors at full size; the
@@ -126,6 +133,8 @@ const activeBgVariants: Record<string, string> = {
     "bg-active shadow-[0_0_0_1px_var(--border),inset_0_0_0_0px_var(--border)] group-active:shadow-[0_0_0_0px_var(--border),inset_0_0_0_1px_var(--border)]",
   ghost:
     "bg-active shadow-[0_0_0_1px_var(--active)] group-active:shadow-[0_0_0_0px_var(--active)]",
+  surface:
+    "[--btn-bg:color-mix(in_oklab,var(--foreground)_7%,var(--background))] bg-[var(--btn-bg)] shadow-[0_0_0_1px_var(--border),0_0_0_4px_color-mix(in_oklab,var(--background)_70%,transparent),0_1px_1px_oklch(0_0_0/0.04),0_0_0_0_transparent,inset_0_0_0_0px_var(--border)] group-active:shadow-[0_0_0_0px_var(--border),0_0_0_4px_color-mix(in_oklab,var(--background)_70%,transparent),0_1px_1px_oklch(0_0_0/0.04),0_0_0_0_transparent,inset_0_0_0_1px_var(--border)]",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

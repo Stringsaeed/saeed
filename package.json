@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@paper-design/shaders-react": "0.0.81",
     "@portabletext/react": "^8.0.1",
     "@remixicon/react": "^4.9.0",
     "@sanity/code-input": "^7.3.8",

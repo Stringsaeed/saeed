@@ -45,13 +45,13 @@ export default async function LinksPage() {
       >
         <div className="shrink-0">
           <h1
-            className="text-2xl font-semibold tracking-[-0.035em]"
+            className="backdrop-plate text-2xl font-semibold tracking-[-0.035em]"
             data-analytics-view="Content Viewed"
             data-analytics-label="Links Archive"
           >
             Links
           </h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+          <p className="backdrop-plate mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
             {entries.length} saved websites, tools, articles, and references
             collected by <SaeedName />.
           </p>

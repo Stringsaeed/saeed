@@ -669,6 +669,11 @@ const CardTitle = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
     // instead; minmax(0,1fr) clamps the implicit track to the clipped grid's
     // width so the ellipsis falls inside the visible box. All of it is inert
     // while titles wrap normally.
+    //
+    // That clip would also cut ascenders and descenders that poke past the
+    // cap-trimmed line box (Atkinson's f and q do), so the spans carry block
+    // padding the negative margin cancels: the clip edge moves out, the
+    // layout doesn't.
     return (
       <span
         ref={ref}
@@ -682,7 +687,7 @@ const CardTitle = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
       >
         <span
           className={cn(
-            "col-start-1 row-start-1 invisible min-w-0 overflow-hidden text-ellipsis",
+            "col-start-1 row-start-1 invisible -my-[0.3em] min-w-0 overflow-hidden py-[0.3em] text-ellipsis",
             trim,
           )}
           style={{
@@ -694,7 +699,7 @@ const CardTitle = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(
         </span>
         <span
           className={cn(
-            "col-start-1 row-start-1 min-w-0 overflow-hidden text-ellipsis text-foreground transition-[font-variation-settings] duration-80",
+            "col-start-1 row-start-1 -my-[0.3em] min-w-0 overflow-hidden py-[0.3em] text-ellipsis text-foreground transition-[font-variation-settings] duration-80",
             trim,
           )}
           style={{

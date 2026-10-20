@@ -55,17 +55,17 @@ export default async function BlogPage() {
                 data-sound="tap"
               >
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-                  <h2 className="font-medium tracking-[-0.015em] underline-offset-4 group-hover:underline">
+                  <h2 className="backdrop-plate font-medium tracking-[-0.015em] underline-offset-4 group-hover:underline">
                     {post.title}
                   </h2>
                   <time
-                    className="shrink-0 font-mono text-xs text-muted-foreground"
+                    className="backdrop-plate shrink-0 font-mono text-xs text-muted-foreground"
                     dateTime={post.date}
                   >
                     {formatPostDate(post.date)}
                   </time>
                 </div>
-                <p className="mt-1 max-w-[38rem] text-sm leading-6 text-muted-foreground">
+                <p className="backdrop-plate mt-1 max-w-[38rem] text-sm leading-6 text-muted-foreground">
                   {post.description}
                 </p>
               </Link>

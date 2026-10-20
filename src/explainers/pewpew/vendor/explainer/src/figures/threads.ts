@@ -1,5 +1,5 @@
 import { h, svg } from '../dom';
-import { codeView } from '../code'; import { hasExcerpt } from '../../../../shims/data';
+import { codeView } from '../code'; import { hasExcerpt } from '../../../../shims/data'; import { makePressable } from '../../../../shims/dom-a11y';
 import { figure, playback, rich, segmented } from '../figure';
 
 type Lane = 'build' | 'js' | 'ui' | 'dawn' | 'gpu' | 'audio' | 'io';
@@ -89,7 +89,7 @@ export function threadsFigure(): HTMLElement {
       }
       for (const l of hp.lanes) {
         const c = svg('circle', { cx: cx(k), cy: cy(l), r: k === i ? 7 : 4.5, class: k === i ? 'stop on' : k < i ? 'stop past' : 'stop' });
-        c.addEventListener('click', () => { pb.stop(); i = k; paint(); });
+        { const go = () => { pb.stop(); i = k; paint(); }; if (l === hp.lanes[0]) makePressable(c, go, `${k + 1}/${HOPS.length}: ${hp.title}`); else c.addEventListener('click', go); }
         els.push(c);
       }
     });

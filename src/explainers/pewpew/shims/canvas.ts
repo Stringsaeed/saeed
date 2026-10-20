@@ -18,17 +18,17 @@ export function canvasFont(px: number): string {
   return `${px}px ${fontFamily}`;
 }
 
-/** The ratio canvas2d() (world2d.ts) uses between backing pixels and drawing units. */
-const ratio = (): number => (window.devicePixelRatio > 1 ? 2 : 1);
+// Drawing units come from the fixed inline size canvas2d() (world2d.ts) sets, not from the backing store and the
+// current devicePixelRatio, so zooming or moving the window to another screen after mount cannot skew them.
 
 /** A pointer's clientX as an x in the canvas's drawing units, however wide the canvas is shown. */
 export function canvasX(canvas: HTMLCanvasElement, clientX: number): number {
   const rect = canvas.getBoundingClientRect();
-  return ((clientX - rect.left) * (canvas.width / ratio())) / rect.width;
+  return ((clientX - rect.left) * parseFloat(canvas.style.width)) / rect.width;
 }
 
 /** A pointer's clientY as a y in the canvas's drawing units, however tall the canvas is shown. */
 export function canvasY(canvas: HTMLCanvasElement, clientY: number): number {
   const rect = canvas.getBoundingClientRect();
-  return ((clientY - rect.top) * (canvas.height / ratio())) / rect.height;
+  return ((clientY - rect.top) * parseFloat(canvas.style.height)) / rect.height;
 }

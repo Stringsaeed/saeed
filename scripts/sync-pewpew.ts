@@ -152,10 +152,61 @@ const PATCHES: readonly {
     why: "Same as the rx patch, for the 250-unit drawing height.",
   },
   {
+    file: "explainer/src/figures/collide.ts",
+    find: "    const r = cv.getBoundingClientRect();",
+    replace: "",
+    why: "Unused after the rx/ry patches; canvasX/canvasY measure the canvas themselves. Replaced by an empty line, so line numbers still match upstream.",
+  },
+  {
+    file: "explainer/src/figures/collide.ts",
+    find: "  cv.style.cursor = 'crosshair';",
+    replace:
+      "  cv.style.cursor = 'crosshair'; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'A rocket and one body. Move the pointer over it to move the rocket; the result is described below.');",
+    why: "The canvas had no accessible name. The outcome text below it is the accessible version (see the next patch).",
+  },
+  {
+    file: "explainer/src/figures/collide.ts",
+    find: "  const out = h('div', { class: 'collide-out' });",
+    replace:
+      "  const out = h('div', { class: 'collide-out', 'aria-live': 'polite' });",
+    why: "Announces the outcome of each move to screen readers.",
+  },
+  {
+    file: "explainer/src/figure.ts",
+    find: "  const playBtn = pill('▶ Play', () => (timer ? stop() : start()), { 'aria-label': 'play' });",
+    replace:
+      "  const playBtn = pill('▶ Play', () => (timer ? stop() : start()));",
+    why: "The fixed aria-label said 'play' while the button read '❚❚ Pause'. Its visible text, which start() and stop() update, is the name.",
+  },
+  {
+    file: "explainer/src/figure.ts",
+    find: "  const buttons = options.map((o) => h('button', { type: 'button', class: o === value ? 'on' : '', onclick: () => { set(o); onChange(o); } }, label(o)));",
+    replace:
+      "  const buttons = options.map((o) => h('button', { type: 'button', class: o === value ? 'on' : '', 'aria-pressed': String(o === value), onclick: () => { set(o); onChange(o); } }, label(o)));",
+    why: "Segmented controls (speed, level, kind) showed the selected option by colour only. aria-pressed exposes it; the next patch keeps it current.",
+  },
+  {
+    file: "explainer/src/figure.ts",
+    find: "    buttons.forEach((b, i) => b.classList.toggle('on', options[i] === v));",
+    replace:
+      "    buttons.forEach((b, i) => { b.classList.toggle('on', options[i] === v); b.setAttribute('aria-pressed', String(options[i] === v)); });",
+    why: "See the segmented-control patch above.",
+  },
+  {
     file: "explainer/src/figures/levels.ts",
     find: "import { GOLDEN } from '../data';",
-    replace: "import { GOLDEN } from '../../../../shims/data';",
-    why: "Golden rows come from golden.json through shims/data.ts (see the code.ts patch).",
+    replace:
+      "import { GOLDEN } from '../../../../shims/data'; import { pressable } from '../../../../shims/dom-a11y';",
+    why: "Golden rows come from golden.json through shims/data.ts (see the code.ts patch). pressable is for the field-row patch below.",
+  },
+  {
+    file: "explainer/src/figures/levels.ts",
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: the upstream source line, matched as text.
+    find: "      lines.push(h('div', { class: `cl field${f === field ? ' on' : ''}`, onclick: () => { field = f; paint(); } },",
+    replace:
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: replacement source text, not a template.
+      "      lines.push(h('div', { class: `cl field${f === field ? ' on' : ''}`, ...pressable(() => { field = f; paint(); }) },",
+    why: "The field rows were clickable divs a keyboard could not reach. pressable makes them focusable buttons that Enter and Space activate.",
   },
   {
     file: "explainer/src/figures/proof.ts",
@@ -167,8 +218,16 @@ const PATCHES: readonly {
     file: "explainer/src/figures/threads.ts",
     find: "import { codeView } from '../code';",
     replace:
-      "import { codeView } from '../code'; import { hasExcerpt } from '../../../../shims/data';",
-    why: "Three hops quote files that are not vendored (App.tsx, src/shell/useGpu.ts, src/audio/engine.ts), so their excerpts are missing. See the codeBox patch below.",
+      "import { codeView } from '../code'; import { hasExcerpt } from '../../../../shims/data'; import { makePressable } from '../../../../shims/dom-a11y';",
+    why: "Three hops quote files that are not vendored (App.tsx, src/shell/useGpu.ts, src/audio/engine.ts), so their excerpts are missing. See the codeBox patch below. makePressable is for the hop-dot patch.",
+  },
+  {
+    file: "explainer/src/figures/threads.ts",
+    find: "        c.addEventListener('click', () => { pb.stop(); i = k; paint(); });",
+    replace:
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: replacement source text, not a template.
+      "        { const go = () => { pb.stop(); i = k; paint(); }; if (l === hp.lanes[0]) makePressable(c, go, `${k + 1}/${HOPS.length}: ${hp.title}`); else c.addEventListener('click', go); }",
+    why: "The hop dots were clickable SVG circles a keyboard could not reach. The first dot of each hop becomes a focusable, labelled button that Enter and Space activate (one tab stop per hop); the others stay click-only.",
   },
   {
     file: "explainer/src/figures/threads.ts",

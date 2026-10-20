@@ -19,6 +19,8 @@ export type FigureContextValue = {
   setPlaying: (playing: boolean) => void;
   /** Playing, on screen, and the tab is visible. Loops run only while true. */
   active: boolean;
+  /** The reader has used play/pause on this figure at least once. */
+  userChose: boolean;
 };
 
 export const FigureContext = createContext<FigureContextValue>({
@@ -26,6 +28,7 @@ export const FigureContext = createContext<FigureContextValue>({
   playing: true,
   setPlaying: () => {},
   active: true,
+  userChose: false,
 });
 
 /** Read inside a figure to honour reduced motion and pausing. */
@@ -47,17 +50,47 @@ export type FigureLayout = {
     }
   | {
       aspect?: never;
-      /** For figures whose height follows their content: the stage height
-       *  (px) of the mounted figure below and from the `sm` breakpoint,
-       *  measured at 375px and 688px wide. Reserved before the figure
-       *  loads; the figure may grow past it. */
+      /** For figures whose height follows their content: the mounted
+       *  stage's height (px) at each width in MIN_HEIGHT_WIDTHS. The stage
+       *  reserves it before the figure loads, interpolating between the
+       *  two nearest widths (globals.css); the figure may grow past it. */
       minHeight: FigureMinHeight;
     }
 );
 
-export type FigureMinHeight = {
-  base: number;
-  sm: number;
+/** Stage widths (px) a `minHeight` is given at: a post's figure is 272px
+ *  wide on a 320px phone, 591px at the widest below `sm`, and 624–688px
+ *  from `sm` up. Must match the bands in globals.css. */
+export const MIN_HEIGHT_WIDTHS = [
+  272,
+  292,
+  312,
+  332,
+  352,
+  372,
+  392,
+  412,
+  432,
+  452,
+  472,
+  492,
+  512,
+  532,
+  552,
+  572,
+  591,
+  624,
+  656,
+  688,
+] as const;
+
+/** One height per entry of MIN_HEIGHT_WIDTHS, chosen so the linear
+ *  interpolation between neighbours is never below the figure's real
+ *  height (no shift on mount) and barely above it. */
+export type FigureMinHeight = OnePer<typeof MIN_HEIGHT_WIDTHS>;
+
+type OnePer<T extends readonly unknown[]> = {
+  readonly [K in keyof T]: number;
 };
 
 export type FigureHost = FigureLayout & {

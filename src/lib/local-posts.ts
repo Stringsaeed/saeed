@@ -75,6 +75,21 @@ function sortPosts<T extends BlogPost>(posts: T[]) {
   });
 }
 
+/** Validates and converts one local post's source (frontmatter and Markdown). Throws on anything readLocalPosts rejects. */
+export function parseLocalPost(slug: string, source: string): BlogPostContent {
+  assertTrustedMarkdown(slug, source);
+  const { data, content } = matter(source);
+
+  return {
+    slug,
+    title: readString(slug, "title", data.title),
+    description: readString(slug, "description", data.description),
+    date: readDate(slug, data.date),
+    tags: readTags(slug, data.tags),
+    body: markdownToPortableText(content),
+  };
+}
+
 export function readLocalPosts(): BlogPostContent[] {
   const posts = fs
     .readdirSync(blogDirectory)
@@ -86,17 +101,7 @@ export function readLocalPosts(): BlogPostContent[] {
       }
 
       const source = fs.readFileSync(path.join(blogDirectory, file), "utf8");
-      assertTrustedMarkdown(slug, source);
-      const { data, content } = matter(source);
-
-      return {
-        slug,
-        title: readString(slug, "title", data.title),
-        description: readString(slug, "description", data.description),
-        date: readDate(slug, data.date),
-        tags: readTags(slug, data.tags),
-        body: markdownToPortableText(content),
-      };
+      return parseLocalPost(slug, source);
     });
 
   return sortPosts(posts);

@@ -31,7 +31,7 @@ I'm Muhammed Ibrahim, a software engineer who works mostly in React Native. This
 
 **A page that answers back.** Links tick under your cursor. The face next to my name follows your pointer with its eyes. The dot grid behind everything moves out of your way. The speaker in the header mutes it all if you'd rather read in silence.
 
-**The rest of me.** Five companies I've shipped apps for, from Breadfast to Aquanow. Twelve posts on React Native and building software with coding agents. A list of 94 links I keep coming back to.
+**The rest of me.** Five companies I've shipped apps for, from Breadfast to Aquanow. Twelve posts on React Native and building software with coding agents. A list of 94 links I keep coming back to. Six side projects, like Azkarify and Trove.
 
 ## On your phone too
 

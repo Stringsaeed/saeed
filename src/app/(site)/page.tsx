@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { BookShelf } from "@/components/book-shelf";
+import { ProjectsSection } from "@/components/projects-section";
 import { SaeedName } from "@/components/saeed-name";
 import {
   Card,
@@ -124,6 +125,11 @@ export default async function Home() {
               </Card>
             ))}
           </CardGroup>
+        </div>
+
+        <div className="mt-12">
+          <h2 className="list-heading backdrop-plate">Projects</h2>
+          <ProjectsSection />
         </div>
 
         <div

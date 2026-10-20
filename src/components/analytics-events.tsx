@@ -12,6 +12,7 @@ const propertyKeys = {
   analyticsLabel: "label",
   analyticsLocation: "location",
   analyticsNetwork: "network",
+  analyticsProject: "project",
   analyticsSlug: "slug",
   analyticsType: "type",
 } as const;

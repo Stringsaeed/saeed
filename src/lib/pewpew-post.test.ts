@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { describe, test } from "node:test";
+import { isInteractiveName } from "./interactive-names";
 import { parseLocalPost } from "./local-posts";
 
 const slug = "pewpew-source-tour";
@@ -42,6 +43,25 @@ describe("pewpew post draft", () => {
     assert.equal(post.date, "2026-10-21T00:00:00.000Z");
     assert.ok(post.description.length <= 160);
     assert.ok(post.body.length > 0);
+  });
+
+  test("converts every figure slot into an interactive block", () => {
+    const { body } = parseLocalPost(slug, source);
+    const interactive = body.filter((block) => block._type === "interactive");
+    assert.equal(interactive.length, 17);
+    assert.deepEqual(
+      interactive.map((block) => block.name),
+      figures,
+    );
+    for (const block of interactive) {
+      assert.ok(isInteractiveName(block.name), String(block.name));
+    }
+    const leftover = body.filter(
+      (block) =>
+        block._type === "block" &&
+        block.children?.some((child) => child.text.includes("{{")),
+    );
+    assert.equal(leftover.length, 0);
   });
 
   test("places every figure exactly once, on its own line", () => {

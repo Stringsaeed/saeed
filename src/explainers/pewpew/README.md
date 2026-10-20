@@ -31,3 +31,5 @@ bun run check:ts
 bun run pewpew:post            # downloads post.md at the pinned SHA
 bun run pewpew:post path/to/post.md
 ```
+
+`bun run pewpew:import` writes the draft into Sanity as the draft document `drafts.post-pewpew-source-tour` (project and dataset from `src/sanity/env.ts`). It parses `post.mdx` with the same `parseLocalPost` the site uses, checks every block against the post schema, and uploads with `sanity documents create --replace`, so it uses the Sanity CLI's login. Use it for the draft only, and review and publish from the Studio. (`--publish --yes-publish-live` writes the published id directly; it is there for later and is refused without the confirmation flag.) `--dry-run` builds and validates the document without uploading it.

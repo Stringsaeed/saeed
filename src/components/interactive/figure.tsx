@@ -56,11 +56,14 @@ function stageBox(
     };
   if (minHeight !== undefined)
     return {
-      className: "min-h-(--figure-min-h) sm:min-h-(--figure-min-h-sm)",
-      style: {
-        "--figure-min-h": `${minHeight.base}px`,
-        "--figure-min-h-sm": `${minHeight.sm}px`,
-      } as CSSProperties,
+      // globals.css turns these into a min-height for the stage's width.
+      className: "figure-min-height",
+      style: Object.fromEntries(
+        minHeight.map((height, index) => [
+          `--figure-h-${index}`,
+          height,
+        ]),
+      ) as CSSProperties,
     };
   return {};
 }
@@ -123,6 +126,7 @@ export function Figure({
         playing,
         setPlaying,
         active: playing && onScreen,
+        userChose: choice !== null,
       }}
     >
       <div ref={surfaceRef} className={cn(surfaceClass, shape.container)}>

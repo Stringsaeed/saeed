@@ -1,7 +1,7 @@
 import { h, svg } from '../dom';
 import { figure, rich, walk, type WalkStep } from '../figure';
 import { highlightInto } from '../code';
-import { GOLDEN } from '../../../../shims/data';
+import { GOLDEN } from '../../../../shims/data'; import { pressable } from '../../../../shims/dom-a11y';
 import { KIND_COLOR, KIND_NAME } from '../world2d';
 import { slide } from './basics';
 import { ARCHETYPES, BOSSES, Kind, LEVELS, levelSpec, tierOf, type LevelNumber, type LevelSpec } from '../../../src/levels';
@@ -40,7 +40,7 @@ export function levelRow(): HTMLElement {
     for (const f of FIELDS) {
       const val = h('span', {});
       highlightInto(val, f.get(l));
-      lines.push(h('div', { class: `cl field${f === field ? ' on' : ''}`, onclick: () => { field = f; paint(); } },
+      lines.push(h('div', { class: `cl field${f === field ? ' on' : ''}`, ...pressable(() => { field = f; paint(); }) },
         h('span', { class: 'cc' }, '  ', h('span', { class: 't-prop call' }, f.key), ': ', val, ',')));
     }
     lines.push(h('div', { class: 'cl' }, h('span', { class: 'cc' }, '}')));

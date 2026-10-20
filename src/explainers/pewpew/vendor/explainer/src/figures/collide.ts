@@ -18,8 +18,8 @@ export function collideFigure(): HTMLElement {
   let shield = false, immune = false, bolt = false;
   let rx = -1.6, ry = -0.6;
   const { el: cv, ctx } = canvas2d(W, H);
-  cv.style.cursor = 'crosshair';
-  const out = h('div', { class: 'collide-out' });
+  cv.style.cursor = 'crosshair'; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', 'A rocket and one body. Move the pointer over it to move the rocket; the result is described below.');
+  const out = h('div', { class: 'collide-out', 'aria-live': 'polite' });
   const code = codeView('collide', { maxHeight: 260 });
 
   // Lines of collide() that each outcome passes through, found by their text so they follow the source.
@@ -117,7 +117,7 @@ export function collideFigure(): HTMLElement {
   }
 
   const move = (e: PointerEvent): void => {
-    const r = cv.getBoundingClientRect();
+
     rx = (canvasX(cv, e.clientX) - W / 2) / S;
     ry = -(canvasY(cv, e.clientY) - H / 2) / S;
     run();

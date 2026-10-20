@@ -132,6 +132,11 @@ function HeroStage({ name }: { name: string }) {
       draw(hero);
     };
     resize();
+    // A paused hero draws once; redraw when the web font arrives so its
+    // labels are not left in the fallback face.
+    document.fonts.ready.then(() => {
+      if (heroRef.current === hero) draw(hero);
+    });
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
     return () => {

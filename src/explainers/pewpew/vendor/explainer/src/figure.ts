@@ -53,9 +53,9 @@ export function pill(text: Child, onClick: () => void, attrs: Record<string, str
 
 /** A segmented control. Returns the element and a setter. */
 export function segmented<T extends string | number>(options: readonly T[], value: T, onChange: (v: T) => void, label: (v: T) => string = String): { el: HTMLElement; set(v: T): void } {
-  const buttons = options.map((o) => h('button', { type: 'button', class: o === value ? 'on' : '', onclick: () => { set(o); onChange(o); } }, label(o)));
+  const buttons = options.map((o) => h('button', { type: 'button', class: o === value ? 'on' : '', 'aria-pressed': String(o === value), onclick: () => { set(o); onChange(o); } }, label(o)));
   function set(v: T): void {
-    buttons.forEach((b, i) => b.classList.toggle('on', options[i] === v));
+    buttons.forEach((b, i) => { b.classList.toggle('on', options[i] === v); b.setAttribute('aria-pressed', String(options[i] === v)); });
   }
   return { el: h('div', { class: 'seg' }, buttons), set };
 }
@@ -64,7 +64,7 @@ export function segmented<T extends string | number>(options: readonly T[], valu
 export function playback(opts: { prev(): void; next(): void; baseMs: number; onPlayChange?(on: boolean): void }): { el: HTMLElement; stop(): void; playing(): boolean } {
   let speed = 1;
   let timer = 0;
-  const playBtn = pill('▶ Play', () => (timer ? stop() : start()), { 'aria-label': 'play' });
+  const playBtn = pill('▶ Play', () => (timer ? stop() : start()));
   function start(): void {
     stop();
     timer = setInterval(opts.next, opts.baseMs / speed);

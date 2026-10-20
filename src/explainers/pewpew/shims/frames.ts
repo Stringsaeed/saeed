@@ -4,9 +4,10 @@
 // (see PATCHES in scripts/sync-pewpew.ts), and every timer belongs to the scope of the figure that created it.
 //
 // A scope is "current" while code of its figure runs: during mount, inside its own timer callbacks, and during DOM
-// events on its root (the island marks them with enterOnEvent). While a scope is inactive its timers are held, not
-// run: a pending frame waits, and an interval stops ticking until the scope is active again. dispose() drops them all.
-// Called with no current scope, the functions fall back to the browser's own.
+// events on its root (the island marks them with enterOnEvent and exitOnEvent). While a scope is inactive its timers
+// are held, not run: a pending frame waits, and an interval stops ticking until the scope is active again, then
+// resumes with the time it had left. dispose() drops them all. Called with no current scope, the functions fall back
+// to the browser's own.
 
 type Timer =
   | {
@@ -19,6 +20,12 @@ type Timer =
       readonly callback: () => void;
       readonly ms: number;
       handle: number | null;
+      /** Whether `handle` is the one-off timeout that finishes a period cut short by a pause. */
+      resuming: boolean;
+      /** performance.now() when the next tick is due, while running. */
+      dueAt: number;
+      /** Milliseconds left of the current period when it was paused, or null for a full period. */
+      left: number | null;
     };
 
 let current: FigureScope | null = null;
@@ -58,12 +65,19 @@ export class FigureScope {
     }
   }
 
-  /** Makes this scope current for the rest of a DOM event dispatch. Use as a capture listener on the root. */
+  /**
+   * Makes this scope current for an event on the figure's root: a capture listener, so it runs before the figure's
+   * own handlers. exitOnEvent (a bubble listener) clears it after them. Events that do not bubble never reach
+   * exitOnEvent, so a timeout clears it too. Not a microtask: the browser runs microtasks between listeners, which
+   * would clear the scope before the figure's handler runs.
+   */
   enterOnEvent = (): void => {
     current = this;
-    setTimeout(() => {
-      if (current === this) current = null;
-    }, 0);
+    setTimeout(this.exitOnEvent, 0);
+  };
+
+  exitOnEvent = (): void => {
+    if (current === this) current = null;
   };
 
   setActive(active: boolean): void {
@@ -117,18 +131,49 @@ export class FigureScope {
         this.#tick();
         this.run(() => timer.callback(time));
       });
-    } else {
-      timer.handle = window.setInterval(() => {
-        this.#tick();
-        this.run(timer.callback);
-      }, timer.ms);
+      return;
     }
+    const fire = () => {
+      timer.dueAt = performance.now() + timer.ms;
+      this.#tick();
+      this.run(timer.callback);
+    };
+    const every = () => {
+      timer.resuming = false;
+      timer.dueAt = performance.now() + timer.ms;
+      timer.handle = window.setInterval(fire, timer.ms);
+    };
+    const left = timer.left;
+    timer.left = null;
+    if (left === null || left >= timer.ms) {
+      every();
+      return;
+    }
+    // Finish the period the pause cut short, then tick at the full rate.
+    timer.resuming = true;
+    timer.dueAt = performance.now() + left;
+    timer.handle = window.setTimeout(() => {
+      timer.handle = null;
+      fire();
+      // The callback may have cleared this timer, or the scope may have gone inactive.
+      if (
+        this.#timers.get(id) === timer &&
+        this.#active &&
+        timer.handle === null
+      )
+        every();
+    }, left);
   }
 
   #stop(timer: Timer): void {
     if (timer.handle === null) return;
     if (timer.kind === "frame") window.cancelAnimationFrame(timer.handle);
-    else window.clearInterval(timer.handle);
+    else {
+      timer.left = Math.max(0, timer.dueAt - performance.now());
+      if (timer.resuming) window.clearTimeout(timer.handle);
+      else window.clearInterval(timer.handle);
+      timer.resuming = false;
+    }
     timer.handle = null;
   }
 }
@@ -161,6 +206,9 @@ export function setInterval(callback: () => void, ms: number): number {
     callback,
     ms,
     handle: null,
+    resuming: false,
+    dueAt: 0,
+    left: null,
   });
 }
 

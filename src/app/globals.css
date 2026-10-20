@@ -314,6 +314,251 @@
   outline-offset: -2px;
 }
 
+/* Reserved height for figures whose height follows their content (the
+   registry's `minHeight`). A figure's height there depends on its width,
+   so the registry gives one height per stage width in MIN_HEIGHT_WIDTHS
+   (use-figure.ts), as --figure-h-0…19, and the stage interpolates linearly
+   between the two around its own width. The figure element is the size
+   container, so the server-rendered skeleton reserves the right height
+   before any script runs. Kept in step with MIN_HEIGHT_WIDTHS by hand. */
+[data-interactive] {
+  container: figure / inline-size;
+}
+
+@container figure (width < 292px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-0) *
+      1px +
+      (var(--figure-h-1) - var(--figure-h-0)) *
+      (100cqw - 272px) /
+      20
+    );
+  }
+}
+
+@container figure (292px <= width < 312px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-1) *
+      1px +
+      (var(--figure-h-2) - var(--figure-h-1)) *
+      (100cqw - 292px) /
+      20
+    );
+  }
+}
+
+@container figure (312px <= width < 332px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-2) *
+      1px +
+      (var(--figure-h-3) - var(--figure-h-2)) *
+      (100cqw - 312px) /
+      20
+    );
+  }
+}
+
+@container figure (332px <= width < 352px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-3) *
+      1px +
+      (var(--figure-h-4) - var(--figure-h-3)) *
+      (100cqw - 332px) /
+      20
+    );
+  }
+}
+
+@container figure (352px <= width < 372px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-4) *
+      1px +
+      (var(--figure-h-5) - var(--figure-h-4)) *
+      (100cqw - 352px) /
+      20
+    );
+  }
+}
+
+@container figure (372px <= width < 392px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-5) *
+      1px +
+      (var(--figure-h-6) - var(--figure-h-5)) *
+      (100cqw - 372px) /
+      20
+    );
+  }
+}
+
+@container figure (392px <= width < 412px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-6) *
+      1px +
+      (var(--figure-h-7) - var(--figure-h-6)) *
+      (100cqw - 392px) /
+      20
+    );
+  }
+}
+
+@container figure (412px <= width < 432px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-7) *
+      1px +
+      (var(--figure-h-8) - var(--figure-h-7)) *
+      (100cqw - 412px) /
+      20
+    );
+  }
+}
+
+@container figure (432px <= width < 452px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-8) *
+      1px +
+      (var(--figure-h-9) - var(--figure-h-8)) *
+      (100cqw - 432px) /
+      20
+    );
+  }
+}
+
+@container figure (452px <= width < 472px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-9) *
+      1px +
+      (var(--figure-h-10) - var(--figure-h-9)) *
+      (100cqw - 452px) /
+      20
+    );
+  }
+}
+
+@container figure (472px <= width < 492px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-10) *
+      1px +
+      (var(--figure-h-11) - var(--figure-h-10)) *
+      (100cqw - 472px) /
+      20
+    );
+  }
+}
+
+@container figure (492px <= width < 512px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-11) *
+      1px +
+      (var(--figure-h-12) - var(--figure-h-11)) *
+      (100cqw - 492px) /
+      20
+    );
+  }
+}
+
+@container figure (512px <= width < 532px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-12) *
+      1px +
+      (var(--figure-h-13) - var(--figure-h-12)) *
+      (100cqw - 512px) /
+      20
+    );
+  }
+}
+
+@container figure (532px <= width < 552px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-13) *
+      1px +
+      (var(--figure-h-14) - var(--figure-h-13)) *
+      (100cqw - 532px) /
+      20
+    );
+  }
+}
+
+@container figure (552px <= width < 572px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-14) *
+      1px +
+      (var(--figure-h-15) - var(--figure-h-14)) *
+      (100cqw - 552px) /
+      20
+    );
+  }
+}
+
+@container figure (572px <= width < 591px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-15) *
+      1px +
+      (var(--figure-h-16) - var(--figure-h-15)) *
+      (100cqw - 572px) /
+      19
+    );
+  }
+}
+
+@container figure (591px <= width < 624px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-16) *
+      1px +
+      (var(--figure-h-17) - var(--figure-h-16)) *
+      (100cqw - 591px) /
+      33
+    );
+  }
+}
+
+@container figure (624px <= width < 656px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-17) *
+      1px +
+      (var(--figure-h-18) - var(--figure-h-17)) *
+      (100cqw - 624px) /
+      32
+    );
+  }
+}
+
+@container figure (656px <= width < 688px) {
+  .figure-min-height {
+    min-height: calc(
+      var(--figure-h-18) *
+      1px +
+      (var(--figure-h-19) - var(--figure-h-18)) *
+      (100cqw - 656px) /
+      32
+    );
+  }
+}
+
+@container figure (width >= 688px) {
+  .figure-min-height {
+    min-height: calc(var(--figure-h-19) * 1px);
+  }
+}
+
 @utility bleed {
   @media (width >= 40rem) {
     --bleed: max(

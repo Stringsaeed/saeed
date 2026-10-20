@@ -40,11 +40,13 @@ const FIGURE_EVENTS = [
 ] as const;
 
 /** Events that count as the reader asking the figure to move: under
- *  reduced motion a figure starts paused, and the first one starts it. */
+ *  reduced motion a figure starts paused, and the first press of one of
+ *  its controls starts it, unless the reader has already used play/pause. */
 const CONSENT_EVENTS = [
   "click",
   "input",
 ] as const;
+const CONTROLS = "button, input, select, [role=button]";
 
 /**
  * A React island around an imperative figure. Mounts once the figure is
@@ -60,7 +62,7 @@ export function ImperativeFigure({
   name: string;
   mount: MountFigure;
 }) {
-  const { active, playing, setPlaying } = useFigure();
+  const { active, playing, setPlaying, reducedMotion, userChose } = useFigure();
   const rootRef = useRef<HTMLDivElement>(null);
   const scopeRef = useRef<FigureScope | null>(null);
   // A latch: once mounted, the figure stays mounted while it scrolls away.
@@ -69,8 +71,12 @@ export function ImperativeFigure({
 
   const runMount = useEffectEvent((root: HTMLElement) => mount(root));
   const isActive = useEffectEvent(() => active);
-  const startOnConsent = useEffectEvent(() => {
-    if (!playing) setPlaying(true);
+  // Only the reduced-motion start: a reader who paused the figure keeps it
+  // paused while they use its controls.
+  const startOnConsent = useEffectEvent((event: Event) => {
+    if (playing || !reducedMotion || userChose) return;
+    if (event.target instanceof Element && event.target.closest(CONTROLS))
+      setPlaying(true);
   });
   const pause = useEffectEvent(() => setPlaying(false));
 
@@ -86,11 +92,13 @@ export function ImperativeFigure({
     const scope = new FigureScope(name);
     scopeRef.current = scope;
     scope.onPauseRequest = () => pause();
-    const consent = () => startOnConsent();
-    for (const type of FIGURE_EVENTS)
+    const consent = (event: Event) => startOnConsent(event);
+    for (const type of FIGURE_EVENTS) {
       root.addEventListener(type, scope.enterOnEvent, {
         capture: true,
       });
+      root.addEventListener(type, scope.exitOnEvent);
+    }
     for (const type of CONSENT_EVENTS)
       root.addEventListener(type, consent, {
         capture: true,
@@ -128,10 +136,12 @@ export function ImperativeFigure({
     return () => {
       window.clearInterval(report);
       scope.dispose();
-      for (const type of FIGURE_EVENTS)
+      for (const type of FIGURE_EVENTS) {
         root.removeEventListener(type, scope.enterOnEvent, {
           capture: true,
         });
+        root.removeEventListener(type, scope.exitOnEvent);
+      }
       for (const type of CONSENT_EVENTS)
         root.removeEventListener(type, consent, {
           capture: true,

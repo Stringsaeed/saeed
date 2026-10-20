@@ -306,6 +306,8 @@
 /* Live code: real line numbers, a marked range, and clickable calls. */
 [data-interactive^="pewpew-"] .pewpew-root .codebox {
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   border-radius: 10px;
   background: var(--pp-code-bg);
   box-shadow: inset 0 0 0 1px var(--pp-card-border);
@@ -332,6 +334,11 @@
 }
 [data-interactive^="pewpew-"] .pewpew-root .cl .ln {
   flex: none;
+  /* Sticky, so the numbers stay put while a long line scrolls sideways. */
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--pp-code-bg);
   width: 44px;
   padding-right: 14px;
   text-align: right;
@@ -340,12 +347,15 @@
 }
 [data-interactive^="pewpew-"] .pewpew-root .cl.on {
   background: var(--pp-mark);
-  box-shadow: inset 2px 0 0 var(--pp-ink);
 }
 [data-interactive^="pewpew-"] .pewpew-root .cl.on .ln {
   color: var(--pp-ink);
+  background:
+    linear-gradient(var(--pp-mark), var(--pp-mark)), var(--pp-code-bg);
+  box-shadow: inset 2px 0 0 var(--pp-ink);
 }
-[data-interactive^="pewpew-"] .pewpew-root .cl.dim {
+[data-interactive^="pewpew-"] .pewpew-root .cl.dim .cc {
+  /* On the code only: a translucent sticky gutter would show code through it. */
   opacity: 0.42;
 }
 [data-interactive^="pewpew-"] .pewpew-root .call {
@@ -486,6 +496,8 @@
   color: var(--pp-bad);
 }
 [data-interactive^="pewpew-"] .pewpew-root canvas.game2d {
+  /* Vertical swipes still scroll the page; horizontal drags reach the figure. */
+  touch-action: pan-y;
   border-radius: 10px;
   display: block;
   background: var(--pp-world);
@@ -846,7 +858,20 @@
 @container pewpew (max-width: 620px) {
   [data-interactive^="pewpew-"] .pewpew-root .two,
   [data-interactive^="pewpew-"] .pewpew-root .walk-panel {
-    grid-template-columns: 1fr;
+    /* minmax(0, …): fixed-width children (the drone plot) shrink to fit. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-interactive^="pewpew-"] .pewpew-root .phases {
+    /* One card per row: two narrow cards wrap into a taller grid than three
+       stacked ones, which made the height jump with width. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+  [data-interactive^="pewpew-"] .pewpew-root .row > .slide {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  [data-interactive^="pewpew-"] .pewpew-root .slide input {
+    min-width: 0;
   }
   [data-interactive^="pewpew-"] .pewpew-root .rowcode {
     min-width: 0;

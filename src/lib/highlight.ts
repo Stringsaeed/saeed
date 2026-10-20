@@ -1,72 +1,52 @@
 import "server-only";
 import { createHighlighter, type Highlighter, type ThemedToken } from "shiki";
+import { warnOnceInDev } from "@/lib/dev-warn";
+import {
+  HIGHLIGHT_LANGUAGES,
+  resolveLanguage,
+} from "@/lib/highlight-languages";
 
 // Code is highlighted on the server only; the client gets plain spans with
 // two colour variables per token and globals.css picks one by theme.
-
-const languages = [
-  "ts",
-  "tsx",
-  "js",
-  "jsx",
-  "json",
-  "bash",
-  "swift",
-  "kotlin",
-  "css",
-  "html",
-  "wgsl",
-] as const;
-
-const aliases: Record<string, (typeof languages)[number]> = {
-  typescript: "ts",
-  javascript: "js",
-  sh: "bash",
-  shell: "bash",
-  zsh: "bash",
-  kt: "kotlin",
-  jsonc: "json",
-};
 
 const themes = {
   light: "github-light",
   dark: "github-dark",
 } as const;
 
-let highlighter: Promise<Highlighter> | undefined;
+// In development the module re-evaluates on every HMR update; keeping the
+// promise on globalThis stops each reload from starting another highlighter
+// (Shiki warns after ten instances).
+const cache = globalThis as typeof globalThis & {
+  __postHighlighter?: Promise<Highlighter>;
+};
 
 function getHighlighter() {
-  if (!highlighter) {
-    highlighter = createHighlighter({
+  if (!cache.__postHighlighter) {
+    const created = createHighlighter({
       themes: [
         themes.light,
         themes.dark,
       ],
       langs: [
-        ...languages,
+        ...HIGHLIGHT_LANGUAGES,
       ],
     });
+    cache.__postHighlighter = created;
     // Let a failed start retry on the next request instead of caching it.
-    highlighter.catch(() => {
-      highlighter = undefined;
+    created.catch(() => {
+      if (cache.__postHighlighter === created)
+        cache.__postHighlighter = undefined;
     });
   }
-  return highlighter;
-}
-
-export function resolveLanguage(language: unknown) {
-  if (typeof language !== "string") return null;
-  const name = language.trim().toLowerCase();
-  if ((languages as readonly string[]).includes(name))
-    return name as (typeof languages)[number];
-  return aliases[name] ?? null;
+  return cache.__postHighlighter;
 }
 
 export type HighlightedLine = readonly ThemedToken[];
 
 /**
  * Tokens per line with `--shiki-light` / `--shiki-dark` in `htmlStyle`, or
- * null for an unknown language (render it as plain text).
+ * null for plain text (unknown language, or highlighting failed).
  */
 export async function highlight(
   code: string,
@@ -81,7 +61,11 @@ export async function highlight(
       themes,
       defaultColor: false,
     }).tokens;
-  } catch {
+  } catch (error) {
+    warnOnceInDev(
+      `highlight:${lang}`,
+      `[highlight] Could not highlight ${lang}; rendering plain text. ${String(error)}`,
+    );
     return null;
   }
 }

@@ -305,6 +305,15 @@
    The overhang shrinks so the figure never pokes past the 44rem site
    wrapper or comes within 0.5rem of the viewport edge. Percentages in
    margins resolve against the parent's width, which is the column. */
+/* The figure surface clips to its radius (overflow: clip), which would cut
+   off a focus ring drawn outside a control touching the stage edge, so
+   focus inside the stage is drawn inset. Unlayered on purpose: it has to
+   beat `outline-none` utilities on components such as Button. */
+[data-figure-stage] :focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
 @utility bleed {
   @media (width >= 40rem) {
     --bleed: max(
@@ -491,8 +500,19 @@
     scroll-margin-block-start: 1.5rem;
   }
 
+  /* The `#` link is the heading's sibling (so it stays out of the heading's
+     accessible name) and hangs in the left gutter on the heading's first
+     line. The wrapper has no margins of its own, so the heading's top
+     margin collapses through it as before. */
+  .article-body .heading-anchored {
+    position: relative;
+  }
+
   .article-body a.heading-anchor {
-    margin-inline-start: 0.4em;
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 100%;
+    padding-inline-end: 0.3em;
     color: var(--muted-foreground);
     font-weight: 400;
     text-decoration-line: none;
@@ -500,13 +520,39 @@
     transition: opacity 160ms ease;
   }
 
-  .article-body :is(h2, h3):hover a.heading-anchor,
+  .article-body a.heading-anchor[data-level="h2"] {
+    font-size: 1.4rem;
+    line-height: 1.35;
+  }
+
+  .article-body a.heading-anchor[data-level="h3"] {
+    font-size: 1.1rem;
+    line-height: 1.45;
+  }
+
+  .article-body .heading-anchored:hover a.heading-anchor,
   .article-body a.heading-anchor:focus-visible {
     opacity: 1;
   }
 
   .article-body a.heading-anchor:hover {
     color: var(--foreground);
+  }
+
+  /* Figures are UI, not prose: undo the article's text styling inside
+     them so links, lists, code, and strong text look as their components
+     style them. `revert-layer` rolls back to base (preflight), and
+     utilities still win because they sit in a later layer. The caption
+     keeps its own utility classes. */
+  .article-body figure[data-interactive] {
+    color: var(--foreground);
+    line-height: 1.5;
+  }
+
+  .article-body
+    figure[data-interactive]
+    :is(a, strong, ul, ol, li, blockquote, pre, code) {
+    all: revert-layer;
   }
 
   .article-body :not(pre) > code {

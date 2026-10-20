@@ -50,6 +50,8 @@
     "@types/react-dom": "^19",
     "@types/three": "0.186.0",
     "babel-plugin-react-compiler": "1.0.0",
+    "github-slugger": "^2.0.0",
+    "server-only": "^0.0.1",
     "sharp": "0.35.4",
     "tailwindcss": "^4",
     "typescript": "^7.0.2"

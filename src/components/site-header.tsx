@@ -65,11 +65,17 @@ const socialLinks = [
   },
 ];
 
+// The header needs about 412px for the labelled Blog and Links buttons, so
+// below 420px they collapse to icon-only squares (the label stays in the DOM
+// for screen readers).
+const NAV_LINK_CLASS = "max-[419px]:w-9 max-[419px]:gap-0 max-[419px]:px-0";
+const NAV_LABEL_CLASS = "max-[419px]:sr-only";
+
 export function SiteHeader() {
   return (
-    <header className="flex items-center justify-between gap-3 py-6">
+    <header className="flex items-center justify-between gap-2 py-6 sm:gap-3">
       <Link
-        className="backdrop-plate flex shrink-0 items-center gap-3"
+        className="backdrop-plate flex shrink-0 items-center gap-2 sm:gap-3"
         href="/"
         data-analytics-event="Navigation Clicked"
         data-analytics-destination="Home"
@@ -80,27 +86,42 @@ export function SiteHeader() {
         <SaeedName className="signature-name" />
       </Link>
 
-      <nav className="ml-auto flex items-center gap-2" aria-label="Site links">
-        <Button asChild variant="surface" leadingIcon={RiArticleLine}>
+      <nav
+        className="ml-auto flex items-center gap-1.5 sm:gap-2"
+        aria-label="Site links"
+      >
+        <Button
+          asChild
+          variant="surface"
+          leadingIcon={RiArticleLine}
+          className={NAV_LINK_CLASS}
+        >
           <Link
             href="/blog"
             data-analytics-event="Navigation Clicked"
             data-analytics-destination="Blog"
             data-analytics-location="Header"
             data-sound="tap"
+            title="Blog"
           >
-            Blog
+            <span className={NAV_LABEL_CLASS}>Blog</span>
           </Link>
         </Button>
-        <Button asChild variant="surface" leadingIcon={RiLinksLine}>
+        <Button
+          asChild
+          variant="surface"
+          leadingIcon={RiLinksLine}
+          className={NAV_LINK_CLASS}
+        >
           <Link
             href="/links"
             data-analytics-event="Navigation Clicked"
             data-analytics-destination="Links"
             data-analytics-location="Header"
             data-sound="tap"
+            title="Links"
           >
-            Links
+            <span className={NAV_LABEL_CLASS}>Links</span>
           </Link>
         </Button>
         <ThemeSwitcher />

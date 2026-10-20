@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostBody } from "@/components/content/post-body";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -174,7 +175,10 @@ export default function PewpewPreviewPage() {
     >
       <div className="mx-auto w-full max-w-176 px-6 pt-12 pb-24 sm:px-8">
         <p className="font-mono text-xs text-muted-foreground">
-          Prototype · PewPew figures
+          Prototype · PewPew figures ·{" "}
+          <Link className="text-link" href="/prototypes/pewpew-post">
+            Preview the post
+          </Link>
         </p>
         <h1 className="mt-3 text-3xl leading-tight font-semibold tracking-[-0.045em] sm:text-4xl">
           How pewpew works

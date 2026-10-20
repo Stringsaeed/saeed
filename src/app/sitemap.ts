@@ -2,11 +2,13 @@ import type { MetadataRoute } from "next";
 import { getPosts } from "@/lib/content";
 import { getAbsoluteUrl } from "@/lib/site";
 
-const siteUpdatedAt = new Date("2026-10-20T00:00:00.000Z");
+// Each page keeps its own date so <lastmod> stays accurate per entry.
+const homeUpdatedAt = new Date("2026-10-20T00:00:00.000Z");
+const linksUpdatedAt = new Date("2026-10-19T00:00:00.000Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getPosts();
-  const latestPostDate = posts[0]?.date ?? siteUpdatedAt;
+  const latestPostDate = posts[0]?.date ?? homeUpdatedAt;
   const postEntries: MetadataRoute.Sitemap = posts.map((post) => ({
     url: getAbsoluteUrl(`/blog/${post.slug}`),
     lastModified: new Date(post.date),
@@ -17,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
       url: getAbsoluteUrl(),
-      lastModified: siteUpdatedAt,
+      lastModified: homeUpdatedAt,
       changeFrequency: "monthly",
       priority: 1,
     },
@@ -29,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: getAbsoluteUrl("/links"),
-      lastModified: siteUpdatedAt,
+      lastModified: linksUpdatedAt,
       changeFrequency: "monthly",
       priority: 0.6,
     },

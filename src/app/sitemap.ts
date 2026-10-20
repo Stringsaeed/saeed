@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getPosts } from "@/lib/content";
 import { getAbsoluteUrl } from "@/lib/site";
 
-const siteUpdatedAt = new Date("2026-08-30T00:00:00.000Z");
+const siteUpdatedAt = new Date("2026-10-20T00:00:00.000Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getPosts();

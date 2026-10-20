@@ -11,6 +11,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { withPewpewCaptions } from "../src/explainers/pewpew/captions";
 import { CODE_LANGUAGE_OPTIONS } from "../src/lib/highlight-languages";
 import { isContentHref } from "../src/lib/https-url";
 import { isInteractiveName } from "../src/lib/interactive-names";
@@ -180,7 +181,8 @@ const document = {
   tags: [
     ...post.tags,
   ],
-  body: toSanityBody(post.body),
+  // post.mdx has no captions; each figure gets its caption from src/explainers/pewpew/captions.ts here.
+  body: toSanityBody(withPewpewCaptions(post.body)),
 };
 
 const dir = await mkdtemp(join(tmpdir(), "pewpew-import-"));
@@ -189,8 +191,16 @@ await writeFile(file, `${JSON.stringify(document, null, 2)}\n`);
 
 const count = (type: string) =>
   document.body.filter((block) => block._type === type).length;
+const uncaptioned = document.body.filter(
+  (block) => block._type === "interactive" && !("caption" in block),
+);
+if (uncaptioned.length > 0) {
+  throw new Error(
+    `Interactive blocks without a caption: ${uncaptioned.map((block) => block._key).join(", ")}`,
+  );
+}
 console.log(
-  `${document._id}: ${document.body.length} blocks, ${count("interactive")} interactive, ${count("code")} code; JSON at ${file}`,
+  `${document._id}: ${document.body.length} blocks, ${count("interactive")} interactive (all captioned), ${count("code")} code; JSON at ${file}`,
 );
 
 if (dryRun) {

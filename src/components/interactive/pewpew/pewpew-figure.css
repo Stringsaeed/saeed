@@ -823,6 +823,13 @@
 [data-interactive^="pewpew-"] .pewpew-root .stop.on {
   fill: var(--pp-accent);
 }
+/* runtimes.tsx wraps the table in .rt-scroll, so a table wider than the
+   stage scrolls sideways inside the figure instead of breaking words. */
+[data-interactive^="pewpew-"] .pewpew-root .rt-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
 [data-interactive^="pewpew-"] .pewpew-root table.rt {
   border-collapse: collapse;
   width: 100%;
@@ -852,8 +859,8 @@
   margin: 8px 0;
 }
 
-/* Narrow stages (phones): one column, and long code lines and table cells
-   wrap instead of overflowing the figure. Last, so it wins over the rules
+/* Narrow stages (phones): one column, long code lines wrap instead of
+   overflowing the figure, and the runtimes table scrolls sideways. Last, so it wins over the rules
    above at equal specificity. */
 @container pewpew (max-width: 620px) {
   [data-interactive^="pewpew-"] .pewpew-root .two,
@@ -881,10 +888,13 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
+  /* Cells keep their words whole and .rt-scroll scrolls the table instead.
+     The file column is not pinned: at phone widths it alone is most of the
+     stage, so pinning it would leave a sliver for the rest. */
   [data-interactive^="pewpew-"] .pewpew-root table.rt th,
   [data-interactive^="pewpew-"] .pewpew-root table.rt td {
-    padding: 6px 4px;
-    overflow-wrap: anywhere;
+    padding: 6px 8px;
+    white-space: nowrap;
   }
   [data-interactive^="pewpew-"] .pewpew-root .slide > span {
     min-width: 88px;

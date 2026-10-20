@@ -7,12 +7,14 @@ import { PostBody } from "@/components/content/post-body";
 import { SiteBackdrop } from "@/components/site-backdrop";
 import { SiteHeader, SiteSocialLinks } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { withPewpewCaptions } from "@/explainers/pewpew/captions";
 import { formatPostDate } from "@/lib/content";
 import { parseLocalPost } from "@/lib/local-posts";
 
 // The PewPew post draft (src/explainers/pewpew/post.mdx) rendered the way
 // /blog/[slug] will render it once the Sanity draft is published, for
-// review before publishing. Dev only: production builds answer 404.
+// review before publishing, with the captions the Sanity import attaches
+// (src/explainers/pewpew/captions.ts). Dev only: production builds answer 404.
 // biome-ignore lint/style/useComponentExportOnlyModules: Next.js requires metadata to be exported from a page.
 export const metadata: Metadata = {
   title: "PewPew post preview",
@@ -72,7 +74,7 @@ export default function PewpewPostPreviewPage() {
               </header>
 
               <div className="article-body mt-10">
-                <PostBody value={post.body} />
+                <PostBody value={withPewpewCaptions(post.body)} />
               </div>
             </article>
           </main>

@@ -649,6 +649,12 @@
     margin-block-start: 1.25rem;
   }
 
+  /* Body text sits on the same plate as the page intro, so it reads over the
+     dot grid. Code blocks and figures bring their own surfaces. */
+  .article-body > :is(p, ul, ol, blockquote, aside, .heading-anchored) {
+    @apply backdrop-plate;
+  }
+
   .article-body h2,
   .article-body h3 {
     color: var(--foreground);

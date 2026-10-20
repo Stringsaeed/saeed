@@ -11,7 +11,8 @@
     "check:ts": "npx tsc --noEmit",
     "pewpew:sync": "bun scripts/sync-pewpew.ts",
     "pewpew:excerpts": "bun scripts/pewpew-excerpts.ts",
-    "pewpew:post": "bun scripts/pewpew-post.ts"
+    "pewpew:post": "bun scripts/pewpew-post.ts",
+    "pewpew:import": "bun scripts/pewpew-import.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

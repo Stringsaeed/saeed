@@ -1,11 +1,11 @@
 // Stable ids for post headings, following github-slugger: lowercase, drop
 // punctuation, spaces become hyphens, and repeats get `-1`, `-2`, … in
 // document order. Matching GitHub keeps links people copy from a draft or a
-// README working here.
+// README working here. Two deliberate differences: text is trimmed first,
+// and a heading with no sluggable text becomes `section`.
 
 type HeadingSource = {
   _type?: unknown;
-  _key?: unknown;
   style?: unknown;
   children?: unknown;
   body?: unknown;
@@ -38,9 +38,10 @@ export const headingStyles: ReadonlySet<string> = new Set([
   "h3",
 ]);
 
-function blockText(children: unknown) {
-  if (!Array.isArray(children)) return "";
-  return children
+/** Plain text of a portable-text block's spans. */
+export function blockText(block: { children?: unknown }) {
+  if (!Array.isArray(block.children)) return "";
+  return block.children
     .map((child) =>
       child && typeof child === "object" && "text" in child
         ? String(child.text)
@@ -50,12 +51,14 @@ function blockText(children: unknown) {
 }
 
 /**
- * Maps each h2/h3 block `_key` to its id. Walks nested bodies (callouts) in
- * reading order so ids stay unique across the whole post.
+ * Maps each h2/h3 block object to its id. Keyed by object rather than
+ * `_key`, which is only unique within one array (a callout body can repeat
+ * a key from the post). Walks nested bodies in reading order so ids stay
+ * unique across the whole post.
  */
 export function headingIds(blocks: readonly HeadingSource[]) {
   const slug = createSlugger();
-  const ids = new Map<string, string>();
+  const ids = new WeakMap<object, string>();
 
   const walk = (list: readonly HeadingSource[]) => {
     for (const block of list) {
@@ -63,10 +66,9 @@ export function headingIds(blocks: readonly HeadingSource[]) {
       if (
         block._type === "block" &&
         typeof block.style === "string" &&
-        headingStyles.has(block.style) &&
-        typeof block._key === "string"
+        headingStyles.has(block.style)
       ) {
-        ids.set(block._key, slug(blockText(block.children)));
+        ids.set(block, slug(blockText(block)));
       }
       if (Array.isArray(block.body)) walk(block.body);
     }

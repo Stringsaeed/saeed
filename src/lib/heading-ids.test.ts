@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
+import GithubSlugger from "github-slugger";
 import { createSlugger, headingIds, slugify } from "./heading-ids";
 
 function heading(key: string, text: string, style = "h2") {
@@ -16,60 +17,83 @@ function heading(key: string, text: string, style = "h2") {
   };
 }
 
+const realHeadings = [
+  "The Challenge: Consistency in Theme Selection",
+  "Step 1: Creating a React Context for the Theme",
+  "Step 2: Enabling User Theme Persistence Using Storage",
+  "Exploring Theme Variations",
+  "Without Appearance API",
+  "The `Frame` loop",
+  "Why 60 Hz? (and not 120)",
+  "Café déjà vu",
+  "Hello, World!",
+  "snake_case & kebab-case",
+  "Ship it 🚀",
+  "What’s a “fixed step”?",
+  "Two  spaces",
+  "a",
+  "a",
+  "a-1",
+  "Exploring Theme Variations",
+];
+
 describe("heading ids", () => {
-  test("slugifies like github-slugger", () => {
-    assert.equal(slugify("Hello, World!"), "hello-world");
-    assert.equal(slugify("The `Frame` loop"), "the-frame-loop");
-    assert.equal(slugify("  Two  spaces "), "two--spaces");
-    assert.equal(slugify("Café déjà vu"), "café-déjà-vu");
+  test("match github-slugger for real headings, in order", () => {
+    const ours = createSlugger();
+    const github = new GithubSlugger();
+    for (const text of realHeadings) {
+      assert.equal(ours(text), github.slug(text), text);
+    }
   });
 
-  test("dedupes repeats in order", () => {
+  test("dedupes repeats like github-slugger", () => {
     const slug = createSlugger();
-    assert.equal(slug("a"), "a");
-    assert.equal(slug("a"), "a-1");
-    assert.equal(slug("a"), "a-2");
-    assert.equal(slug("a-1"), "a-1-1");
-    assert.equal(slug("!!!"), "section");
+    assert.deepEqual(
+      [
+        slug("a"),
+        slug("a"),
+        slug("a"),
+        slug("a-1"),
+      ],
+      [
+        "a",
+        "a-1",
+        "a-2",
+        "a-1-1",
+      ],
+    );
   });
 
-  test("maps h2 and h3 keys across nested callout bodies", () => {
+  test("deliberate differences: trims, and empty becomes section", () => {
+    assert.equal(slugify("  Padded  "), "padded");
+    assert.equal(new GithubSlugger().slug("  Padded  "), "--padded--");
+    const slug = createSlugger();
+    assert.equal(slug("!!!"), "section");
+    assert.equal(slug("🚀"), "section-1");
+  });
+
+  test("ids cover nested callouts and survive repeated _keys", () => {
+    const first = heading("same", "Setup");
+    const nested = heading("same", "Setup", "h3");
+    const last = heading("other", "Setup");
     const ids = headingIds([
-      heading("one", "Setup"),
+      first,
       {
         _type: "block",
-        _key: "p",
         style: "normal",
         children: [],
       },
       {
         _type: "callout",
-        _key: "c",
         body: [
-          heading("two", "Setup", "h3"),
+          nested,
         ],
       },
-      heading("three", "Setup"),
+      last,
     ]);
 
-    assert.deepEqual(
-      [
-        ...ids,
-      ],
-      [
-        [
-          "one",
-          "setup",
-        ],
-        [
-          "two",
-          "setup-1",
-        ],
-        [
-          "three",
-          "setup-2",
-        ],
-      ],
-    );
+    assert.equal(ids.get(first), "setup");
+    assert.equal(ids.get(nested), "setup-1");
+    assert.equal(ids.get(last), "setup-2");
   });
 });

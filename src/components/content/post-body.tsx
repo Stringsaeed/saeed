@@ -8,10 +8,14 @@ import {
 import { createImageUrlBuilder } from "@sanity/image-url";
 import Image from "next/image";
 import type { CSSProperties, ReactNode } from "react";
+import {
+  figcaptionClass,
+  figureClass,
+} from "@/components/interactive/frame-classes";
 import { InteractiveBlock } from "@/components/interactive/interactive-block";
 import { isBlogImagePath } from "@/lib/content-patterns";
 import { warnOnceInDev } from "@/lib/dev-warn";
-import { headingIds } from "@/lib/heading-ids";
+import { blockText, headingIds } from "@/lib/heading-ids";
 import { highlight } from "@/lib/highlight";
 import { isContentHref, isHttpsUrl } from "@/lib/https-url";
 import { isInteractiveName } from "@/lib/interactive-names";
@@ -207,8 +211,18 @@ function InteractiveSerializer({
   const caption =
     typeof value.caption === "string" && value.caption.trim() !== ""
       ? value.caption
-      : undefined;
-  return <InteractiveBlock name={value.name} caption={caption} />;
+      : null;
+  // The figure element and caption are server HTML, so readers without JS,
+  // crawlers, and slow hydration still get the author's caption; only the
+  // surface inside is a client component.
+  return (
+    <figure data-interactive={value.name} className={`bleed ${figureClass}`}>
+      <InteractiveBlock name={value.name} />
+      {caption ? (
+        <figcaption className={figcaptionClass}>{caption}</figcaption>
+      ) : null}
+    </figure>
+  );
 }
 
 // Content can name block types, marks, or styles this build doesn't render
@@ -218,31 +232,35 @@ const warnMissingComponent: MissingComponentHandler = (
   { nodeType, type },
 ) => warnOnceInDev(`${nodeType}:${type}`, message);
 
+type HeadingIds = ReturnType<typeof headingIds>;
+
+// The `#` link sits beside the heading, not inside it, so the heading's
+// accessible name stays its own text. The wrapper is what hover reveals the
+// link on; the heading's top margin collapses through it unchanged.
 function headingComponent(
   Tag: "h2" | "h3",
-  ids: ReadonlyMap<string, string>,
+  ids: HeadingIds,
 ): PortableTextBlockComponent {
   return function Heading({ value, children }) {
-    const id = typeof value._key === "string" ? ids.get(value._key) : undefined;
+    const id = ids.get(value);
     if (!id) return <Tag>{children}</Tag>;
     return (
-      <Tag id={id}>
-        {children}
+      <div className="heading-anchored">
+        <Tag id={id}>{children}</Tag>
         <a
           href={`#${id}`}
-          aria-label="Link to section"
+          aria-label={`Link to “${blockText(value)}”`}
           className="heading-anchor"
+          data-level={Tag}
         >
           #
         </a>
-      </Tag>
+      </div>
     );
   };
 }
 
-function createComponents(
-  ids: ReadonlyMap<string, string>,
-): PortableTextComponents {
+function createComponents(ids: HeadingIds): PortableTextComponents {
   // Callouts render their body with these same components (and ids), so a
   // heading inside a callout can't reuse an id from the rest of the post.
   function CalloutBlock({

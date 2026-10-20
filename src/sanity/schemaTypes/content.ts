@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
+import { CODE_LANGUAGE_OPTIONS } from "@/lib/highlight-languages";
 import { isContentHref, isHttpsUrl } from "@/lib/https-url";
 import { INTERACTIVE_NAMES } from "@/lib/interactive-names";
 
@@ -60,8 +61,14 @@ export const blockContent = defineArrayMember({
   },
 });
 
+// Only languages the site highlights (src/lib/highlight.ts), plus plain text.
 const codeBlock = defineArrayMember({
   type: "code",
+  options: {
+    languageAlternatives: CODE_LANGUAGE_OPTIONS.map((option) => ({
+      ...option,
+    })),
+  },
 });
 
 export const callout = defineType({

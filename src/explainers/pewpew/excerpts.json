@@ -5,7 +5,7 @@
     "startLine": 24,
     "endLine": 42,
     "code": "export function step(w: World, input: Input, out: SimEvent[]): void {\n  if (w.phase.p === 'won' || w.phase.p === 'lost') return;\n  const p = w.player, b = w.bodies;\n  if (w.tick === 0) out.push({ e: 'start', level: w.spec.n });\n  p.px = p.x; p.py = p.y;\n  for (let i = 0; i < b.count; i++) { b.px[i] = b.x[i]; b.py[i] = b.y[i]; }\n  if (w.boss !== null) w.boss.px = w.boss.x;\n\n  steer(w, input);\n  if (w.phase.p === 'fly') p.y += w.spec.scroll * STEP;\n  spawnFromTrack(w);\n  fire(w, out);\n  if (w.boss !== null) runBoss(w, w.boss, out);\n  moveBodies(w, out);\n  collide(w, out);\n  despawn(w);\n  transition(w, out);\n  w.tick++;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L24-L42"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L24-L42"
   },
   {
     "id": "steer",
@@ -13,7 +13,7 @@
     "startLine": 44,
     "endLine": 51,
     "code": "export function steer(w: World, input: Input): void {\n  const p = w.player;\n  p.vx = input.targetX === null ? p.vx * COAST_DAMPING : steerVelocity(p.x, p.vx, input.targetX);\n  p.vx += wellPull(w) * STEP;\n  p.x += p.vx * STEP;\n  if (p.x > PLAYER_X_LIMIT) { p.x = PLAYER_X_LIMIT; p.vx = 0; }\n  else if (p.x < -PLAYER_X_LIMIT) { p.x = -PLAYER_X_LIMIT; p.vx = 0; }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L44-L51"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L44-L51"
   },
   {
     "id": "wellPull",
@@ -21,7 +21,7 @@
     "startLine": 54,
     "endLine": 65,
     "code": "export function wellPull(w: World): number {\n  const p = w.player, b = w.bodies;\n  let a = 0;\n  for (let i = 0; i < b.count; i++) {\n    if (ARCHETYPES[b.kind[i] as Kind].role !== 'field') continue;\n    const dy = b.y[i] - p.y;\n    if (dy >= WELL_REACH_Y || dy <= -WELL_REACH_Y) continue;\n    const dx = b.x[i] - p.x;\n    a += b.param[i] * 1.4142135623730951 * dx / (0.5 + dx * dx) * (1 - dy * dy / (WELL_REACH_Y * WELL_REACH_Y));\n  }\n  return a;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L54-L65"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L54-L65"
   },
   {
     "id": "spawnFromTrack",
@@ -29,7 +29,7 @@
     "startLine": 67,
     "endLine": 79,
     "code": "export function spawnFromTrack(w: World): void {\n  const b = w.bodies;\n  while (w.cursor < w.track.length && w.track[w.cursor].y <= w.player.y + SPAWN_AHEAD) {\n    const s = w.track[w.cursor++];\n    const i = add(w, s.kind, s.x, s.y, 0, 0);\n    if (i < 0) continue;\n    b.variant[i] = s.variant;\n    b.param[i] = s.param;\n    b.spin[i] = (rand(w) - 0.5) * 3;\n    if (s.kind === Kind.Asteroid) { b.vx[i] = s.param; b.vy[i] = -0.5; }\n    else if (s.kind === Kind.Drone) b.t[i] = droneClock(w);\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L67-L79"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L67-L79"
   },
   {
     "id": "fire",
@@ -37,7 +37,7 @@
     "startLine": 81,
     "endLine": 88,
     "code": "export function fire(w: World, out: SimEvent[]): void {\n  const p = w.player;\n  if (w.tick < p.fireAtTick) return;\n  const rapid = w.tick < p.rapidUntilTick;\n  p.fireAtTick = w.tick + (rapid ? FIRE_TICKS / 2 : FIRE_TICKS);\n  add(w, Kind.Bolt, p.x, p.y + 0.8, 0, BOLT_SPEED);\n  out.push({ e: 'fire', x: p.x, y: p.y + 0.8, rapid });\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L81-L88"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L81-L88"
   },
   {
     "id": "moveBodies",
@@ -45,7 +45,7 @@
     "startLine": 90,
     "endLine": 115,
     "code": "export function moveBodies(w: World, out: SimEvent[]): void {\n  const b = w.bodies, p = w.player;\n  const rate = w.spec.droneFireRate;\n  for (let i = 0; i < b.count; i++) {\n    const k = b.kind[i] as Kind;\n    b.t[i] += STEP;\n    b.rot[i] += b.spin[i] * STEP;\n    if (k === Kind.Drone) {\n      DRONE_MOVES[DRONE_PATTERNS[b.variant[i]]](w, i);\n      b.y[i] += b.vy[i] * STEP;\n      const dy = b.y[i] - p.y;\n      if (rate > 0 && dy > 1.5 && dy < 20 && Math.floor(b.t[i] * rate) > Math.floor((b.t[i] - STEP) * rate)) {\n        const dx = p.x - b.x[i], len = Math.sqrt(dx * dx + dy * dy);\n        add(w, Kind.EnemyBolt, b.x[i], b.y[i] - 0.4, ENEMY_BOLT_SPEED * dx / len, -ENEMY_BOLT_SPEED * dy / len);\n        out.push({ e: 'enemyFire', x: b.x[i], y: b.y[i] });\n      }\n      continue;\n    }\n    b.x[i] += b.vx[i] * STEP;\n    b.y[i] += b.vy[i] * STEP;\n    if (k === Kind.Asteroid || k === Kind.Fragment) {\n      const lim = TRACK_HALF_WIDTH - ARCHETYPES[k].radius;\n      if ((b.x[i] > lim && b.vx[i] > 0) || (b.x[i] < -lim && b.vx[i] < 0)) b.vx[i] = -b.vx[i];\n    }\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L90-L115"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L90-L115"
   },
   {
     "id": "collide",
@@ -53,7 +53,7 @@
     "startLine": 138,
     "endLine": 190,
     "code": "export function collide(w: World, out: SimEvent[]): void {\n  const p = w.player, b = w.bodies;\n  const n = b.count;\n  for (let i = 0; i < n; i++) {\n    if (b.hp[i] < 0) continue;\n    const k = b.kind[i] as Kind;\n    const a = ARCHETYPES[k];\n    if (a.role === 'playerShot') continue;\n    const dx = b.x[i] - p.x, dy = b.y[i] - p.y;\n    const rr = a.radius + PLAYER_RADIUS + (a.role === 'pickup' ? PICKUP_SLACK : 0);\n    if (dx * dx + dy * dy >= rr * rr) continue;\n    if (a.role === 'pickup') {\n      collect(w, k as PickupKind, b.x[i], b.y[i], out);\n      b.hp[i] = DEAD;\n      continue;\n    }\n    if (w.tick < p.invulnUntilTick) continue;\n    hurt(w, out);\n    if (a.role === 'field') continue;\n    b.hp[i] = DEAD;\n    if (a.role === 'hazard') out.push({ e: 'destroy', target: k, x: b.x[i], y: b.y[i] });\n  }\n\n  const boss = w.boss;\n  for (let j = 0; j < n; j++) {\n    if (b.hp[j] < 0 || ARCHETYPES[b.kind[j] as Kind].role !== 'playerShot') continue;\n    const bx = b.x[j], by = b.y[j], br = ARCHETYPES[Kind.Bolt].radius;\n    if (boss !== null && boss.hp > 0) {\n      const dx = boss.x - bx, dy = boss.y - by, rr = BOSS_R + br;\n      if (dx * dx + dy * dy < rr * rr) {\n        b.hp[j] = DEAD;\n        boss.hp--;\n        if (boss.hp > 0) out.push({ e: 'hit', target: 'boss', x: bx, y: by });\n        continue;\n      }\n    }\n    for (let i = 0; i < n; i++) {\n      if (b.hp[i] <= 0) continue;\n      const k = b.kind[i] as Kind;\n      const a = ARCHETYPES[k];\n      if (a.role !== 'hazard') continue;\n      const dx = b.x[i] - bx, dy = b.y[i] - by, rr = a.radius + br;\n      if (dx * dx + dy * dy >= rr * rr) continue;\n      b.hp[j] = DEAD;\n      if (--b.hp[i] > 0) { out.push({ e: 'hit', target: k, x: b.x[i], y: b.y[i] }); break; }\n      b.hp[i] = DEAD;\n      w.score += a.score;\n      out.push({ e: 'destroy', target: k, x: b.x[i], y: b.y[i] });\n      if (a.splitInto !== null) split(w, i, a.splitInto.kind, a.splitInto.count);\n      break;\n    }\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L138-L190"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L138-L190"
   },
   {
     "id": "collect",
@@ -61,7 +61,7 @@
     "startLine": 130,
     "endLine": 136,
     "code": "function collect(w: World, kind: PickupKind, x: number, y: number, out: SimEvent[]): void {\n  const p = w.player;\n  if (kind === Kind.Shield) p.shield = true;\n  else if (kind === Kind.Rapid) p.rapidUntilTick = w.tick + RAPID_TICKS;\n  w.score += ARCHETYPES[kind].score;\n  out.push({ e: 'pickup', kind, x, y });\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L130-L136"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L130-L136"
   },
   {
     "id": "split",
@@ -69,7 +69,7 @@
     "startLine": 192,
     "endLine": 203,
     "code": "function split(w: World, i: number, kind: Kind, count: number): void {\n  const b = w.bodies;\n  const x = b.x[i], y = b.y[i], vx = b.vx[i], vy = b.vy[i];\n  const base = rand(w) * TWO_PI;\n  for (let k = 0; k < count; k++) {\n    const a = base + TWO_PI * k / count;\n    const j = add(w, kind, x, y, vx + 2.2 * cosT(a), vy + 2.2 * sinT(a));\n    if (j < 0) continue;\n    b.variant[j] = k;\n    b.spin[j] = (rand(w) - 0.5) * 6;\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L192-L203"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L192-L203"
   },
   {
     "id": "despawn",
@@ -77,7 +77,7 @@
     "startLine": 205,
     "endLine": 211,
     "code": "export function despawn(w: World): void {\n  const b = w.bodies, p = w.player;\n  const behind = p.y - DESPAWN_BEHIND, ahead = p.y + BOLT_RANGE, side = TRACK_HALF_WIDTH + 2;\n  for (let i = b.count - 1; i >= 0; i--) {\n    if (b.hp[i] < 0 || b.y[i] < behind || b.y[i] > ahead || b.x[i] > side || b.x[i] < -side) remove(b, i);\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L205-L211"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L205-L211"
   },
   {
     "id": "transition",
@@ -85,7 +85,7 @@
     "startLine": 213,
     "endLine": 244,
     "code": "export function transition(w: World, out: SimEvent[]): void {\n  const p = w.player;\n  if (p.lives === 0) {\n    w.phase = { p: 'lost' };\n    out.push({ e: 'lost', score: w.score });\n    return;\n  }\n  const boss = w.boss;\n  if (boss !== null && boss.hp <= 0) {\n    out.push({ e: 'destroy', target: 'boss', x: boss.x, y: boss.y });\n    w.score += BOSSES[boss.id].hp * BOSS_SCORE_PER_HP;\n    // The boss's bolts die with it, so the flight to the wormhole is a victory lap, not a cleanup.\n    const b = w.bodies;\n    for (let i = b.count - 1; i >= 0; i--) if (ARCHETYPES[b.kind[i] as Kind].role === 'enemyShot') remove(b, i);\n    w.boss = null;\n    w.wormholeY = boss.y;\n    w.phase = { p: 'fly' };\n    out.push({ e: 'wormholeOpen', y: boss.y });\n  } else if (w.phase.p === 'fly' && w.spec.boss !== null && w.wormholeY === null && p.y >= w.spec.length) {\n    w.phase = { p: 'boss' };\n    w.boss = { id: w.spec.boss, x: 0, px: 0, y: p.y + BOSS_DIST, hp: BOSSES[w.spec.boss].hp, attack: 0, attackAtTick: w.tick + BOSS_GRACE_TICKS, t: 0 };\n    out.push({ e: 'bossEnter', boss: w.spec.boss });\n  }\n  const wy = w.wormholeY;\n  if (wy === null) return;\n  if (p.py + SPAWN_AHEAD < wy && wy <= p.y + SPAWN_AHEAD) out.push({ e: 'wormholeOpen', y: wy });\n  if (p.y >= wy) {\n    const stars = p.lives as Stars;\n    w.phase = { p: 'won', stars };\n    out.push({ e: 'won', score: w.score, stars });\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L213-L244"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L213-L244"
   },
   {
     "id": "hurt",
@@ -93,7 +93,7 @@
     "startLine": 117,
     "endLine": 128,
     "code": "function hurt(w: World, out: SimEvent[]): void {\n  const p = w.player;\n  if (p.shield) {\n    p.shield = false;\n    p.invulnUntilTick = w.tick + SHIELD_INVULN_TICKS;\n    out.push({ e: 'shieldBlock', x: p.x, y: p.y });\n    return;\n  }\n  p.lives = (p.lives - 1) as Player['lives'];\n  p.invulnUntilTick = w.tick + HIT_INVULN_TICKS;\n  out.push({ e: 'playerHit', x: p.x, y: p.y, lives: p.lives });\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/step.ts#L117-L128"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/step.ts#L117-L128"
   },
   {
     "id": "Bodies",
@@ -101,7 +101,7 @@
     "startLine": 8,
     "endLine": 19,
     "code": "export interface Bodies {\n  count: number;\n  readonly kind: Uint8Array;\n  readonly variant: Uint8Array; // mesh variant for asteroids; DronePattern index for drones\n  readonly x: Float32Array; readonly y: Float32Array;\n  readonly px: Float32Array; readonly py: Float32Array; // previous step, for render interpolation\n  readonly vx: Float32Array; readonly vy: Float32Array;\n  readonly rot: Float32Array; readonly spin: Float32Array;\n  readonly t: Float32Array;     // per-body clock: pattern phase, fire timer\n  readonly param: Float32Array; // pattern anchor x for drones, pull for wells\n  readonly hp: Int16Array;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/world.ts#L8-L19"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/world.ts#L8-L19"
   },
   {
     "id": "World",
@@ -109,7 +109,7 @@
     "startLine": 41,
     "endLine": 54,
     "code": "export interface World {\n  readonly spec: LevelSpec;\n  readonly track: Track;\n  cursor: number;           // next Spawn index\n  tick: number;\n  rng: number;              // mulberry32 state; the only randomness source\n  phase: Phase;\n  score: number;\n  wormholeY: number | null; // null while a boss lives\n  readonly player: Player;\n  readonly bodies: Bodies;\n  boss: Boss | null;\n  dropped: number;          // spawns refused at MAX_BODIES; verifier asserts 0\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/world.ts#L41-L54"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/world.ts#L41-L54"
   },
   {
     "id": "createWorld",
@@ -117,7 +117,7 @@
     "startLine": 86,
     "endLine": 102,
     "code": "export function createWorld(n: LevelNumber): World {\n  const spec = levelSpec(n);\n  return {\n    spec,\n    track: compileTrack(spec),\n    cursor: 0,\n    tick: 0,\n    rng: (spec.seed ^ 0x5bd1e995) | 0,\n    phase: { p: 'fly' },\n    score: 0,\n    wormholeY: spec.boss === null ? spec.length : null,\n    player: { x: 0, px: 0, vx: 0, y: 0, py: 0, lives: 3, shield: false, rapidUntilTick: 0, invulnUntilTick: 0, fireAtTick: 0 },\n    bodies: createBodies(),\n    boss: null,\n    dropped: 0,\n  };\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/world.ts#L86-L102"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/world.ts#L86-L102"
   },
   {
     "id": "add",
@@ -125,7 +125,7 @@
     "startLine": 115,
     "endLine": 124,
     "code": "export function add(w: World, kind: Kind, x: number, y: number, vx: number, vy: number): number {\n  const b = w.bodies;\n  if (b.count === MAX_BODIES) { w.dropped++; return -1; }\n  const i = b.count++;\n  b.kind[i] = kind; b.variant[i] = 0;\n  b.x[i] = x; b.y[i] = y; b.px[i] = x; b.py[i] = y; b.vx[i] = vx; b.vy[i] = vy;\n  b.rot[i] = 0; b.spin[i] = 0; b.t[i] = 0; b.param[i] = 0;\n  b.hp[i] = ARCHETYPES[kind].hp;\n  return i;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/world.ts#L115-L124"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/world.ts#L115-L124"
   },
   {
     "id": "remove",
@@ -133,7 +133,7 @@
     "startLine": 125,
     "endLine": 129,
     "code": "export function remove(b: Bodies, i: number): void {\n  const last = --b.count;\n  if (i === last) return;\n  for (const c of COLUMNS) b[c][i] = b[c][last];\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/world.ts#L125-L129"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/world.ts#L125-L129"
   },
   {
     "id": "compileTrack",
@@ -141,7 +141,7 @@
     "startLine": 17,
     "endLine": 81,
     "code": "export function compileTrack(spec: LevelSpec): Track {\n  const s: Rng = { rng: spec.seed | 0 };\n  const out: Spawn[] = [];\n  const mix: readonly (readonly [Kind, number])[] = [\n    [Kind.Asteroid, spec.mix.asteroid ?? 0], [Kind.Mine, spec.mix.mine ?? 0], [Kind.Drone, spec.mix.drone ?? 0],\n  ];\n  const total = mix.reduce((sum, [, wt]) => sum + wt, 0);\n  const pickKind = (u: number): Kind => {\n    let acc = u * total;\n    for (const [k, wt] of mix) { if (acc < wt) return k; acc -= wt; }\n    return Kind.Asteroid;\n  };\n  const rows = Math.floor((spec.length - TRACK_END_CLEAR - TRACK_START) / ROW_DY) + 1;\n  const wellRows = new Set<number>();\n  for (let k = 0; k < spec.wells; k++) wellRows.add(Math.floor((k + 0.5) * rows / spec.wells));\n  const reach = 0.5 * PLAYER_MAX_VX * ROW_DY / spec.scroll;\n  const gapLimit = PLAYER_X_LIMIT - ROW_GAP / 2;\n  const perRow = spec.density / 100 * ROW_DY;\n  const pickupPerRow = [\n    [Kind.Crystal, spec.pickups.crystal / 100 * ROW_DY], [Kind.Shield, spec.pickups.shield / 100 * ROW_DY],\n    [Kind.Rapid, spec.pickups.rapid / 100 * ROW_DY],\n  ] as const;\n  const pickupOwed = [0, 0, 0];\n  let gapX = 0, owed = 0;\n\n  const outsideGap = (r: number): number => {\n    const lo = -TRACK_HALF_WIDTH + r, hi = TRACK_HALF_WIDTH - r;\n    const left = Math.max(0, gapX - ROW_GAP / 2 - r - lo);\n    const right = Math.max(0, hi - (gapX + ROW_GAP / 2 + r));\n    const u = rand(s) * (left + right);\n    return u < left ? lo + u : gapX + ROW_GAP / 2 + r + (u - left);\n  };\n\n  for (let row = 0; row < rows; row++) {\n    const y = TRACK_START + row * ROW_DY;\n    gapX = clamp(gapX + (rand(s) * 2 - 1) * reach, -gapLimit, gapLimit);\n    owed += perRow;\n    const n = Math.floor(owed);\n    owed -= n;\n    if (wellRows.has(row)) {\n      out.push({ y, x: outsideGap(ARCHETYPES[Kind.Well].radius), kind: Kind.Well, variant: 0, param: spec.wellPull });\n    }\n    for (let k = 0; k < n; k++) {\n      const kind = pickKind(rand(s));\n      const x = outsideGap(ARCHETYPES[kind].radius);\n      if (kind === Kind.Asteroid) out.push({ y, x, kind, variant: Math.floor(rand(s) * 4), param: (rand(s) - 0.5) * 0.6 });\n      else if (kind === Kind.Drone) {\n        const pattern = spec.drones[Math.floor(rand(s) * spec.drones.length)];\n        const ax = clamp(x, -DRONE_ANCHOR_LIMIT, DRONE_ANCHOR_LIMIT);\n        out.push({ y, x: ax, kind, variant: DRONE_PATTERNS.indexOf(pattern), param: ax });\n      } else out.push({ y, x, kind, variant: 0, param: 0 });\n    }\n    let slot = 0;\n    pickupPerRow.forEach(([kind, rate], k) => {\n      pickupOwed[k] += rate;\n      while (pickupOwed[k] >= 1) {\n        pickupOwed[k] -= 1;\n        const x = kind === Kind.Crystal ? clamp(gapX + (rand(s) - 0.5) * 1.2, -PLAYER_X_LIMIT, PLAYER_X_LIMIT)\n          : (rand(s) * 2 - 1) * (PLAYER_X_LIMIT - 0.5);\n        out.push({ y: y + ROW_DY / 2 + 0.8 * slot++, x, kind, variant: 0, param: 0 });\n      }\n    });\n  }\n  return out.sort((a, b) => a.y - b.y);\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/track.ts#L17-L81"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/track.ts#L17-L81"
   },
   {
     "id": "steerVelocity",
@@ -149,7 +149,7 @@
     "startLine": 13,
     "endLine": 16,
     "code": "export function steerVelocity(x: number, vx: number, targetX: number): number {\n  const want = clamp((clamp(targetX, -PLAYER_X_LIMIT, PLAYER_X_LIMIT) - x) * STEER_GAIN, -PLAYER_MAX_VX, PLAYER_MAX_VX);\n  return vx + clamp(want - vx, -STEER_ACCEL * STEP, STEER_ACCEL * STEP);\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/input.ts#L13-L16"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/input.ts#L13-L16"
   },
   {
     "id": "dragInput",
@@ -157,7 +157,7 @@
     "startLine": 8,
     "endLine": 10,
     "code": "export function dragInput(anchorX: number, dxFrac: number): Input {\n  return { targetX: clamp(anchorX + dxFrac * DRAG_GAIN, -PLAYER_X_LIMIT, PLAYER_X_LIMIT) };\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/input.ts#L8-L10"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/input.ts#L8-L10"
   },
   {
     "id": "rand",
@@ -165,7 +165,7 @@
     "startLine": 9,
     "endLine": 15,
     "code": "export function rand(s: Rng): number {\n  s.rng = (s.rng + 0x6d2b79f5) | 0;\n  let t = s.rng;\n  t = Math.imul(t ^ (t >>> 15), t | 1);\n  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);\n  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/math.ts#L9-L15"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/math.ts#L9-L15"
   },
   {
     "id": "sinT",
@@ -173,7 +173,7 @@
     "startLine": 18,
     "endLine": 24,
     "code": "export function sinT(x: number): number {\n  let r = x - Math.floor(x / TWO_PI + 0.5) * TWO_PI;\n  if (r > HALF_PI) r = PI - r;\n  else if (r < -HALF_PI) r = -PI - r;\n  const r2 = r * r;\n  return r * (1 + r2 * (-1 / 6 + r2 * (1 / 120 + r2 * (-1 / 5040 + r2 * (1 / 362880 + r2 * (-1 / 39916800))))));\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/math.ts#L18-L24"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/math.ts#L18-L24"
   },
   {
     "id": "cosT",
@@ -181,7 +181,7 @@
     "startLine": 25,
     "endLine": 25,
     "code": "export function cosT(x: number): number { return sinT(x + HALF_PI); }",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/math.ts#L25-L25"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/math.ts#L25-L25"
   },
   {
     "id": "clamp",
@@ -189,7 +189,7 @@
     "startLine": 5,
     "endLine": 5,
     "code": "export function clamp(v: number, lo: number, hi: number): number { return Math.min(hi, Math.max(lo, v)); }",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/math.ts#L5-L5"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/math.ts#L5-L5"
   },
   {
     "id": "DRONE_MOVES",
@@ -197,7 +197,7 @@
     "startLine": 13,
     "endLine": 32,
     "code": "export const DRONE_MOVES: { readonly [P in DronePattern]: (w: World, i: number) => void } = {\n  sine: (w, i) => { const b = w.bodies; driveX(b, i, b.param[i] + 1.6 * sinT(2.4 * b.t[i])); b.vy[i] = -1.2; },\n  zigzag: (w, i) => {\n    const b = w.bodies;\n    const ph = 0.5 * b.t[i], f = ph - Math.floor(ph);\n    driveX(b, i, b.param[i] + 1.8 * (f < 0.5 ? 4 * f - 1 : 3 - 4 * f));\n    b.vy[i] = -1.2;\n  },\n  dive: (w, i) => {\n    const b = w.bodies, p = w.player;\n    if (b.y[i] - p.y < 8) { b.vy[i] = -7; b.vx[i] = clamp((p.x - b.x[i]) * 1.2, -2, 2); }\n    else { b.vy[i] = -1; b.vx[i] = 0; }\n    b.x[i] += b.vx[i] * STEP;\n  },\n  orbit: (w, i) => {\n    const b = w.bodies;\n    driveX(b, i, b.param[i] + 1.5 * sinT(2 * b.t[i]));\n    b.vy[i] = -1 + 3 * cosT(2 * b.t[i]);\n  },\n};",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/drones.ts#L13-L32"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/drones.ts#L13-L32"
   },
   {
     "id": "driveX",
@@ -205,7 +205,7 @@
     "startLine": 33,
     "endLine": 37,
     "code": "function driveX(b: Bodies, i: number, x: number): void {\n  const nx = clamp(x, -PLAYER_X_LIMIT, PLAYER_X_LIMIT);\n  b.vx[i] = (nx - b.x[i]) / STEP;\n  b.x[i] = nx;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/drones.ts#L33-L37"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/drones.ts#L33-L37"
   },
   {
     "id": "droneClock",
@@ -213,7 +213,7 @@
     "startLine": 7,
     "endLine": 10,
     "code": "export function droneClock(w: World): number {\n  const rate = w.spec.droneFireRate;\n  return rate > 0 ? rand(w) / rate : rand(w) * 4;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/drones.ts#L7-L10"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/drones.ts#L7-L10"
   },
   {
     "id": "runBoss",
@@ -221,7 +221,7 @@
     "startLine": 19,
     "endLine": 28,
     "code": "export function runBoss(w: World, boss: Boss, out: SimEvent[]): void {\n  const phase = bossPhase(BOSSES[boss.id], boss.hp);\n  boss.t += phase.sweepSpeed / BOSS_SWEEP * STEP;\n  boss.x = BOSS_SWEEP * sinT(boss.t);\n  if (w.tick < boss.attackAtTick) return;\n  bossAttack(w, boss, phase.attacks[boss.attack % phase.attacks.length]);\n  out.push({ e: 'enemyFire', x: boss.x, y: boss.y });\n  boss.attack++;\n  boss.attackAtTick = w.tick + Math.floor(phase.attackEverySec * TICKS_PER_SEC);\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/boss.ts#L19-L28"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/boss.ts#L19-L28"
   },
   {
     "id": "bossAttack",
@@ -229,7 +229,7 @@
     "startLine": 30,
     "endLine": 76,
     "code": "function bossAttack(w: World, boss: Boss, atk: BossAttack): void {\n  const p = w.player, b = w.bodies;\n  const y = boss.y - BOSS_R;\n  switch (atk.a) {\n    case 'spread': {\n      const arc = atk.arcDeg * PI / 180;\n      for (let k = 0; k < atk.bolts; k++) {\n        const a = atk.bolts === 1 ? 0 : -arc / 2 + arc * k / (atk.bolts - 1);\n        add(w, Kind.EnemyBolt, boss.x, y, ENEMY_BOLT_SPEED * sinT(a), -ENEMY_BOLT_SPEED * cosT(a));\n      }\n      return;\n    }\n    case 'aimed': {\n      const dx = p.x - boss.x, dy = p.y - y;\n      const len = Math.sqrt(dx * dx + dy * dy);\n      const ux = dx / len, uy = dy / len;\n      for (let k = 0; k < atk.bolts; k++) {\n        const a = (k - (atk.bolts - 1) / 2) * AIM_SPREAD;\n        const c = cosT(a), s = sinT(a);\n        add(w, Kind.EnemyBolt, boss.x, y, ENEMY_BOLT_SPEED * (ux * c - uy * s), ENEMY_BOLT_SPEED * (ux * s + uy * c));\n      }\n      return;\n    }\n    case 'mines': {\n      // A wall across the track with two adjacent empty slots, so there is always a gap about 3 units wide.\n      const slots = atk.count + 2;\n      const skip = Math.floor(rand(w) * (slots - 1));\n      const edge = TRACK_HALF_WIDTH - 0.6;\n      for (let k = 0; k < slots; k++) {\n        if (k === skip || k === skip + 1) continue;\n        const i = add(w, Kind.Mine, -edge + 2 * edge * (k + 0.5) / slots, y, 0, -2.5);\n        if (i >= 0) b.spin[i] = 1.5;\n      }\n      return;\n    }\n    case 'drones': {\n      const pattern = DRONE_PATTERNS.indexOf(atk.pattern);\n      for (let k = 0; k < atk.count; k++) {\n        const x = clamp(boss.x + (k - (atk.count - 1) / 2) * 1.6, -DRONE_ANCHOR_LIMIT, DRONE_ANCHOR_LIMIT);\n        const i = add(w, Kind.Drone, x, y, 0, 0);\n        if (i < 0) continue;\n        b.variant[i] = pattern; b.param[i] = x; b.t[i] = droneClock(w);\n      }\n      return;\n    }\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/boss.ts#L30-L76"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/boss.ts#L30-L76"
   },
   {
     "id": "bossPhase",
@@ -237,7 +237,7 @@
     "startLine": 12,
     "endLine": 17,
     "code": "export function bossPhase(spec: BossSpec, hp: number): BossPhase {\n  const health = hp / spec.hp;\n  let phase: BossPhase = spec.phases[0];\n  for (const ph of spec.phases) if (ph.atHpFraction >= health) phase = ph;\n  return phase;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/boss.ts#L12-L17"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/boss.ts#L12-L17"
   },
   {
     "id": "simulate",
@@ -245,7 +245,7 @@
     "startLine": 19,
     "endLine": 26,
     "code": "export function simulate(n: LevelNumber, bot: Bot, maxSteps?: number): RunResult {\n  const spec = levelSpec(n);\n  const limit = maxSteps ?? Math.floor((spec.length / spec.scroll + 240) * TICKS_PER_SEC);\n  return run(n, limit, (w) => {\n    const x = bot(w).targetX;\n    return x === null ? NaN : x;\n  });\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/run.ts#L19-L26"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/run.ts#L19-L26"
   },
   {
     "id": "replay",
@@ -253,7 +253,7 @@
     "startLine": 27,
     "endLine": 29,
     "code": "export function replay(n: LevelNumber, inputs: Float32Array): RunResult {\n  return run(n, inputs.length, (_, i) => inputs[i]);\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/run.ts#L27-L29"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/run.ts#L27-L29"
   },
   {
     "id": "run",
@@ -261,7 +261,7 @@
     "startLine": 32,
     "endLine": 53,
     "code": "function run(n: LevelNumber, maxSteps: number, next: (w: World, i: number) => number): RunResult {\n  const w = createWorld(n);\n  const inputs = new Float32Array(maxSteps);\n  const out: SimEvent[] = [];\n  let i = 0;\n  for (; i < maxSteps && (w.phase.p === 'fly' || w.phase.p === 'boss'); i++) {\n    inputs[i] = next(w, i);\n    const x = inputs[i];\n    step(w, x === x ? { targetX: x } : COAST, out);\n    out.length = 0;\n  }\n  const ph = w.phase;\n  return {\n    outcome: ph.p === 'won' ? 'won' : ph.p === 'lost' ? 'lost' : 'timeout',\n    steps: i,\n    score: w.score,\n    stars: ph.p === 'won' ? ph.stars : 0,\n    hash: hashWorld(w),\n    dropped: w.dropped,\n    inputs: inputs.slice(0, i),\n  };\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/run.ts#L32-L53"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/run.ts#L32-L53"
   },
   {
     "id": "hashWorld",
@@ -269,7 +269,7 @@
     "startLine": 57,
     "endLine": 75,
     "code": "export function hashWorld(w: World): number {\n  const f = new Float64Array(1);\n  const u = new Uint32Array(f.buffer);\n  let h = 0x811c9dc5;\n  const word = (v: number): void => {\n    h = Math.imul(h ^ (v & 0xff), 16777619);\n    h = Math.imul(h ^ ((v >>> 8) & 0xff), 16777619);\n    h = Math.imul(h ^ ((v >>> 16) & 0xff), 16777619);\n    h = Math.imul(h ^ (v >>> 24), 16777619);\n  };\n  const num = (v: number): void => { f[0] = v; word(u[0]); word(u[1]); };\n  const p = w.player, b = w.bodies;\n  num(w.tick); num(w.score); num(w.rng); num(w.cursor); num(w.dropped); num(PHASE_CODE[w.phase.p]);\n  num(p.x); num(p.y); num(p.vx); num(p.lives); num(p.shield ? 1 : 0); num(p.rapidUntilTick); num(p.invulnUntilTick);\n  num(b.count);\n  for (let i = 0; i < b.count; i++) { num(b.kind[i]); num(b.x[i]); num(b.y[i]); num(b.hp[i]); }\n  if (w.boss !== null) { num(w.boss.hp); num(w.boss.x); num(w.boss.attack); }\n  return h >>> 0;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/run.ts#L57-L75"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/run.ts#L57-L75"
   },
   {
     "id": "hudOf",
@@ -277,7 +277,7 @@
     "startLine": 9,
     "endLine": 21,
     "code": "export function hudOf(w: WorldView, prev: Hud | null): Hud {\n  const p = w.player;\n  const score = w.score;\n  const lives = p.lives;\n  const progress = Math.floor(100 * Math.min(1, p.y / w.spec.length));\n  const shield = p.shield;\n  const rapid = w.tick < p.rapidUntilTick;\n  const max = w.boss === null ? 0 : BOSSES[w.boss.id].hp;\n  const bossHp = w.boss === null ? null : Math.floor((100 * Math.max(0, w.boss.hp) + max - 1) / max);\n  if (prev !== null && prev.score === score && prev.lives === lives && prev.progress === progress\n    && prev.shield === shield && prev.rapid === rapid && prev.bossHp === bossHp) return prev;\n  return { score, lives, progress, shield, rapid, bossHp };\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/hud.ts#L9-L21"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/hud.ts#L9-L21"
   },
   {
     "id": "advance",
@@ -285,7 +285,7 @@
     "startLine": 108,
     "endLine": 176,
     "code": "export function advance(loop: Loop, now: number, sinks: Sinks): void {\n  const dtMs = Math.min(now - loop.last, 100);\n  const dt = dtMs / 1000;\n  loop.last = now;\n  const world = loop.world;\n\n  let finished: Hold | null = null;\n  if (loop.hold) {\n    loop.hold.leftMs -= dtMs;\n    if (loop.hold.leftMs <= 0) {\n      finished = loop.hold;\n      loop.hold = null;\n    }\n  }\n\n  if (loop.playing && loop.hold === null && finished === null && world) {\n    loop.acc += dt;\n    let steps = 0;\n    const timing = FRAME_TIMING;\n    while (loop.acc >= STEP && steps < MAX_STEPS_PER_FRAME) {\n      if (!loop.auto) loop.botOnly = false;\n      let mark = timing.on ? performance.now() : 0;\n      const input = loop.auto ? greedyBot(world) : loop.input;\n      if (timing.on) {\n        const now = performance.now();\n        timing.bot += now - mark;\n        mark = now;\n      }\n      step(world, input, loop.events);\n      if (timing.on) timing.step += performance.now() - mark;\n      loop.acc -= STEP;\n      steps += 1;\n    }\n    if (loop.acc >= STEP) loop.acc = 0;\n  }\n\n  let started: EventOf<'won'> | EventOf<'lost'> | null = null;\n  if (loop.hold === null && finished === null) {\n    for (const ev of loop.events) {\n      if (ev.e === 'won' || ev.e === 'lost') { started = ev; break; }\n    }\n  }\n  const slow = loop.hold !== null || finished !== null || started !== null;\n  sinks.render(world, loop.events, loop.acc / STEP, slow ? dt * SLOW_MOTION : dt);\n  sinks.audio(loop.events);\n  if (finished) sinks.ended(finished.ev);\n  for (const ev of loop.events) {\n    if (ev.e === 'won' || ev.e === 'lost') continue;\n    sinks.ended(ev);\n  }\n  if (started) {\n    const totalMs = started.e === 'lost' ? LOSS_HOLD_MS : WIN_HOLD_MS;\n    setPlaying(loop, false);\n    // The renderer counts the hold in the dt it receives, which is already slowed, so the seconds are scaled too.\n    sinks.hold?.(started.e, (totalMs / 1000) * SLOW_MOTION);\n    sinks.terminal?.(started);\n    const leftMs = totalMs - dtMs;\n    if (leftMs <= 0) sinks.ended(started);\n    else loop.hold = { kind: started.e, leftMs, ev: started };\n  }\n  loop.events.length = 0;\n  if (world) {\n    const next = hudOf(world, loop.hud);\n    if (next !== loop.hud) {\n      loop.hud = next;\n      sinks.hud(next);\n    }\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/shell/loop.ts#L108-L176"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/shell/loop.ts#L108-L176"
   },
   {
     "id": "press",
@@ -293,7 +293,7 @@
     "startLine": 82,
     "endLine": 86,
     "code": "export function press(loop: Loop, pageX: number): void {\n  loop.anchorX = loop.world?.player.x ?? 0;\n  loop.fx = pageX;\n  loop.input = dragInput(loop.anchorX, 0);\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/shell/loop.ts#L82-L86"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/shell/loop.ts#L82-L86"
   },
   {
     "id": "drag",
@@ -301,7 +301,7 @@
     "startLine": 88,
     "endLine": 90,
     "code": "export function drag(loop: Loop, pageX: number, width: number): void {\n  loop.input = dragInput(loop.anchorX, (pageX - loop.fx) / width);\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/shell/loop.ts#L88-L90"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/shell/loop.ts#L88-L90"
   },
   {
     "id": "release",
@@ -309,7 +309,7 @@
     "startLine": 92,
     "endLine": 94,
     "code": "export function release(loop: Loop): void {\n  loop.input = COAST;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/shell/loop.ts#L92-L94"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/shell/loop.ts#L92-L94"
   },
   {
     "id": "resetRun",
@@ -317,7 +317,7 @@
     "startLine": 68,
     "endLine": 80,
     "code": "export function resetRun(loop: Loop, run: Run | null): boolean {\n  loop.input = COAST;\n  const key = runKey(run);\n  if (key === loop.key) return false;\n  loop.key = key;\n  loop.world = run === null ? null : createWorld(run.level);\n  loop.botOnly = true;\n  loop.acc = 0;\n  loop.events.length = 0;\n  loop.hud = null;\n  loop.hold = null;\n  return true;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/shell/loop.ts#L68-L80"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/shell/loop.ts#L68-L80"
   },
   {
     "id": "setPlaying",
@@ -325,7 +325,7 @@
     "startLine": 60,
     "endLine": 62,
     "code": "export function setPlaying(loop: Loop, playing: boolean): void {\n  loop.playing = playing;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/shell/loop.ts#L60-L62"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/shell/loop.ts#L60-L62"
   },
   {
     "id": "reduce",
@@ -333,7 +333,7 @@
     "startLine": 35,
     "endLine": 74,
     "code": "export function reduce(s: Screen, act: Action, save: Save): Screen {\n  switch (s.s) {\n    case 'title':\n      if (act.a === 'start') return { s: 'levels' };\n      if (act.a === 'settings') return { s: 'settings', back: 'title' };\n      return s;\n    case 'levels':\n      if (act.a === 'pick') return isUnlocked(save, act.level) ? { s: 'play', level: act.level, attempt: 0 } : s;\n      if (act.a === 'settings') return { s: 'settings', back: 'levels' };\n      if (act.a === 'back') return { s: 'title' };\n      return s;\n    case 'settings':\n      if (act.a !== 'back') return s;\n      return s.back === 'paused' ? { s: 'paused', level: s.level, attempt: s.attempt } : { s: s.back };\n    case 'play':\n      if (act.a === 'pause') return { s: 'paused', level: s.level, attempt: s.attempt };\n      if (act.a === 'quit') return { s: 'levels' };\n      if (act.a === 'ended') {\n        return act.result.e === 'won'\n          ? { s: 'complete', level: s.level, score: act.result.score, stars: act.result.stars }\n          : { s: 'gameover', level: s.level, score: act.result.score };\n      }\n      return s;\n    case 'paused':\n      if (act.a === 'resume') return { s: 'play', level: s.level, attempt: s.attempt };\n      if (act.a === 'retry') return { s: 'play', level: s.level, attempt: s.attempt + 1 };\n      if (act.a === 'quit') return { s: 'levels' };\n      if (act.a === 'settings') return { s: 'settings', back: 'paused', level: s.level, attempt: s.attempt };\n      return s;\n    case 'complete':\n      if (act.a === 'next') return s.level === LEVEL_COUNT ? { s: 'levels' } : { s: 'play', level: (s.level + 1) as LevelNumber, attempt: 0 };\n      if (act.a === 'retry') return { s: 'play', level: s.level, attempt: 0 };\n      if (act.a === 'quit') return { s: 'levels' };\n      return s;\n    case 'gameover':\n      if (act.a === 'retry') return { s: 'play', level: s.level, attempt: 0 };\n      if (act.a === 'quit') return { s: 'levels' };\n      return s;\n  }\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/flow.ts#L35-L74"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/flow.ts#L35-L74"
   },
   {
     "id": "writeCamera",
@@ -341,7 +341,7 @@
     "startLine": 14,
     "endLine": 34,
     "code": "export function writeCamera(uniforms: Float32Array, camY: number, width: number, height: number, time: number, zoom = 1, shakeX = 0, shakeY = 0): void {\n  const aspect = width / height;\n  const t = Math.tan(FOV_Y / 2);\n  const dist = Math.max(VISIBLE_HALF_WIDTH / (t * aspect), 14) * zoom;\n  const ty = camY + shakeY + LOOK_AHEAD;\n  const ey = ty - dist * Math.sin(PITCH);\n  const ez = dist * Math.cos(PITCH);\n  // Eye and target share x = 0, so the basis is right = +x, forward = (0, fy, fz), up = (0, -fz, fy).\n  const fy = (ty - ey) / dist;\n  const fz = -ez / dist;\n  const u = uniforms;\n  u.fill(0, 0, 36);\n  u[0] = 1;\n  u[5] = -fz; u[6] = -fy;\n  u[9] = fy; u[10] = -fz;\n  u[12] = -shakeX; u[13] = -(-fz * ey + fy * ez); u[14] = fy * ey + fz * ez; u[15] = 1;\n  const f = 1 / t;\n  const nf = 1 / (NEAR - FAR);\n  u[16] = f / aspect; u[21] = f; u[26] = FAR * nf; u[27] = -1; u[30] = NEAR * FAR * nf;\n  u[32] = width; u[33] = height; u[34] = camY; u[35] = time;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/render/camera.ts#L14-L34"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/render/camera.ts#L14-L34"
   },
   {
     "id": "greedyBot",
@@ -349,7 +349,7 @@
     "startLine": 25,
     "endLine": 73,
     "code": "export const greedyBot: Bot = (w) => {\n  const p = w.player, b = w.bodies;\n  const pvy = w.phase.p === 'fly' ? w.spec.scroll : 0;\n  for (let l = 0; l < LANES.length; l++) {\n    let x = p.x, vx = p.vx;\n    for (let s = 0; s < PATH_POINTS; s++) {\n      paths[l * PATH_POINTS + s] = x;\n      for (let k = 0; k < PATH_TICKS; k++) { vx = steerVelocity(x, vx, LANES[l]); x += vx * STEP; }\n    }\n  }\n  let best: number = LANES[0], bestScore = Infinity;\n  for (let l = 0; l < LANES.length; l++) {\n    const lane = LANES[l];\n    let score = 0.02 * Math.abs(lane - p.x) + CORNER * Math.abs(lane);\n    for (let i = 0; i < b.count; i++) {\n      const k = b.kind[i] as Kind;\n      const a = ARCHETYPES[k];\n      if (a.role === 'playerShot') continue;\n      const contact = a.radius + PLAYER_RADIUS;\n      const reach = contact + (a.role === 'pickup' ? 0.2 : MARGIN);\n      const dy = b.y[i] - p.y, rvy = b.vy[i] - pvy;\n      let t0 = 0, t1 = HORIZON;\n      if (rvy < -0.01 || rvy > 0.01) {\n        const ta = (dy - reach) / -rvy, tb = (dy + reach) / -rvy;\n        t0 = Math.max(0, Math.min(ta, tb));\n        t1 = Math.min(HORIZON, Math.max(ta, tb));\n      } else if (dy > reach || dy < -reach) continue;\n      if (t0 > t1) continue;\n      for (let s = 0; s < SAMPLES; s++) {\n        const t = t0 + (t1 - t0) * s / (SAMPLES - 1);\n        const bx = b.x[i] + b.vx[i] * t;\n        const ex = paths[l * PATH_POINTS + Math.floor(t / PATH_DT + 0.5)] - bx, ey = dy + rvy * t, d2 = ex * ex + ey * ey;\n        if (d2 >= reach * reach) continue;\n        if (a.role === 'pickup') score -= (k === Kind.Crystal ? 0.15 : 0.6) / (0.5 + t);\n        else {\n          const killable = a.hp > 0 && Math.abs(lane - bx) < a.radius && t > b.hp[i] * FIRE_PERIOD + dy / BOLT_SPEED + 0.3;\n          score += (killable ? 0.2 : 1) * (d2 < contact * contact ? 1 : 0.25) / (0.2 + t);\n        }\n        break;\n      }\n    }\n    if (w.boss !== null) {\n      const bx = w.boss.x + (w.boss.x - w.boss.px) / STEP * 0.45;\n      score -= 0.25 * Math.max(0, 1 - Math.abs(lane - bx) / 1.5);\n    }\n    if (score < bestScore) { bestScore = score; best = lane; }\n  }\n  return { targetX: best };\n};",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/bot.ts#L25-L73"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/bot.ts#L25-L73"
   },
   {
     "id": "defineLevels",
@@ -357,7 +357,7 @@
     "startLine": 108,
     "endLine": 125,
     "code": "export function defineLevels(rows: LevelTable): LevelTable {\n  if (rows.length !== 30) throw new Error(`LEVELS has ${rows.length} rows, expected 30`);\n  rows.forEach((row, i) => {\n    const n = i + 1;\n    if (row.n !== n) throw new Error(`LEVELS[${i}].n is ${row.n}, expected ${n}`);\n    if ((row.boss !== null) !== (n % 10 === 0)) throw new Error(`level ${n}: boss must be set on 10, 20, and 30 only`);\n    const weights = Object.values(row.mix).filter((w) => w !== undefined);\n    if (weights.length === 0 || weights.some((w) => !(w > 0))) throw new Error(`level ${n}: mix weights must be positive`);\n    if ((row.mix.drone !== undefined) !== (row.drones.length > 0)) throw new Error(`level ${n}: a drone weight needs a drone pattern list, and only then`);\n  });\n  for (const col of RAMP_COLUMNS) {\n    if (RAMP[col] !== 'nondecreasing') continue;\n    for (let i = 1; i < rows.length; i++) {\n      if (rows[i][col] < rows[i - 1][col]) throw new Error(`level ${i + 1}: ${col} decreases from ${rows[i - 1][col]} to ${rows[i][col]}`);\n    }\n  }\n  return rows;\n}",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/levels.ts#L108-L125"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/levels.ts#L108-L125"
   },
   {
     "id": "levelSpec",
@@ -365,7 +365,7 @@
     "startLine": 190,
     "endLine": 190,
     "code": "export const levelSpec = (n: LevelNumber): LevelSpec => LEVELS[n - 1];",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/levels.ts#L190-L190"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/levels.ts#L190-L190"
   },
   {
     "id": "tierOf",
@@ -373,7 +373,7 @@
     "startLine": 191,
     "endLine": 191,
     "code": "export const tierOf = (n: LevelNumber): 1 | 2 | 3 => (n <= 10 ? 1 : n <= 20 ? 2 : 3);",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/levels.ts#L191-L191"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/levels.ts#L191-L191"
   },
   {
     "id": "ARCHETYPES",
@@ -381,7 +381,7 @@
     "startLine": 19,
     "endLine": 30,
     "code": "export const ARCHETYPES: { readonly [K in Kind]: Archetype } = {\n  [Kind.Asteroid]:  { role: 'hazard', radius: 0.7, hp: 3, score: 50, splitInto: { kind: Kind.Fragment, count: 3 } },\n  [Kind.Fragment]:  { role: 'hazard', radius: 0.3, hp: 1, score: 10, splitInto: null },\n  [Kind.Mine]:      { role: 'hazard', radius: 0.45, hp: 0, score: 0, splitInto: null },\n  [Kind.Drone]:     { role: 'hazard', radius: 0.5, hp: 2, score: 100, splitInto: null },\n  [Kind.Well]:      { role: 'field', radius: 0.6, hp: 0, score: 0, splitInto: null },\n  [Kind.Crystal]:   { role: 'pickup', radius: 0.4, hp: 0, score: 25, splitInto: null },\n  [Kind.Shield]:    { role: 'pickup', radius: 0.45, hp: 0, score: 0, splitInto: null },\n  [Kind.Rapid]:     { role: 'pickup', radius: 0.45, hp: 0, score: 0, splitInto: null },\n  [Kind.Bolt]:      { role: 'playerShot', radius: 0.12, hp: 1, score: 0, splitInto: null },\n  [Kind.EnemyBolt]: { role: 'enemyShot', radius: 0.15, hp: 1, score: 0, splitInto: null },\n};",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/levels.ts#L19-L30"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/levels.ts#L19-L30"
   },
   {
     "id": "RAMP",
@@ -389,6 +389,6 @@
     "startLine": 100,
     "endLine": 103,
     "code": "export const RAMP: { readonly [K in Exclude<NumericKeys<LevelSpec>, 'n' | 'seed'>]: 'nondecreasing' | 'free' } = {\n  length: 'nondecreasing', scroll: 'nondecreasing', density: 'nondecreasing',\n  droneFireRate: 'nondecreasing', wells: 'nondecreasing', wellPull: 'nondecreasing',\n};",
-    "permalink": "https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/levels.ts#L100-L103"
+    "permalink": "https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/levels.ts#L100-L103"
   }
 ]

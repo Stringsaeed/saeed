@@ -1,4 +1,4 @@
-import { ARCHETYPES, BOSSES, Kind } from '../../src/levels';
+import { ARCHETYPES, BOSSES, Kind } from '../../src/levels'; import { canvasFont } from '../../../shims/canvas';
 import { PLAYER_RADIUS, type World, type WorldView } from '../../src/sim';
 import { BOSS_R, TRACK_HALF_WIDTH } from '../../src/sim/rules';
 
@@ -31,7 +31,7 @@ export function drawWorld(ctx: CanvasRenderingContext2D, w: WorldView, o: DrawOp
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = '#272d48';
   for (let i = 0; i < 60; i++) ctx.fillRect((i * 97.3) % W, (i * 53.7 + p.y * S * 0.4) % H, 1.4, 1.4);
-  ctx.font = '10px "Paper Mono", ui-monospace, monospace';
+  ctx.font = canvasFont(10);
   ctx.fillStyle = '#3d4466';
   for (let y = Math.ceil((p.y - 8) / 10) * 10; y < p.y + 30; y += 10) { ctx.fillText(`y ${y}`, 4, sy(y) - 3); ctx.fillRect(0, sy(y), 10, 1); }
   ctx.strokeStyle = '#2b3557';

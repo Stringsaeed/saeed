@@ -45,4 +45,35 @@ const value = 1
       /bad/,
     );
   });
+
+  test("turns a {{name}} paragraph into an interactive block", () => {
+    const blocks = markdownToPortableText(`Before.
+
+{{demo-placeholder}}
+
+{{ pewpew-step }}
+
+{{not-a-figure}}
+
+Inline {{demo-placeholder}} stays text.
+`);
+
+    assert.deepEqual(
+      blocks.map((block) => block._type),
+      [
+        "block",
+        "interactive",
+        "interactive",
+        "block",
+        "block",
+      ],
+    );
+    assert.equal(blocks[1]?.name, "demo-placeholder");
+    assert.equal(blocks[2]?.name, "pewpew-step");
+    assert.equal(blocks[3]?.children?.[0]?.text, "{{not-a-figure}}");
+    assert.match(
+      blocks[4]?.children?.map((child) => child.text).join("") ?? "",
+      /\{\{demo-placeholder\}\}/,
+    );
+  });
 });

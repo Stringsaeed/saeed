@@ -1,5 +1,6 @@
 import { lexer, type Token, type Tokens } from "marked";
 import { isContentHref } from "@/lib/https-url";
+import { isInteractiveName } from "@/lib/interactive-names";
 
 export type ContentSpan = {
   _type: "span";
@@ -26,6 +27,15 @@ export type ContentBlock = {
   code?: string;
   [key: string]: unknown;
 };
+
+const interactivePlaceholder = /^\{\{\s*([a-z0-9-]+)\s*\}\}$/;
+
+/** A paragraph that is only `{{name}}` with a registered figure name. */
+function interactiveName(token: Token) {
+  if (!("text" in token) || typeof token.text !== "string") return null;
+  const name = interactivePlaceholder.exec(token.text.trim())?.[1];
+  return isInteractiveName(name) ? name : null;
+}
 
 function markdownToPortableText(markdown: string): ContentBlock[] {
   const blocks: ContentBlock[] = [];
@@ -159,6 +169,16 @@ function markdownToPortableText(markdown: string): ContentBlock[] {
         const style = token.depth <= 2 ? "h2" : "h3";
         pushTextBlock(token.tokens, style, list);
       } else if (token.type === "paragraph" || token.type === "text") {
+        const name =
+          token.type === "paragraph" && !list ? interactiveName(token) : null;
+        if (name) {
+          blocks.push({
+            _type: "interactive",
+            _key: nextKey(),
+            name,
+          });
+          continue;
+        }
         pushTextBlock(
           token.tokens ?? [],
           token.type === "paragraph" ? "normal" : "normal",

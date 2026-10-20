@@ -1,13 +1,20 @@
 import {
+  type MissingComponentHandler,
   PortableText,
+  type PortableTextBlockComponent,
   type PortableTextComponents,
   type PortableTextMarkComponentProps,
 } from "@portabletext/react";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import Image from "next/image";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { InteractiveBlock } from "@/components/interactive/interactive-block";
 import { isBlogImagePath } from "@/lib/content-patterns";
+import { warnOnceInDev } from "@/lib/dev-warn";
+import { headingIds } from "@/lib/heading-ids";
+import { highlight } from "@/lib/highlight";
 import { isContentHref, isHttpsUrl } from "@/lib/https-url";
+import { isInteractiveName } from "@/lib/interactive-names";
 import type { ContentBlock } from "@/lib/markdown-to-portable-text";
 import { dataset, projectId } from "@/sanity/env";
 
@@ -103,18 +110,55 @@ function FigureBlock({
   );
 }
 
-function CodeBlock({
+function lineStarts(code: string) {
+  const starts: number[] = [];
+  let offset = 0;
+  for (const line of code.split("\n")) {
+    starts.push(offset);
+    offset += line.length + 1;
+  }
+  return starts;
+}
+
+async function CodeBlock({
   value,
 }: {
   value?: {
     code?: unknown;
+    language?: unknown;
   };
 }) {
   if (!value || typeof value.code !== "string" || value.code.length === 0)
     return null;
+  const lines = await highlight(value.code, value.language);
+  if (!lines) {
+    return (
+      <pre>
+        <code>{value.code}</code>
+      </pre>
+    );
+  }
+
+  // Each token carries --shiki-light and --shiki-dark; globals.css picks one
+  // by theme, so the server never needs to know which theme a reader has.
+  const starts = lineStarts(value.code);
   return (
-    <pre>
-      <code>{value.code}</code>
+    <pre className="shiki">
+      <code>
+        {lines.map((line, index) => (
+          <span key={`line-${starts[index] ?? index}`} className="line">
+            {line.map((token) => (
+              <span
+                key={token.offset}
+                style={token.htmlStyle as CSSProperties | undefined}
+              >
+                {token.content}
+              </span>
+            ))}
+            {index < lines.length - 1 ? "\n" : null}
+          </span>
+        ))}
+      </code>
     </pre>
   );
 }
@@ -144,34 +188,108 @@ function LinkMark({
   );
 }
 
-function CalloutBlock({
+function InteractiveSerializer({
   value,
 }: {
   value?: {
-    tone?: unknown;
-    body?: ContentBlock[];
+    name?: unknown;
+    caption?: unknown;
   };
 }) {
-  if (!value || !Array.isArray(value.body)) return null;
-  return (
-    <Callout tone={typeof value.tone === "string" ? value.tone : "note"}>
-      <PostBody value={value.body} />
-    </Callout>
-  );
+  if (!value) return null;
+  if (!isInteractiveName(value.name)) {
+    warnOnceInDev(
+      `interactive:${String(value.name)}`,
+      `[PostBody] Unknown interactive figure "${String(value.name)}"; rendering nothing. Add it to src/lib/interactive-names.ts and the registry.`,
+    );
+    return null;
+  }
+  const caption =
+    typeof value.caption === "string" && value.caption.trim() !== ""
+      ? value.caption
+      : undefined;
+  return <InteractiveBlock name={value.name} caption={caption} />;
 }
 
-const components: PortableTextComponents = {
-  types: {
-    callout: CalloutBlock,
-    figure: FigureBlock,
-    code: CodeBlock,
-  },
-  unknownType: () => null,
-  marks: {
-    link: LinkMark,
-  },
-};
+// Content can name block types, marks, or styles this build doesn't render
+// yet. Readers see nothing; authors get one console line per kind in dev.
+const warnMissingComponent: MissingComponentHandler = (
+  message,
+  { nodeType, type },
+) => warnOnceInDev(`${nodeType}:${type}`, message);
+
+function headingComponent(
+  Tag: "h2" | "h3",
+  ids: ReadonlyMap<string, string>,
+): PortableTextBlockComponent {
+  return function Heading({ value, children }) {
+    const id = typeof value._key === "string" ? ids.get(value._key) : undefined;
+    if (!id) return <Tag>{children}</Tag>;
+    return (
+      <Tag id={id}>
+        {children}
+        <a
+          href={`#${id}`}
+          aria-label="Link to section"
+          className="heading-anchor"
+        >
+          #
+        </a>
+      </Tag>
+    );
+  };
+}
+
+function createComponents(
+  ids: ReadonlyMap<string, string>,
+): PortableTextComponents {
+  // Callouts render their body with these same components (and ids), so a
+  // heading inside a callout can't reuse an id from the rest of the post.
+  function CalloutBlock({
+    value,
+  }: {
+    value?: {
+      tone?: unknown;
+      body?: ContentBlock[];
+    };
+  }) {
+    if (!value || !Array.isArray(value.body)) return null;
+    return (
+      <Callout tone={typeof value.tone === "string" ? value.tone : "note"}>
+        <PortableText
+          components={components}
+          value={value.body}
+          onMissingComponent={warnMissingComponent}
+        />
+      </Callout>
+    );
+  }
+
+  const components: PortableTextComponents = {
+    types: {
+      callout: CalloutBlock,
+      figure: FigureBlock,
+      code: CodeBlock,
+      interactive: InteractiveSerializer,
+    },
+    block: {
+      h2: headingComponent("h2", ids),
+      h3: headingComponent("h3", ids),
+    },
+    unknownType: () => null,
+    marks: {
+      link: LinkMark,
+    },
+  };
+  return components;
+}
 
 export function PostBody({ value }: { value: ContentBlock[] }) {
-  return <PortableText components={components} value={value} />;
+  return (
+    <PortableText
+      components={createComponents(headingIds(value))}
+      value={value}
+      onMissingComponent={warnMissingComponent}
+    />
+  );
 }

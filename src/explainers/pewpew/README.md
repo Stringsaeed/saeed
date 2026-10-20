@@ -27,6 +27,14 @@ bun run check:ts
 
 `post.mdx` is the explainer's prose as a post for this site. `scripts/pewpew-post.ts` generates it from the explainer's `post.md` at the commit in `vendor/VERSION`: figures become `{{pewpew-*}}` slots, `{{code:Name}}` becomes a `ts` fence with a permalink from `excerpts.json`, and endnotes become a final Notes list. The site does not serve this file; it is the source for the Sanity import. Do not edit it by hand.
 
+The generator also makes the prose true of this site rather than of the repo's explainer:
+
+- `proseEdits` in the script is a table of exact-string edits to `post.md`, each with a `why`. Like `PATCHES` in the sync, each must match exactly once or the script fails. They cover the pinned commit (upstream's excerpts follow the code; here they are pinned to `vendor/VERSION` and re-synced on purpose), the hero (the 2D sim view here, not the WebGPU renderer), and the step walkthrough's count (a guard plus ten stages, eleven steps).
+- Note markers are joined to the word before them with a non-breaking space, so `[5]` never wraps onto a line of its own.
+- `HELD_FIGURES` leaves a figure out of the post and puts a sentence in its place. `pewpew-sound` is held there until the sound figure is ported; its name and registry entry stay. To put it back in the post, delete its line in `HELD_FIGURES` and regenerate.
+
+Captions are not in `post.mdx`. `captions.ts` has the caption for every PewPew figure (upstream's `fig.caption()` text as plain text, reworded only where it describes something this site lacks). `bun run pewpew:import` attaches them to the interactive blocks, and both dev previews read them from the same map. `captions.test.ts` checks that every `pewpew-*` figure has one.
+
 In dev, `/prototypes/pewpew-post` renders this draft as the blog will, with live figures.
 
 ```sh

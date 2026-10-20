@@ -3,6 +3,8 @@
 // src/content/blog is, as a fallback when Sanity returns nothing); it is the source for the Sanity import.
 // Usage: bun run pewpew:post [path/to/post.md]
 // With no argument it downloads post.md at the pinned SHA. The transform is deterministic: same input, same output.
+// Before parsing, `proseEdits` rewords the claims that hold for the repo's explainer but not for this site, and
+// HELD_FIGURES keeps figures that are not ported yet out of the post. Captions are attached at import, not here.
 //
 // The explainer's dialect (explainer/build.mjs, `markdown` and `inline`):
 // - Blocks: `#` title, `##` / `###` headings, paragraphs (consecutive lines, joined with a space), `- ` and `1. ` lists
@@ -48,6 +50,76 @@ const FIGURES: Record<string, string> = {
   flow: "pewpew-flow",
   sound: "pewpew-sound",
 };
+
+/**
+ * Figures the post leaves out for now, with the sentence that stands in their place. The figure keeps its name and
+ * registry entry; to put it back in the post once it is ported, delete its line here.
+ */
+const HELD_FIGURES: Record<string, string> = {
+  sound:
+    "The sound figure is still being ported; the audio engine runs on the device only for now.",
+};
+
+type ProseEdit = {
+  find: string;
+  replace: string;
+  why: string;
+};
+
+/**
+ * Exact-string edits to upstream's post.md, for claims that are true of the repo's explainer but not of this site.
+ * Applied to the source before parsing, so they can reach notes too. Like the sync script's PATCHES, each `find`
+ * must occur exactly once, or the script fails and the edit needs a look.
+ */
+function proseEdits(sha: string): ProseEdit[] {
+  const commit = `[${sha.slice(0, 7)}](https://github.com/${REPO}/tree/${sha})`;
+  return [
+    {
+      why: "This site copies excerpts at a pinned commit; it does not read them from the source at build time.",
+      find: "every code excerpt is read from the source with its real line number.",
+      replace:
+        "every code excerpt is copied from the source at a pinned commit, with its real line number.",
+    },
+    {
+      why: "Note 1 says the post follows the code. Here the excerpts and figures are pinned and re-synced on purpose.",
+      find: "^[`explainer/build.mjs` bundles the modules under `src/` with esbuild and reads each excerpt from disk at build time. When the code changes, the post changes with it.]",
+      replace: `^[The excerpts and figures in this post are pinned to commit ${commit} and re-synced on purpose, so a change to the game reaches this post only when it is synced. The repo's own explainer reads each excerpt from disk at build time, so it follows the code.]`,
+    },
+    {
+      why: "step() runs a guard, then ten stages; the walkthrough shows all eleven, so the prose counts the guard too.",
+      find: "One call to `step(world, input, events)` advances the world one step by calling ten stages, and their order is the game's rules.",
+      replace:
+        "One call to `step(world, input, events)` advances the world one step. A guard stops a finished run and records where every body was, then ten stages run, and their order is the game's rules.",
+    },
+    {
+      why: "The walkthrough has eleven steps: the guard plus the ten stages.",
+      find: "The walkthrough runs those stages one at a time on a real world.",
+      replace:
+        "The walkthrough runs the guard and the ten stages one at a time on a real world, eleven steps in all.",
+    },
+    {
+      why: "Note 4 says the hero runs the game's renderer. Here the hero is the 2D sim view, without WebGPU.",
+      find: "That is why the hero figure can run the game's renderer unchanged.]",
+      replace:
+        "That is why the repo's own explainer can run the game's renderer unchanged in a browser. The hero figure here is the 2D sim view; the WebGPU renderer runs in the app and in that explainer.]",
+    },
+  ];
+}
+
+/** Applies each edit once, and fails if its `find` does not occur exactly once. */
+function applyProseEdits(source: string, edits: ProseEdit[]) {
+  let out = source;
+  for (const edit of edits) {
+    const count = out.split(edit.find).length - 1;
+    if (count !== 1) {
+      throw new Error(
+        `Prose edit matched ${count} times, expected 1 (${edit.why}): ${edit.find.slice(0, 80)}`,
+      );
+    }
+    out = out.replace(edit.find, () => edit.replace);
+  }
+  return out;
+}
 
 /** Excerpts upstream defines but this site does not port, because their files are not vendored. */
 const UNPORTED_EXCERPTS: Record<string, string> = {
@@ -195,20 +267,27 @@ function parseBlocks(md: string): Block[] {
   return blocks;
 }
 
-/** The same note pattern as build.mjs: one level of nested brackets, so a note can hold a link. */
-const NOTE_PATTERN = /\^\[((?:[^[\]]|\[[^\]]*\])+)\]/g;
+/**
+ * The same note pattern as build.mjs: one level of nested brackets, so a note can hold a link. Spaces before the
+ * marker are taken too, because the marker is rejoined to the word before it.
+ */
+const NOTE_PATTERN = /[ \t]*\^\[((?:[^[\]]|\[[^\]]*\])+)\]/g;
+
+/** Joins a note marker to the word before it, so `[5]` never wraps onto a line of its own. */
+const NOTE_JOIN = " ";
 
 function main(source: string, sha: string, excerpts: Map<string, Excerpt>) {
-  const blocks = parseBlocks(source);
+  const blocks = parseBlocks(applyProseEdits(source, proseEdits(sha)));
   const notes: string[] = [];
   const unported: string[] = [];
   const figuresSeen: string[] = [];
+  const figuresHeld: string[] = [];
 
   /** Replaces each ^[note] with [n] and collects the note. Rejects anything marked would read differently. */
   function inline(text: string) {
     const out = text.replace(NOTE_PATTERN, (_, note: string) => {
       notes.push(note.replace(/\s+/g, " ").trim());
-      return `[${notes.length}]`;
+      return `${NOTE_JOIN}[${notes.length}]`;
     });
     if (out.includes("^["))
       throw new Error(`Unterminated note in: ${text.slice(0, 80)}`);
@@ -278,6 +357,12 @@ function main(source: string, sha: string, excerpts: Map<string, Excerpt>) {
         }
         const name = FIGURES[block.name];
         if (!name) throw new Error(`Unknown figure: ${block.name}`);
+        const held = HELD_FIGURES[block.name];
+        if (held !== undefined) {
+          figuresHeld.push(block.name);
+          out.push(inline(held));
+          break;
+        }
         figuresSeen.push(block.name);
         out.push(`{{${name}}}`);
         break;
@@ -299,6 +384,13 @@ function main(source: string, sha: string, excerpts: Map<string, Excerpt>) {
         out.push(inline(block.text));
         break;
     }
+  }
+
+  for (const name of Object.keys(HELD_FIGURES)) {
+    if (!figuresHeld.includes(name))
+      throw new Error(
+        `HELD_FIGURES lists ${name}, which the post does not place`,
+      );
   }
 
   if (notes.length > 0) {
@@ -325,6 +417,7 @@ function main(source: string, sha: string, excerpts: Map<string, Excerpt>) {
     title,
     notes: notes.length,
     figures: figuresSeen,
+    held: figuresHeld,
     unported,
   };
 }
@@ -364,5 +457,5 @@ if (DESCRIPTION.length > 160)
 const result = main(source, sha, excerpts);
 await writeFile(OUT_FILE, result.text);
 console.log(
-  `wrote ${OUT_FILE}: title "${result.title}", ${result.figures.length} figures, ${result.notes} notes, unported excerpts used: ${result.unported.join(", ") || "none"}`,
+  `wrote ${OUT_FILE}: title "${result.title}", ${result.figures.length} figures (held back: ${result.held.join(", ") || "none"}), ${result.notes} notes, unported excerpts used: ${result.unported.join(", ") || "none"}`,
 );

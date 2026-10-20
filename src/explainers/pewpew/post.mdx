@@ -11,14 +11,14 @@ Every figure in this post runs the game's own TypeScript, from the [pewpew repo]
 
 pewpew is an arcade shooter for iOS and Android. A rocket climbs a narrow track and fires on its own. You steer it with one finger past asteroids, mines, drones, and gravity wells, through 30 levels and 3 bosses.
 
-This post follows the code from one tick of the simulation to the thread that plays the sound. Every figure imports the game's own TypeScript, so the game below is the real one, and every code excerpt is read from the source with its real line number.[1]
+This post follows the code from one tick of the simulation to the thread that plays the sound. Every figure imports the game's own TypeScript, so the game below is the real one, and every code excerpt is copied from the source at a pinned commit, with its real line number. [1]
 
 {{pewpew-hero}}
 
 ## Three rules shape the code
 
 1. **The simulation is pure.** The same level and the same inputs produce the same world, to the last bit. The sim never reads a clock, never draws, and imports nothing from React Native.
-2. **The renderer only reads.** It gets a `WorldView`, a read-only type of the world, and writing to it is a compile error.[2]
+2. **The renderer only reads.** It gets a `WorldView`, a read-only type of the world, and writing to it is a compile error. [2]
 3. **Sound only listens.** The audio engine reacts to events such as `fire` and `destroy` and never reads positions.
 
 Together they let a script prove the game before it ships. The script plays every level in Node with a bot and checks that each one can be won. Because the sim is pure, the result also holds on your phone.
@@ -56,13 +56,13 @@ Removal is a swap-remove. The last body moves into the freed slot, which takes c
 
 ## One step runs ten stages in a fixed order
 
-The game advances in fixed steps of 1/60 s. One call to `step(world, input, events)` advances the world one step by calling ten stages, and their order is the game's rules.
+The game advances in fixed steps of 1/60 s. One call to `step(world, input, events)` advances the world one step. A guard stops a finished run and records where every body was, then ten stages run, and their order is the game's rules.
 
-The walkthrough runs those stages one at a time on a real world. Each › calls the stage function and lists what it changed. Click a dotted name to open its source, and click again inside it to go deeper.
+The walkthrough runs the guard and the ten stages one at a time on a real world, eleven steps in all. Each › calls the stage function and lists what it changed. Click a dotted name to open its source, and click again inside it to go deeper.
 
 {{pewpew-step}}
 
-After the last stage, the walkthrough hashes its world and compares it with a copy advanced by the real `step()`. The hashes match, so what you stepped through is what the game does.[3]
+After the last stage, the walkthrough hashes its world and compares it with a copy advanced by the real `step()`. The hashes match, so what you stepped through is what the game does. [3]
 
 Two details are easy to miss. `collide` only marks a body dead by setting `hp = -1`, and nothing leaves the pool until `despawn`, so slot numbers stay valid inside the collision loops. Every result also goes into the `events` array as a plain object, such as `{ e: 'destroy', target, x, y }`. Code outside the sim learns what happened only from that array.
 
@@ -93,7 +93,7 @@ On a phone, one frame passes through several runtimes and threads before you see
 Three points stand out.
 
 - **All the game logic runs on the JS thread.** The sim, the bot, the frame loop, and the renderer's CPU work all run in Hermes. This works because a step takes about a microsecond without the bot, and the frame loop does not allocate.
-- **A WebGPU call is a direct call.** react-native-webgpu exposes Dawn, Google's C++ WebGPU implementation, through JSI. `device.queue.writeBuffer(...)` is a synchronous C++ call on the same thread. Dawn translates it to Metal on iOS and Vulkan on Android.[4]
+- **A WebGPU call is a direct call.** react-native-webgpu exposes Dawn, Google's C++ WebGPU implementation, through JSI. `device.queue.writeBuffer(...)` is a synchronous C++ call on the same thread. Dawn translates it to Metal on iOS and Vulkan on Android. [4]
 - **Sound and HUD animations run off the JS thread.** A native audio thread computes the audio samples, and Reanimated runs the HUD animations as worklets on the UI thread. JavaScript only schedules both.
 
 The same split, by file:
@@ -138,7 +138,7 @@ Every shape is a circle. Contact means the squared distance is less than the squ
 
 {{pewpew-bot}}
 
-The bot keeps no memory between calls, so the same world always gets the same lane and every run is reproducible. It loses a life on several of the later levels, but it wins all 30.[5]
+The bot keeps no memory between calls, so the same world always gets the same lane and every run is reproducible. It loses a life on several of the later levels, but it wins all 30. [5]
 
 ```ts
 export const greedyBot: Bot = (w) => {
@@ -202,7 +202,7 @@ export const greedyBot: Bot = (w) => {
 
 The sim may not call `Math.sin`, `Math.cos`, or any other function whose result depends on the JavaScript engine. V8 runs the verifier and Hermes runs the phone, and the two can disagree in the last bit.
 
-The flipped-bit test in the figure shows what such a disagreement does. Gameplay does not change, because steering pulls the rocket back to its lane.[6] The proof does not. It compares hashes, and a hash cannot tell a harmless rounding difference from a bug. If the phone computed different bits, every golden hash would be wrong.
+The flipped-bit test in the figure shows what such a disagreement does. Gameplay does not change, because steering pulls the rocket back to its lane. [6] The proof does not. It compares hashes, and a hash cannot tell a harmless rounding difference from a bug. If the phone computed different bits, every golden hash would be wrong.
 
 So the sim uses `sinT`, a polynomial built only from operations that IEEE 754 rounds the same way on every engine. A test scans every sim file and fails the build if it finds a banned call.
 
@@ -225,7 +225,7 @@ The shaders are written in TypeScript with TypeGPU and compiled to WGSL at build
 
 The game has no audio files. Each sound comes from a small set of patches: a square, saw, sine, triangle, or noise wave, with an envelope and sometimes a filter or a pitch sweep. The music is four step-sequenced songs, one for each tier and one for bosses.
 
-{{pewpew-sound}}
+The sound figure is still being ported; the audio engine runs on the device only for now.
 
 Two details matter on a phone. Each sound effect has a voice cap, so rapid fire cannot stack hundreds of oscillators. And the engine schedules music slightly ahead on the audio clock instead of starting each note from JavaScript, so a slow frame does not delay the beat.
 
@@ -241,9 +241,9 @@ To check every claim in this post against the code, run `npm run check`. It type
 
 ## Notes
 
-1. `explainer/build.mjs` bundles the modules under `src/` with esbuild and reads each excerpt from disk at build time. When the code changes, the post changes with it.
+1. The excerpts and figures in this post are pinned to commit [42cce2a](https://github.com/Stringsaeed/pewpew/tree/42cce2a3e6ffb73832c438a663391d000a104194) and re-synced on purpose, so a change to the game reaches this post only when it is synced. The repo's own explainer reads each excerpt from disk at build time, so it follows the code.
 2. `src/sim/world.ts` has a function, `readonlyViewProof`, that writes to a `WorldView` under `@ts-expect-error`. If the type became writable, that line would stop being an error and the build would fail.
 3. `step.ts` exports each stage function, and the walkthrough imports them from there. `index.ts`, the sim's public surface, still exports only `step()`.
-4. Chrome also uses Dawn for WebGPU, but in a separate GPU process, and commands cross an IPC channel. That is why the hero figure can run the game's renderer unchanged.
+4. Chrome also uses Dawn for WebGPU, but in a separate GPU process, and commands cross an IPC channel. That is why the repo's own explainer can run the game's renderer unchanged in a browser. The hero figure here is the 2D sim view; the WebGPU renderer runs in the app and in that explainer.
 5. The verifier checks that each level is won with no dropped spawns and that the replay hashes the same. It compares steps, score, stars, and hash with `scripts/verify-levels.golden.txt`, so a balance change shows up as a diff in review.
 6. We changed one input by one ulp at six points in each of nine levels, once with fixed inputs and once with the bot deciding each step. In all 108 runs the hashes split for good, and score, lives, and body count never differed.

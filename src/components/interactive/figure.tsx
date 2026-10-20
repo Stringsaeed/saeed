@@ -23,6 +23,7 @@ import {
 } from "./frame-classes";
 import {
   FigureContext,
+  type FigureMinHeight,
   useFigure,
   useFigureHost,
   useNearViewport,
@@ -36,14 +37,32 @@ import {
 // registry reserved. Standalone (no host) it renders the whole figure.
 // The frame itself is not focusable; children own focus.
 
-function aspectStyle(
+/** Stage sizing: a fixed aspect ratio for figures that draw into a box,
+ *  or a responsive min-height for figures whose height follows their
+ *  content. Set as CSS variables, so the server skeleton reserves the same
+ *  height at every width without knowing the viewport. */
+function stageBox(
   aspect: string | number | undefined,
-): CSSProperties | undefined {
-  return aspect === undefined
-    ? undefined
-    : {
+  minHeight: FigureMinHeight | undefined,
+): {
+  className?: string;
+  style?: CSSProperties;
+} {
+  if (aspect !== undefined)
+    return {
+      style: {
         aspectRatio: aspect,
-      };
+      },
+    };
+  if (minHeight !== undefined)
+    return {
+      className: "min-h-(--figure-min-h) sm:min-h-(--figure-min-h-sm)",
+      style: {
+        "--figure-min-h": `${minHeight.base}px`,
+        "--figure-min-h-sm": `${minHeight.sm}px`,
+      } as CSSProperties,
+    };
+  return {};
 }
 
 export type FigureProps = {
@@ -58,6 +77,9 @@ export type FigureProps = {
   controls?: ReactNode;
   /** CSS aspect-ratio for the stage. In a post the registry's value wins. */
   aspect?: string | number;
+  /** Reserved stage height for a content-height figure. In a post the
+   *  registry's value wins. */
+  minHeight?: FigureMinHeight;
   /** Extend past the text column on wider screens (standalone only). */
   bleed?: boolean;
   className?: string;
@@ -70,6 +92,7 @@ export function Figure({
   caption,
   controls,
   aspect,
+  minHeight,
   bleed = true,
   className,
   children,
@@ -83,7 +106,9 @@ export function Figure({
   const [choice, setPlaying] = useState<boolean | null>(null);
   const playing = choice ?? !reducedMotion;
   const header = title !== undefined || controls !== undefined;
-  const stageAspect = host?.aspect ?? aspect;
+  const box = host
+    ? stageBox(host.aspect, host.minHeight)
+    : stageBox(aspect, minHeight);
 
   if (host && host.header !== header)
     warnOnceInDev(
@@ -117,9 +142,10 @@ export function Figure({
           data-figure-stage=""
           className={cn(
             "relative",
-            stageAspect === undefined && !near && "min-h-40",
+            box.className,
+            box.style === undefined && !near && "min-h-40",
           )}
-          style={aspectStyle(stageAspect)}
+          style={box.style}
         >
           {host || near ? (
             // Opacity only: a transform would offset getBoundingClientRect
@@ -162,10 +188,14 @@ export function Figure({
 }
 
 /** The surface a hosted figure occupies before its code arrives: same
- *  header height and stage aspect as the real one, taken from the host. */
+ *  header height and stage size (aspect or min-height) as the real one,
+ *  taken from the host. */
 export function FigureSkeleton({ ref }: { ref?: Ref<HTMLDivElement> }) {
   const host = useFigureHost();
   const shape = useShape();
+  const box = host
+    ? stageBox(host.aspect, host.minHeight)
+    : stageBox("16 / 9", undefined);
   return (
     <div
       ref={ref}
@@ -173,7 +203,7 @@ export function FigureSkeleton({ ref }: { ref?: Ref<HTMLDivElement> }) {
       className={cn(surfaceClass, shape.container)}
     >
       {host?.header ? <div className={headerClass} /> : null}
-      <div style={aspectStyle(host?.aspect ?? "16 / 9")} />
+      <div className={box.className} style={box.style} />
     </div>
   );
 }

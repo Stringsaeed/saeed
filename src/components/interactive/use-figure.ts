@@ -36,10 +36,28 @@ export function useFigure() {
 /** Layout a hosted figure must match: the post reserves it before the
  *  figure's code loads (see registry.ts). */
 export type FigureLayout = {
-  /** CSS aspect-ratio of the stage, e.g. "16 / 9". */
-  aspect: string;
   /** Whether the figure renders a title/controls row. */
   header: boolean;
+} & (
+  | {
+      /** CSS aspect-ratio of the stage, e.g. "16 / 9". For figures that
+       *  draw into a box (canvases). */
+      aspect: string;
+      minHeight?: never;
+    }
+  | {
+      aspect?: never;
+      /** For figures whose height follows their content: the stage height
+       *  (px) of the mounted figure below and from the `sm` breakpoint,
+       *  measured at 375px and 688px wide. Reserved before the figure
+       *  loads; the figure may grow past it. */
+      minHeight: FigureMinHeight;
+    }
+);
+
+export type FigureMinHeight = {
+  base: number;
+  sm: number;
 };
 
 export type FigureHost = FigureLayout & {

@@ -1,0 +1,867 @@
+/* The insides of the vendored PewPew explainer figures (explainer/site/
+   style.css upstream), scoped to PewPew figures and mapped onto the site's
+   tokens. Light by default, `.dark` for dark, like the rest of the site.
+   Neon stays where the game draws: canvases, the track strips, and the
+   paths in the charts. Chrome (pills, segmented controls, dots, captions)
+   follows the site's tertiary Button and mono text.
+   Unlayered on purpose: it must beat the article reset (`all: revert-layer`
+   on pre/code inside figures, in the base layer). */
+
+[data-interactive^="pewpew-"] {
+  --pp-bg: var(--background);
+  --pp-ink: var(--foreground);
+  --pp-heading: var(--foreground);
+  --pp-muted: var(--muted-foreground);
+  --pp-faint: color-mix(
+    in oklab,
+    var(--muted-foreground) 65%,
+    var(--background)
+  );
+  --pp-rule: var(--border);
+  --pp-card-border: var(--border);
+  --pp-code-bg: color-mix(in oklab, var(--foreground) 3.5%, var(--background));
+  /* Data marks (lit code lines, chart paths). Upstream's own light accent;
+     the neon cyan in dark mode. */
+  --pp-accent: #0891b2;
+  --pp-accent-soft: rgb(8 145 178 / 0.1);
+  --pp-mark: color-mix(in oklab, var(--foreground) 6%, transparent);
+  --pp-ok: #15803d;
+  --pp-bad: #c2410c;
+  --pp-hot: #c0267a;
+  --pp-world: #05060d;
+  --sh-keyword: #c0267a;
+  --sh-string: #15803d;
+  --sh-class: #0369a1;
+  --sh-sign: #5a6180;
+  --sh-comment: #9aa0bb;
+  --sh-property: #0e7490;
+  --sh-entity: #a16207;
+  --sh-num: #c2410c;
+  --pp-mono:
+    var(--font-paper-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --pp-ui: var(--font-sans);
+}
+
+.dark [data-interactive^="pewpew-"] {
+  --pp-accent: #35f0ff;
+  --pp-accent-soft: rgb(53 240 255 / 0.12);
+  --pp-ok: #5dff9b;
+  --pp-bad: #ff5a36;
+  --pp-hot: #ff3d9a;
+  --sh-keyword: #ff3d9a;
+  --sh-string: #5dff9b;
+  --sh-class: #35f0ff;
+  --sh-sign: #8a93b8;
+  --sh-comment: #5b6385;
+  --sh-property: #9fd8ff;
+  --sh-entity: #ffd23f;
+  --sh-num: #ff9e64;
+}
+
+/* Progress dots, adopted into the site's header row. */
+[data-interactive^="pewpew-"] .pewpew-dots {
+  display: flex;
+}
+[data-interactive^="pewpew-"] .dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+[data-interactive^="pewpew-"] .dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--pp-rule);
+  transition: all 0.4s;
+}
+[data-interactive^="pewpew-"] .dots span.on {
+  width: 16px;
+  background: var(--pp-ink);
+}
+
+/* The explainer's card becomes the stage: our surface already draws the
+   border, our header the label, and Sanity the caption. */
+[data-interactive^="pewpew-"] .pewpew-root {
+  font: 14px / 1.5 var(--pp-ui);
+  color: var(--pp-ink);
+  font-variant-ligatures: none;
+}
+[data-interactive^="pewpew-"] .pewpew-root *,
+[data-interactive^="pewpew-"] .pewpew-root *::before,
+[data-interactive^="pewpew-"] .pewpew-root *::after {
+  box-sizing: border-box;
+}
+[data-interactive^="pewpew-"] .pewpew-root .viz {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+[data-interactive^="pewpew-"] .pewpew-root .viz-head,
+[data-interactive^="pewpew-"] .pewpew-root .viz-cap {
+  display: none;
+}
+[data-interactive^="pewpew-"] .pewpew-root .viz-body {
+  padding: 8px 16px 16px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .pewpew-error {
+  margin: 16px;
+  font: 12px var(--pp-mono);
+  color: var(--pp-bad);
+}
+
+[data-interactive^="pewpew-"] .pewpew-root p {
+  margin: 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root strong,
+[data-interactive^="pewpew-"] .pewpew-root b {
+  font-weight: 600;
+  color: var(--pp-heading);
+}
+[data-interactive^="pewpew-"] .pewpew-root code.inline {
+  font: 0.84em / 1 var(--pp-mono);
+  background: var(--pp-code-bg);
+  border: 1px solid var(--pp-card-border);
+  padding: 0.1em 0.34em;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+[data-interactive^="pewpew-"] .pewpew-root .viz code.inline,
+[data-interactive^="pewpew-"] .pewpew-root .walk-note code.inline {
+  font-size: 12px;
+}
+
+/* Syntax colours (the explainer's hand-rolled highlighter). */
+[data-interactive^="pewpew-"] .pewpew-root .t-kw {
+  color: var(--sh-keyword);
+}
+[data-interactive^="pewpew-"] .pewpew-root .t-str {
+  color: var(--sh-string);
+}
+[data-interactive^="pewpew-"] .pewpew-root .t-type {
+  color: var(--sh-class);
+}
+[data-interactive^="pewpew-"] .pewpew-root .t-sign {
+  color: var(--sh-sign);
+}
+[data-interactive^="pewpew-"] .pewpew-root .t-com {
+  color: var(--sh-comment);
+  font-style: italic;
+}
+[data-interactive^="pewpew-"] .pewpew-root .t-prop {
+  color: var(--sh-property);
+}
+[data-interactive^="pewpew-"] .pewpew-root .t-fn {
+  color: var(--sh-entity);
+}
+[data-interactive^="pewpew-"] .pewpew-root .t-num {
+  color: var(--sh-num);
+}
+
+/* Layout helpers */
+[data-interactive^="pewpew-"] .pewpew-root .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root .row.wrap {
+  row-gap: 6px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .two {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: start;
+  margin: 10px 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root .two > * {
+  min-width: 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root {
+  container: pewpew / inline-size;
+}
+[data-interactive^="pewpew-"] .pewpew-root .grow {
+  flex: 1;
+}
+[data-interactive^="pewpew-"] .pewpew-root .small {
+  font-size: 12px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .muted {
+  color: var(--pp-muted);
+}
+[data-interactive^="pewpew-"] .pewpew-root .mono {
+  font-family: var(--pp-mono);
+}
+[data-interactive^="pewpew-"] .pewpew-root .ok {
+  color: var(--pp-ok);
+}
+[data-interactive^="pewpew-"] .pewpew-root .bad {
+  color: var(--pp-bad);
+}
+[data-interactive^="pewpew-"] .pewpew-root .viz h4 {
+  font: 500 11px / 1 var(--pp-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pp-muted);
+  margin: 16px 0 8px;
+}
+
+/* Controls, in the site's tertiary compact Button style. */
+[data-interactive^="pewpew-"] .pewpew-root .pill {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  font: 400 12px / 1 var(--pp-ui);
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: 99px;
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: pointer;
+  transition:
+    color 80ms,
+    background-color 80ms;
+}
+[data-interactive^="pewpew-"] .pewpew-root .pill:hover:not(:disabled) {
+  color: var(--foreground);
+  background: var(--hover);
+}
+[data-interactive^="pewpew-"] .pewpew-root .pill:active:not(:disabled) {
+  background: var(--active);
+}
+[data-interactive^="pewpew-"] .pewpew-root .pill.on,
+[data-interactive^="pewpew-"] .pewpew-root .pill.primary {
+  color: var(--foreground);
+  background: var(--active);
+}
+[data-interactive^="pewpew-"] .pewpew-root .pill:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+[data-interactive^="pewpew-"] .pewpew-root .seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  background: var(--pp-code-bg);
+  border-radius: 16px;
+  padding: 2px;
+  gap: 1px;
+  box-shadow: 0 0 0 1px var(--border);
+}
+[data-interactive^="pewpew-"] .pewpew-root .seg button {
+  font: 400 12px / 1 var(--pp-ui);
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: 99px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+[data-interactive^="pewpew-"] .pewpew-root .seg button:hover {
+  color: var(--foreground);
+}
+[data-interactive^="pewpew-"] .pewpew-root .seg button.on {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 0 0 1px var(--border);
+}
+[data-interactive^="pewpew-"] .pewpew-root .playback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 10px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .slide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--pp-muted);
+  margin: 6px 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root .slide > span {
+  min-width: 112px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .slide input {
+  flex: 1;
+  accent-color: var(--foreground);
+  min-width: 80px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .slide output {
+  font: 12px var(--pp-mono);
+  color: var(--pp-ink);
+  min-width: 48px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+[data-interactive^="pewpew-"] .pewpew-root .sliders {
+  min-width: 220px;
+}
+
+/* Live code: real line numbers, a marked range, and clickable calls. */
+[data-interactive^="pewpew-"] .pewpew-root .codebox {
+  overflow: auto;
+  border-radius: 10px;
+  background: var(--pp-code-bg);
+  box-shadow: inset 0 0 0 1px var(--pp-card-border);
+  position: relative;
+}
+[data-interactive^="pewpew-"] .pewpew-root pre.code.live {
+  margin: 0;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  font: 12.5px / 1.65 var(--pp-mono);
+  color: var(--pp-ink);
+}
+[data-interactive^="pewpew-"] .pewpew-root .cl {
+  display: flex;
+  white-space: pre;
+  padding-right: 16px;
+  transition:
+    opacity 0.25s,
+    background 0.25s;
+  min-width: max-content;
+}
+[data-interactive^="pewpew-"] .pewpew-root .cl .ln {
+  flex: none;
+  width: 44px;
+  padding-right: 14px;
+  text-align: right;
+  color: var(--pp-faint);
+  user-select: none;
+}
+[data-interactive^="pewpew-"] .pewpew-root .cl.on {
+  background: var(--pp-mark);
+  box-shadow: inset 2px 0 0 var(--pp-ink);
+}
+[data-interactive^="pewpew-"] .pewpew-root .cl.on .ln {
+  color: var(--pp-ink);
+}
+[data-interactive^="pewpew-"] .pewpew-root .cl.dim {
+  opacity: 0.42;
+}
+[data-interactive^="pewpew-"] .pewpew-root .call {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  text-decoration-color: currentColor;
+}
+[data-interactive^="pewpew-"] .pewpew-root .call:hover {
+  background: var(--hover);
+  border-radius: 3px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .peek {
+  margin: 4px 10px 8px 44px;
+  border: 1px solid var(--pp-card-border);
+  border-radius: 10px;
+  background: var(--pp-bg);
+  overflow: hidden;
+  white-space: normal;
+}
+[data-interactive^="pewpew-"] .pewpew-root .peek-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 8px 10px;
+  font: 12.5px / 1.45 var(--pp-ui);
+  color: var(--pp-muted);
+  border-bottom: 1px solid var(--pp-card-border);
+}
+[data-interactive^="pewpew-"] .pewpew-root .peek-head > span:first-child {
+  flex: 1;
+}
+[data-interactive^="pewpew-"] .pewpew-root .peek-head b {
+  color: var(--pp-ink);
+  font-family: var(--pp-mono);
+  font-weight: 600;
+}
+[data-interactive^="pewpew-"] .pewpew-root .peek-src {
+  font: 11px var(--pp-mono);
+  color: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .peek-x {
+  border: 0;
+  background: none;
+  color: var(--pp-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+[data-interactive^="pewpew-"] .pewpew-root .peek .codebox {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Walkthroughs */
+[data-interactive^="pewpew-"] .pewpew-root .walk-text {
+  margin-top: 12px;
+  min-height: 92px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .walk-top {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+[data-interactive^="pewpew-"] .pewpew-root .walk-n {
+  font: 12px var(--pp-mono);
+  color: var(--pp-faint);
+  font-variant-numeric: tabular-nums;
+}
+[data-interactive^="pewpew-"] .pewpew-root .walk-title {
+  font-weight: 600;
+}
+[data-interactive^="pewpew-"] .pewpew-root .walk-note {
+  color: var(--pp-ink);
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+[data-interactive^="pewpew-"] .pewpew-root .walk-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--pp-card-border);
+}
+[data-interactive^="pewpew-"] .pewpew-root .walk-panel {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .diff-col {
+  min-width: 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root .diff-meta {
+  font: 11.5px var(--pp-mono);
+  color: var(--pp-muted);
+  margin-bottom: 8px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .diff {
+  font: 12px / 1.55 var(--pp-mono);
+}
+[data-interactive^="pewpew-"] .pewpew-root .d {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+[data-interactive^="pewpew-"] .pewpew-root .d-add {
+  color: var(--pp-ok);
+}
+[data-interactive^="pewpew-"] .pewpew-root .d-del {
+  color: var(--pp-bad);
+}
+[data-interactive^="pewpew-"] .pewpew-root .d-chg {
+  color: var(--pp-ink);
+}
+[data-interactive^="pewpew-"] .pewpew-root .d-dim {
+  color: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .check {
+  margin-top: 10px;
+  font: 11.5px var(--pp-mono);
+  color: var(--pp-muted);
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--pp-code-bg);
+}
+[data-interactive^="pewpew-"] .pewpew-root .check.ok {
+  color: var(--pp-ok);
+}
+[data-interactive^="pewpew-"] .pewpew-root .check.bad {
+  color: var(--pp-bad);
+}
+[data-interactive^="pewpew-"] .pewpew-root canvas.game2d {
+  border-radius: 10px;
+  display: block;
+  background: var(--pp-world);
+  /* Shrinks to fit a narrow stage, keeping its shape. canvas2d sets a fixed
+     inline size; the collide figure maps pointers back (shims/canvas.ts). */
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* Charts */
+[data-interactive^="pewpew-"] .pewpew-root svg.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: var(--pp-bg);
+  border: 1px solid var(--pp-card-border);
+  border-radius: 10px;
+  margin: 8px 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root svg text {
+  font: 10px var(--pp-mono);
+  fill: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .axis {
+  stroke: var(--pp-rule);
+}
+[data-interactive^="pewpew-"] .pewpew-root .frame {
+  stroke: var(--pp-faint);
+  stroke-width: 1.5;
+}
+[data-interactive^="pewpew-"] .pewpew-root .frame.cur {
+  stroke: var(--pp-accent);
+  stroke-width: 2.5;
+}
+[data-interactive^="pewpew-"] .pewpew-root .stepbox {
+  fill: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .stepbox.cur {
+  fill: var(--pp-accent);
+}
+[data-interactive^="pewpew-"] .pewpew-root .simline {
+  fill: none;
+  stroke: var(--pp-accent);
+  stroke-width: 2;
+}
+[data-interactive^="pewpew-"] .pewpew-root .wallline {
+  fill: none;
+  stroke: var(--pp-faint);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+[data-interactive^="pewpew-"] .pewpew-root .xline {
+  fill: none;
+  stroke: var(--pp-accent);
+  stroke-width: 2;
+}
+[data-interactive^="pewpew-"] .pewpew-root .vline {
+  fill: none;
+  stroke: #e8930c;
+  stroke-width: 1.5;
+}
+[data-interactive^="pewpew-"] .pewpew-root .tline {
+  fill: none;
+  stroke: var(--pp-faint);
+  stroke-width: 1;
+}
+[data-interactive^="pewpew-"] .pewpew-root .target {
+  stroke: var(--pp-bad);
+  stroke-dasharray: 5 4;
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--pp-muted);
+  margin-top: 2px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend i {
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+  background: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-frame,
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-wall,
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-kill {
+  background: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-step,
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-x,
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-sim {
+  background: var(--pp-accent);
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-v {
+  background: #e8930c;
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-t {
+  background: var(--pp-bad);
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-pick {
+  background: #06b6d4;
+}
+[data-interactive^="pewpew-"] .pewpew-root .legend .k-hit {
+  background: var(--pp-bad);
+  height: 8px;
+  width: 8px;
+  border-radius: 99px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .mk-playerHit,
+[data-interactive^="pewpew-"] .pewpew-root .mk-shieldBlock {
+  fill: var(--pp-bad);
+}
+[data-interactive^="pewpew-"] .pewpew-root .mk-pickup {
+  fill: #06b6d4;
+}
+[data-interactive^="pewpew-"] .pewpew-root .mk-destroy {
+  fill: var(--pp-faint);
+}
+/* World drawings stay on the game's dark stage in both themes. */
+[data-interactive^="pewpew-"] .pewpew-root .track {
+  fill: var(--pp-world);
+}
+[data-interactive^="pewpew-"] .pewpew-root .rowline {
+  stroke: #3a4266;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+[data-interactive^="pewpew-"] .pewpew-root .worm {
+  stroke: #c86bff;
+  stroke-width: 2;
+}
+[data-interactive^="pewpew-"] .pewpew-root .strip svg.chart {
+  background: var(--pp-world);
+}
+[data-interactive^="pewpew-"] .pewpew-root .dpath {
+  fill: none;
+  stroke: #4b5378;
+  stroke-width: 1.2;
+}
+[data-interactive^="pewpew-"] .pewpew-root .dpath.on {
+  stroke: #4ff3ff;
+  stroke-width: 2.4;
+}
+[data-interactive^="pewpew-"] .pewpew-root .rocket {
+  fill: #eef0fa;
+}
+[data-interactive^="pewpew-"] .pewpew-root .drone-plot {
+  width: 260px;
+  max-width: 100%;
+}
+[data-interactive^="pewpew-"] .pewpew-root .drone-plot svg.chart {
+  background: var(--pp-world);
+}
+[data-interactive^="pewpew-"] .pewpew-root .drone-plot svg text {
+  fill: #8a92b2;
+}
+[data-interactive^="pewpew-"] .pewpew-root .sweep {
+  fill: none;
+  stroke: #ff4fa3;
+  stroke-width: 2;
+}
+[data-interactive^="pewpew-"] .pewpew-root .bossline {
+  stroke: var(--pp-rule);
+  stroke-dasharray: 3 3;
+}
+[data-interactive^="pewpew-"] .pewpew-root .dot {
+  fill: var(--pp-accent);
+}
+[data-interactive^="pewpew-"] .pewpew-root .spark {
+  max-width: 320px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .screen {
+  fill: var(--pp-world);
+  stroke: var(--pp-card-border);
+}
+[data-interactive^="pewpew-"] .pewpew-root svg.cam {
+  max-width: 300px;
+}
+
+/* Specific figures */
+[data-interactive^="pewpew-"] .pewpew-root .pool {
+  font-size: 12px;
+  border: 1px solid var(--pp-card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: var(--pp-bg);
+}
+[data-interactive^="pewpew-"] .pewpew-root .pool-row {
+  display: grid;
+  grid-template-columns: 44px 1.2fr 1fr 1fr 1fr 1fr 0.6fr;
+  padding: 3px 10px;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.3s;
+}
+[data-interactive^="pewpew-"] .pewpew-root .pool-row.head {
+  color: var(--pp-faint);
+  border-bottom: 1px solid var(--pp-card-border);
+}
+[data-interactive^="pewpew-"] .pewpew-root .pool-row.empty {
+  color: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .pool-row.flash {
+  background: var(--pp-mark);
+}
+[data-interactive^="pewpew-"] .pewpew-root .pool-foot {
+  padding: 6px 10px;
+  color: var(--pp-muted);
+  border-top: 1px solid var(--pp-card-border);
+}
+[data-interactive^="pewpew-"] .pewpew-root .fig-note {
+  font-size: 13.5px;
+  color: var(--pp-ink);
+  margin: 8px 0 12px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .rowcode {
+  min-width: 330px;
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--pp-code-bg);
+  border-radius: 10px;
+  font: 12.5px / 1.65 var(--pp-mono);
+  overflow-x: auto;
+}
+[data-interactive^="pewpew-"] .pewpew-root .rowcode .field {
+  cursor: pointer;
+  border-radius: 4px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .rowcode .field:hover {
+  background: var(--hover);
+}
+[data-interactive^="pewpew-"] .pewpew-root .rowcode .field.on {
+  background: var(--pp-mark);
+}
+[data-interactive^="pewpew-"] .pewpew-root .field-note {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+  margin: 10px 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root .phase {
+  border: 1px solid var(--pp-card-border);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--pp-bg);
+  opacity: 0.5;
+  transition:
+    opacity 0.2s,
+    border-color 0.2s;
+}
+[data-interactive^="pewpew-"] .pewpew-root .phase.on {
+  opacity: 1;
+  border-color: var(--pp-ink);
+}
+[data-interactive^="pewpew-"] .pewpew-root .phase-top {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .chip {
+  font: 11px var(--pp-mono);
+  border: 1px solid;
+  border-radius: 99px;
+  padding: 2px 7px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .collide-out {
+  font-size: 13.5px;
+  margin-top: 10px;
+  max-width: 330px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .proof-out p {
+  font-size: 14px;
+  margin: 10px 0 0;
+}
+[data-interactive^="pewpew-"] .pewpew-root .trig div {
+  margin: 3px 0;
+  overflow-wrap: anywhere;
+}
+[data-interactive^="pewpew-"] .pewpew-root .trig div.muted {
+  font-family: var(--pp-ui);
+  font-size: 12.5px;
+  overflow-wrap: normal;
+}
+[data-interactive^="pewpew-"] .pewpew-root .lanes-svg .lane {
+  fill: var(--pp-bg);
+  stroke: var(--pp-card-border);
+}
+[data-interactive^="pewpew-"] .pewpew-root .lanes-svg .lane.on {
+  fill: var(--pp-accent-soft);
+  stroke: var(--pp-accent);
+}
+[data-interactive^="pewpew-"] .pewpew-root .lanes-svg .lane-label {
+  font: 11px var(--pp-ui);
+  fill: var(--pp-ink);
+}
+[data-interactive^="pewpew-"] .pewpew-root .hop {
+  stroke: var(--pp-rule);
+  stroke-width: 2;
+}
+[data-interactive^="pewpew-"] .pewpew-root .hop.on {
+  stroke: var(--pp-accent);
+  stroke-width: 3;
+}
+[data-interactive^="pewpew-"] .pewpew-root .stop {
+  fill: var(--pp-rule);
+  cursor: pointer;
+}
+[data-interactive^="pewpew-"] .pewpew-root .stop.past {
+  fill: var(--pp-faint);
+}
+[data-interactive^="pewpew-"] .pewpew-root .stop.on {
+  fill: var(--pp-accent);
+}
+[data-interactive^="pewpew-"] .pewpew-root table.rt {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12.5px;
+}
+[data-interactive^="pewpew-"] .pewpew-root table.rt th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--pp-muted);
+  border-bottom: 1px solid var(--pp-card-border);
+  padding: 6px 8px;
+  font-size: 11.5px;
+}
+[data-interactive^="pewpew-"] .pewpew-root table.rt td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--pp-card-border);
+  vertical-align: top;
+}
+[data-interactive^="pewpew-"] .pewpew-root table.rt td.mono {
+  font-size: 11.5px;
+}
+[data-interactive^="pewpew-"] .pewpew-root .screen-state {
+  white-space: pre-wrap;
+  background: var(--pp-code-bg);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 8px 0;
+}
+
+/* Narrow stages (phones): one column, and long code lines and table cells
+   wrap instead of overflowing the figure. Last, so it wins over the rules
+   above at equal specificity. */
+@container pewpew (max-width: 620px) {
+  [data-interactive^="pewpew-"] .pewpew-root .two,
+  [data-interactive^="pewpew-"] .pewpew-root .walk-panel {
+    grid-template-columns: 1fr;
+  }
+  [data-interactive^="pewpew-"] .pewpew-root .rowcode {
+    min-width: 0;
+  }
+  [data-interactive^="pewpew-"] .pewpew-root .rowcode .cl {
+    min-width: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  [data-interactive^="pewpew-"] .pewpew-root table.rt th,
+  [data-interactive^="pewpew-"] .pewpew-root table.rt td {
+    padding: 6px 4px;
+    overflow-wrap: anywhere;
+  }
+  [data-interactive^="pewpew-"] .pewpew-root .slide > span {
+    min-width: 88px;
+  }
+}

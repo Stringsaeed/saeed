@@ -8,9 +8,12 @@ export type InteractiveFigureProps = {
 
 // Rules for figure authors
 //
-// - Wrap everything in <Figure>. Its title/controls row and stage aspect
-//   must match the figure's registry entry (`header`, `aspect`), or the
-//   post shifts when the chunk loads; a mismatch warns in dev.
+// - Wrap everything in <Figure>. Its title/controls row and stage size
+//   must match the figure's registry entry (`header`, and `aspect` or
+//   `minHeight`), or the post shifts when the chunk loads; a header
+//   mismatch warns in dev. A `minHeight` figure grows with its content and
+//   must never scroll inside itself; measure its mounted height at 375px
+//   and 688px wide.
 //
 // - Animate through useFigureLoop(callback), never a raw
 //   requestAnimationFrame. It runs only while the figure is playing, on

@@ -3,8 +3,12 @@
 import { useMemo, useRef } from "react";
 import type { InteractiveName } from "@/lib/interactive-names";
 import { FigureSkeleton } from "./figure";
-import { interactiveRegistry } from "./registry";
-import { FigureHostContext, useNearViewport } from "./use-figure";
+import { type InteractiveEntry, interactiveRegistry } from "./registry";
+import {
+  type FigureHost,
+  FigureHostContext,
+  useNearViewport,
+} from "./use-figure";
 
 export type InteractiveBlockProps = {
   name: InteractiveName;
@@ -19,19 +23,19 @@ export type InteractiveBlockProps = {
 export function InteractiveBlock({ name }: InteractiveBlockProps) {
   const ref = useRef<HTMLDivElement>(null);
   const near = useNearViewport(ref);
-  const { component: Entry, aspect, header } = interactiveRegistry[name];
-  const host = useMemo(
-    () => ({
+  const entry: InteractiveEntry = interactiveRegistry[name];
+  const Entry = entry.component;
+  // Entries are module constants, so this changes only with the name.
+  const host = useMemo((): FigureHost => {
+    const { component: _, ...layout } = entry;
+    return {
       name,
-      aspect,
-      header,
-    }),
-    [
-      name,
-      aspect,
-      header,
-    ],
-  );
+      ...layout,
+    };
+  }, [
+    name,
+    entry,
+  ]);
 
   return (
     <FigureHostContext value={host}>

@@ -27,6 +27,8 @@ bun run check:ts
 
 `post.mdx` is the explainer's prose as a post for this site. `scripts/pewpew-post.ts` generates it from the explainer's `post.md` at the commit in `vendor/VERSION`: figures become `{{pewpew-*}}` slots, `{{code:Name}}` becomes a `ts` fence with a permalink from `excerpts.json`, and endnotes become a final Notes list. The site does not serve this file; it is the source for the Sanity import. Do not edit it by hand.
 
+In dev, `/prototypes/pewpew-post` renders this draft as the blog will, with live figures.
+
 ```sh
 bun run pewpew:post            # downloads post.md at the pinned SHA
 bun run pewpew:post path/to/post.md

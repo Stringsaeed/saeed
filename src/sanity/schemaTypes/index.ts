@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { callout, figure, linkUrl, postBody } from "./content";
+import { callout, figure, interactive, linkUrl, postBody } from "./content";
 
 const post = defineType({
   name: "post",
@@ -120,4 +120,5 @@ export const schemaTypes = [
   link,
   callout,
   figure,
+  interactive,
 ];

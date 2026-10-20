@@ -1,5 +1,6 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { isContentHref, isHttpsUrl } from "@/lib/https-url";
+import { INTERACTIVE_NAMES } from "@/lib/interactive-names";
 
 const linkAnnotation = {
   name: "link",
@@ -124,6 +125,37 @@ export const figure = defineType({
   ],
 });
 
+// A figure built in code (src/components/interactive), placed by name. The
+// list comes from the same constant the site's registry is checked against.
+export const interactive = defineType({
+  name: "interactive",
+  title: "Interactive figure",
+  type: "object",
+  fields: [
+    defineField({
+      name: "name",
+      type: "string",
+      options: {
+        list: INTERACTIVE_NAMES.map((name) => ({
+          title: name,
+          value: name,
+        })),
+      },
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: "caption",
+      type: "string",
+    }),
+  ],
+  preview: {
+    select: {
+      title: "name",
+      subtitle: "caption",
+    },
+  },
+});
+
 export const postBody = [
   blockContent,
   codeBlock,
@@ -132,6 +164,9 @@ export const postBody = [
   }),
   defineArrayMember({
     type: "figure",
+  }),
+  defineArrayMember({
+    type: "interactive",
   }),
 ];
 

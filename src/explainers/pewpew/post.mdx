@@ -44,7 +44,7 @@ export interface Bodies {
 }
 ```
 
-[src/sim/world.ts:8-19](https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/sim/world.ts#L8-L19)
+[src/sim/world.ts:8-19](https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/sim/world.ts#L8-L19)
 
 The pool has 512 slots, allocated once. A new object per body, 60 times a second, would give the garbage collector work in the middle of a frame. Typed arrays allocate nothing per frame.
 
@@ -192,7 +192,7 @@ export const greedyBot: Bot = (w) => {
 };
 ```
 
-[src/bot.ts:25-73](https://github.com/Stringsaeed/pewpew/blob/42cce2a3e6ffb73832c438a663391d000a104194/src/bot.ts#L25-L73)
+[src/bot.ts:25-73](https://github.com/Stringsaeed/pewpew/blob/ce76c3d70fd989be8984a629454b120f8259b89d/src/bot.ts#L25-L73)
 
 ## The proof compares hashes
 
@@ -241,7 +241,7 @@ To check every claim in this post against the code, run `npm run check`. It type
 
 ## Notes
 
-1. The excerpts and figures in this post are pinned to commit [42cce2a](https://github.com/Stringsaeed/pewpew/tree/42cce2a3e6ffb73832c438a663391d000a104194) and re-synced on purpose, so a change to the game reaches this post only when it is synced. The repo's own explainer reads each excerpt from disk at build time, so it follows the code.
+1. The excerpts and figures in this post are pinned to commit [ce76c3d](https://github.com/Stringsaeed/pewpew/tree/ce76c3d70fd989be8984a629454b120f8259b89d) and re-synced on purpose, so a change to the game reaches this post only when it is synced. The repo's own explainer reads each excerpt from disk at build time, so it follows the code.
 2. `src/sim/world.ts` has a function, `readonlyViewProof`, that writes to a `WorldView` under `@ts-expect-error`. If the type became writable, that line would stop being an error and the build would fail.
 3. `step.ts` exports each stage function, and the walkthrough imports them from there. `index.ts`, the sim's public surface, still exports only `step()`.
 4. Chrome also uses Dawn for WebGPU, but in a separate GPU process, and commands cross an IPC channel. That is why the repo's own explainer can run the game's renderer unchanged in a browser. The hero figure here is the 2D sim view; the WebGPU renderer runs in the app and in that explainer.

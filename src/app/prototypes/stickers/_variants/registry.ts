@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { StickerLongTake } from "@/components/sticker-long-take";
 import { StickerPaperweights } from "@/components/sticker-paperweights";
+import * as backingPaper from "./backing-paper";
 import * as mobile from "./mobile";
 import * as portrait from "./portrait";
 import * as questions from "./questions";
@@ -43,4 +44,5 @@ export const VARIANTS: PrototypeVariant[] = [
   variant("Questions", "Ask: questions lead, objects answer", questions),
   variant("Rebus", "Copy: stickers stuck over the nouns", rebus),
   variant("Portrait", "Compose: a portrait in three objects", portrait),
+  variant("Backing Paper", "Sheet: peel a sticker, read the liner", backingPaper),
 ];

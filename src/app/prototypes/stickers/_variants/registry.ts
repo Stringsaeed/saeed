@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import { StickerLongTake } from "@/components/sticker-long-take";
 import { StickerPaperweights } from "@/components/sticker-paperweights";
 import * as mobile from "./mobile";
+import * as questions from "./questions";
 import type { StickerDisplayProps, VariantKind, VariantModule } from "./types";
 
 export type PrototypeVariant = {
@@ -37,4 +38,5 @@ export const VARIANTS: PrototypeVariant[] = [
     pickerPosition: "bottom",
   }),
   variant("Mobile", "Balance: a hanging mobile with weight", mobile),
+  variant("Questions", "Ask: questions lead, objects answer", questions),
 ];

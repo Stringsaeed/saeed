@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
-import { RiCloseLine } from "@remixicon/react";
+import { RiAmazonFill, RiCloseLine } from "@remixicon/react";
 import {
   animate,
   motion,
@@ -475,6 +475,21 @@ function PulledBook({
           >
             <RiCloseLine aria-hidden="true" className="size-5" />
           </Dialog.Close>
+
+          {/* After the close button in the DOM so it doesn't take initial
+              focus; it sits opposite it, top left. */}
+          <motion.a
+            href={book.buyUrl}
+            target="_blank"
+            rel="sponsored noopener noreferrer"
+            className="fixed top-4 left-4 inline-flex h-10 items-center gap-2 rounded-full bg-accent pr-4 pl-3 text-sm font-medium text-foreground transition-colors hover:bg-active focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            style={{
+              opacity: detail,
+            }}
+          >
+            <RiAmazonFill aria-hidden="true" className="size-5" />
+            Buy on Amazon
+          </motion.a>
         </Dialog.Popup>
       </Dialog.Viewport>
     </>

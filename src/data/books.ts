@@ -75,6 +75,8 @@ export type Book = {
   height: number;
   depth: number;
   spine: BookSpineDesign;
+  // Amazon affiliate link, opened from the pulled-out book.
+  buyUrl: string;
 };
 
 // Stripe Press prints its list at one trim size, so those three share a
@@ -82,6 +84,7 @@ export type Book = {
 export const BOOKS: readonly Book[] = [
   {
     id: "the-design-of-everyday-things",
+    buyUrl: "https://link.amazon/B0fvJOYUN",
     title: "The Design of Everyday Things",
     subtitle: "Revised and Expanded Edition",
     author: "Don Norman",
@@ -97,6 +100,7 @@ export const BOOKS: readonly Book[] = [
   },
   {
     id: "inspired",
+    buyUrl: "https://link.amazon/B0asHAKH3",
     title: "Inspired",
     subtitle: "How to Create Tech Products Customers Love",
     author: "Marty Cagan",
@@ -115,6 +119,7 @@ export const BOOKS: readonly Book[] = [
   },
   {
     id: "the-staff-engineers-path",
+    buyUrl: "https://link.amazon/B0a3WUR2O",
     title: "The Staff Engineer’s Path",
     subtitle:
       "A Guide for Individual Contributors Navigating Growth and Change",
@@ -131,6 +136,7 @@ export const BOOKS: readonly Book[] = [
   },
   {
     id: "scaling-people",
+    buyUrl: "https://amzn.to/4z8Jh1Q",
     title: "Scaling People",
     subtitle: "Tactics for Management and Company Building",
     author: "Claire Hughes Johnson",
@@ -151,6 +157,7 @@ export const BOOKS: readonly Book[] = [
   },
   {
     id: "an-elegant-puzzle",
+    buyUrl: "https://link.amazon/B08coW8gg",
     title: "An Elegant Puzzle",
     subtitle: "Systems of Engineering Management",
     author: "Will Larson",
@@ -188,6 +195,7 @@ export const BOOKS: readonly Book[] = [
   },
   {
     id: "where-is-my-flying-car",
+    buyUrl: "https://link.amazon/B0cO9pCOQ",
     title: "Where Is My Flying Car?",
     author: "J. Storrs Hall",
     cover: "/books/where-is-my-flying-car-front.jpg",

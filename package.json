@@ -17,6 +17,7 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@paper-design/shaders-react": "0.0.81",
+    "@pierre/highlights": "0.3.0",
     "@portabletext/react": "^8.0.1",
     "@remixicon/react": "^4.9.0",
     "@sanity/code-input": "^7.3.8",
@@ -41,7 +42,6 @@
     "sanity": "^6.15.0",
     "shadcn": "^4.19.0",
     "shadow-plugin": "^2.1.1",
-    "shiki": "^4.5.0",
     "styled-components": "^6.1.15",
     "tailwind-merge": "^3.6.0",
     "three": "^0.186.1",

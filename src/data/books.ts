@@ -157,7 +157,7 @@ export const BOOKS: readonly Book[] = [
   },
   {
     id: "an-elegant-puzzle",
-    buyUrl: "https://link.amazon/B08coW8gg",
+    buyUrl: "https://link.amazon/B0cUiYPi4",
     title: "An Elegant Puzzle",
     subtitle: "Systems of Engineering Management",
     author: "Will Larson",

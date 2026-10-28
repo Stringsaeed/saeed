@@ -26,6 +26,10 @@
 .slot {
   position: relative;
   display: inline-grid;
+  /* One row pinned to the line, so a sticker taller than the line (the
+     Burj) overshoots upward into the air above instead of pushing the row
+     down over the next line. */
+  grid-template-rows: var(--line);
   vertical-align: top;
   height: var(--line);
   margin: 0;

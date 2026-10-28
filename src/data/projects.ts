@@ -101,6 +101,15 @@ export const sideProjects: readonly SideProject[] = [
     ],
   },
   {
+    name: "Sonar",
+    description: "Classic Battleship, one on one, in your browser.",
+    href: assertHttpsUrl("https://sonar.saeed.sh"),
+    type: "web",
+    logo: "/projects/sonar.svg",
+    brand: "#39ff88",
+    links: [source("Sonar", "https://github.com/stringsaeed/sonar")],
+  },
+  {
     name: "Jev demos",
     description: "Small demos built on TypeSafe’s Jev model.",
     href: assertHttpsUrl("https://lab.saeed.sh"),

@@ -2,31 +2,31 @@ import type { ComponentType } from "react";
 import { StickerLongTake } from "@/components/sticker-long-take";
 import { StickerPaperweights } from "@/components/sticker-paperweights";
 import * as mobile from "./mobile";
-import type { StickerDisplayProps } from "./types";
+import type { StickerDisplayProps, VariantKind, VariantModule } from "./types";
 
 export type PrototypeVariant = {
   name: string;
   axis: string;
-  Component: ComponentType<StickerDisplayProps>;
+  kind: VariantKind;
+  // Desk variants get onClose; inline and standalone variants take no props.
+  Component: ComponentType<StickerDisplayProps> | ComponentType;
   pickerPosition: "top" | "bottom";
 };
 
 const variant = (
   name: string,
   axis: string,
-  module: {
-    default: ComponentType<StickerDisplayProps>;
-    pickerPosition: "top" | "bottom";
-  },
+  module: VariantModule,
 ): PrototypeVariant => ({
   name,
   axis,
+  kind: module.kind ?? "desk",
   Component: module.default,
   pickerPosition: module.pickerPosition,
 });
 
 // Picker order. Paperweights and Long Take are the desks the site A/B tests;
-// Mobile is kept to revisit later.
+// Mobile is kept to revisit later. New directions go after them.
 export const VARIANTS: PrototypeVariant[] = [
   variant("Long Take", "Time: one walk through a life", {
     default: StickerLongTake,

@@ -124,7 +124,7 @@ function lineStarts(code: string) {
   return starts;
 }
 
-async function CodeBlock({
+function CodeBlock({
   value,
 }: {
   value?: {
@@ -134,7 +134,7 @@ async function CodeBlock({
 }) {
   if (!value || typeof value.code !== "string" || value.code.length === 0)
     return null;
-  const lines = await highlight(value.code, value.language);
+  const lines = highlight(value.code, value.language);
   if (!lines) {
     return (
       <pre>
@@ -143,11 +143,11 @@ async function CodeBlock({
     );
   }
 
-  // Each token carries --shiki-light and --shiki-dark; globals.css picks one
+  // Each token carries --hl-light and --hl-dark; globals.css picks one
   // by theme, so the server never needs to know which theme a reader has.
   const starts = lineStarts(value.code);
   return (
-    <pre className="shiki">
+    <pre className="highlighted">
       <code>
         {lines.map((line, index) => (
           <span key={`line-${starts[index] ?? index}`} className="line">

@@ -727,24 +727,22 @@
     font-family: var(--font-paper-mono);
   }
 
-  /* Shiki only supplies token colours (dual-theme CSS variables); the pre
-     keeps the frame above. Untokenised text inherits the body colour. */
-  .article-body pre.shiki {
+  /* The highlighter only supplies token colours (dual-theme CSS variables);
+     the pre keeps the frame above. Untokenised text inherits the body colour. */
+  .article-body pre.highlighted {
     color: var(--foreground);
   }
 
-  .article-body pre.shiki span[style] {
-    color: var(--shiki-light);
-    font-style: var(--shiki-light-font-style);
-    font-weight: var(--shiki-light-font-weight);
-    text-decoration: var(--shiki-light-text-decoration);
+  .article-body pre.highlighted span[style] {
+    color: var(--hl-light);
+    font-style: var(--hl-light-font-style);
+    font-weight: var(--hl-light-font-weight);
   }
 
-  .dark .article-body pre.shiki span[style] {
-    color: var(--shiki-dark);
-    font-style: var(--shiki-dark-font-style);
-    font-weight: var(--shiki-dark-font-weight);
-    text-decoration: var(--shiki-dark-text-decoration);
+  .dark .article-body pre.highlighted span[style] {
+    color: var(--hl-dark);
+    font-style: var(--hl-dark-font-style);
+    font-weight: var(--hl-dark-font-weight);
   }
 
   .article-body :is(h2, h3)[id] {

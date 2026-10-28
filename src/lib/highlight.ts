@@ -1,65 +1,38 @@
 import "server-only";
-import { createHighlighter, type Highlighter, type ThemedToken } from "shiki";
+import { codeToTokens, type ThemedToken } from "@pierre/highlights";
+import githubDark from "@pierre/highlights/themes/github-dark";
+import githubLight from "@pierre/highlights/themes/github-light";
 import { warnOnceInDev } from "@/lib/dev-warn";
-import {
-  HIGHLIGHT_LANGUAGES,
-  resolveLanguage,
-} from "@/lib/highlight-languages";
+import { resolveLanguage } from "@/lib/highlight-languages";
 
 // Code is highlighted on the server only; the client gets plain spans with
 // two colour variables per token and globals.css picks one by theme.
+// @pierre/highlights inlines its WebAssembly lexers and initialises on
+// import, so there is no highlighter to create or cache.
 
 const themes = {
-  light: "github-light",
-  dark: "github-dark",
-} as const;
-
-// In development the module re-evaluates on every HMR update; keeping the
-// promise on globalThis stops each reload from starting another highlighter
-// (Shiki warns after ten instances).
-const cache = globalThis as typeof globalThis & {
-  __postHighlighter?: Promise<Highlighter>;
+  light: githubLight,
+  dark: githubDark,
 };
-
-function getHighlighter() {
-  if (!cache.__postHighlighter) {
-    const created = createHighlighter({
-      themes: [
-        themes.light,
-        themes.dark,
-      ],
-      langs: [
-        ...HIGHLIGHT_LANGUAGES,
-      ],
-    });
-    cache.__postHighlighter = created;
-    // Let a failed start retry on the next request instead of caching it.
-    created.catch(() => {
-      if (cache.__postHighlighter === created)
-        cache.__postHighlighter = undefined;
-    });
-  }
-  return cache.__postHighlighter;
-}
 
 export type HighlightedLine = readonly ThemedToken[];
 
 /**
- * Tokens per line with `--shiki-light` / `--shiki-dark` in `htmlStyle`, or
- * null for plain text (unknown language, or highlighting failed).
+ * Tokens per line with `--hl-light` / `--hl-dark` in `htmlStyle`, or null
+ * for plain text (unknown language, or highlighting failed).
  */
-export async function highlight(
+export function highlight(
   code: string,
   language: unknown,
-): Promise<readonly HighlightedLine[] | null> {
+): readonly HighlightedLine[] | null {
   const lang = resolveLanguage(language);
   if (!lang) return null;
   try {
-    const instance = await getHighlighter();
-    return instance.codeToTokens(code, {
+    return codeToTokens(code, {
       lang,
       themes,
       defaultColor: false,
+      cssVariablePrefix: "--hl-",
     }).tokens;
   } catch (error) {
     warnOnceInDev(

@@ -388,7 +388,7 @@ function PulledBook({
   return (
     <>
       <Dialog.Backdrop
-        className="fixed inset-0 z-50 bg-background/94 data-closed:pointer-events-none"
+        className="fixed inset-0 z-50 bg-background/94 data-closed:pointer-events-none supports-backdrop-filter:bg-background/80 supports-backdrop-filter:backdrop-blur-lg"
         render={
           <motion.div
             style={{

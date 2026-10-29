@@ -6,9 +6,11 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Plain greedy wrapping. Safari's text-wrap: pretty evens out every line of
+   the paragraph, not just the last few, which leaves the whole sentence
+   ragged well short of the column on a phone. */
 .sentence {
   line-height: var(--line);
-  text-wrap: pretty;
 }
 
 /* The heading is pressable (three times shows everything) but looks like

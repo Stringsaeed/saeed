@@ -51,7 +51,7 @@ const nextConfig: NextConfig = {
   // PostHog's API paths end in a slash; redirecting them would drop events.
   skipTrailingSlashRedirect: true,
   // PostHog through our own domain, so blockers that drop requests to
-  // posthog.com keep the analytics and the sticker desk experiment.
+  // posthog.com keep the analytics.
   async rewrites() {
     return [
       {
@@ -68,8 +68,8 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // The sticker desk used to have its own page; it now opens over any page
-  // from the corner pile, so old links land on the home page.
+  // The stickers used to have their own page; they now sit in the Things
+  // sentence on the home page, so old links land there.
   async redirects() {
     return [
       {

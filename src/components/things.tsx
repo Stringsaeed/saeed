@@ -10,13 +10,8 @@ import {
 import { STICKERS, type StickerDefinition } from "@/components/sticker-data";
 import { playHoverSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
-import { type RebusSlot, SENTENCE, TITLE } from "./copy";
-import styles from "./rebus.module.css";
-
-// biome-ignore lint/style/useComponentExportOnlyModules: read by the prototype registry.
-export const kind = "inline";
-// biome-ignore lint/style/useComponentExportOnlyModules: read by the prototype registry.
-export const pickerPosition: "top" | "bottom" = "bottom";
+import styles from "./things.module.css";
+import { SENTENCE, type ThingSlot, TITLE } from "./things-copy";
 
 // Each sticker is fitted into a square exactly one text line tall, so it
 // sits in the sentence like an icon or an emoji, never taller than the type.
@@ -38,13 +33,17 @@ function slotStyle(sticker: StickerDefinition) {
   } as CSSProperties;
 }
 
+// Things: one sentence about me with the eight stickers standing in for
+// its nouns, sized like inline icons. The stories behind them belong in a
+// blog post (docs/things-stories.md), not on the home page.
+
 // One sticker in the line. If its image cannot load, the noun it stands for
 // is written out instead, so the sentence still reads in full.
 function Slot({
   slot,
   sticker,
 }: {
-  slot: RebusSlot;
+  slot: ThingSlot;
   sticker: StickerDefinition;
 }) {
   const [failed, setFailed] = useState(false);
@@ -81,9 +80,13 @@ function Slot({
   );
 }
 
-export default function Variant() {
+export function Things() {
   return (
-    <div className={cn(styles.root, "max-w-152")}>
+    <div
+      className={cn(styles.root, "max-w-152")}
+      data-analytics-view="Content Viewed"
+      data-analytics-label="Things"
+    >
       <h2 className="list-heading backdrop-plate">{TITLE}</h2>
 
       <p

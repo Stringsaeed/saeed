@@ -2,18 +2,18 @@ import type { StickerDefinition } from "@/components/sticker-data";
 
 // A sticker standing in for a noun. `word` is what the sticker replaces; it
 // is read by assistive tech (as the image's alt) but never shown.
-export type RebusSlot = {
+export type ThingSlot = {
   id: StickerDefinition["id"];
   word: string;
 };
 
-export type RebusToken = string | RebusSlot;
+export type ThingToken = string | ThingSlot;
 
 // One word, set like the other section headings on the home page.
 export const TITLE = "Things";
 
 // Draft copy for Saeed to rewrite. The order is the reading order.
-export const SENTENCE: RebusToken[] = [
+export const SENTENCE: ThingToken[] = [
   "I grew up beside the ",
   {
     id: "pyramids",
@@ -58,5 +58,5 @@ export const SENTENCE: RebusToken[] = [
 ];
 
 export const SLOTS = SENTENCE.filter(
-  (token): token is RebusSlot => typeof token !== "string",
+  (token): token is ThingSlot => typeof token !== "string",
 );

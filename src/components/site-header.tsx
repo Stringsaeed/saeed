@@ -272,9 +272,8 @@ export function SiteSocialLinks() {
     setDismissed(false);
   }, []);
 
-  // Below 960px the fixed sticker pile sits in this corner; keep the links above it.
   return (
-    <footer className="mt-auto flex justify-end pb-28 min-[960px]:pb-6">
+    <footer className="mt-auto flex justify-end pb-6">
       {/* Touch screens have no hover to unfold the dock, so they get every
           link up front at a 44px tap size. CSS picks the layout, so there is
           no collapsed flash before hydration. */}

@@ -50,6 +50,23 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   // PostHog's API paths end in a slash; redirecting them would drop events.
   skipTrailingSlashRedirect: true,
+  // The avatar faces double as the favicon, which swaps every few seconds.
+  // A day in cache means those swaps never go back to the network; a new
+  // face is at most a day late, which is fine for a drawing that rarely
+  // changes.
+  async headers() {
+    return [
+      {
+        source: "/static/:path*.svg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ];
+  },
   // PostHog through our own domain, so blockers that drop requests to
   // posthog.com keep the analytics.
   async rewrites() {

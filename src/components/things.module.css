@@ -1,7 +1,6 @@
 /* Things: eight stickers standing in for eight nouns in one paragraph, each
-   sized like an inline icon. The slot is exactly one text line tall, so the
-   paragraph keeps its ordinary leading and nothing spills onto the lines
-   around it. */
+   sized like an inline icon. Every clause keeps its subject and verb in the
+   clear; the rest of it is out of focus until that lead is pressed. */
 .root {
   --line: 1.75rem;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -12,7 +11,65 @@
   text-wrap: pretty;
 }
 
-/* ---------- a slot in the sentence ---------- */
+/* ---------- a clause ---------- */
+
+/* Subject and verb, set as a quiet pill so they read as pressable. */
+.lead {
+  display: inline;
+  margin: 0;
+  padding: 0.05em 0.5em;
+  border: 1px solid color-mix(in oklab, var(--foreground) 30%, transparent);
+  border-radius: 999px;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  line-height: calc(var(--line) - 0.5em);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color 180ms var(--ease),
+    background-color 180ms var(--ease);
+}
+
+@media (hover: hover) {
+  .lead:hover {
+    border-color: color-mix(in oklab, var(--foreground) 55%, transparent);
+    background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  }
+}
+
+.lead:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Once its clause is open the pill fades back to the line. */
+.lead[aria-expanded="true"] {
+  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+/* The rest of the clause: present, readable to assistive tech, but out of
+   focus and untouchable until opened. Inline, so it wraps with the text. */
+.rest {
+  display: inline;
+  filter: blur(5px);
+  opacity: 0.75;
+  pointer-events: none;
+  user-select: none;
+  transition:
+    filter 480ms var(--ease),
+    opacity 480ms var(--ease);
+}
+
+.rest[data-open] {
+  filter: blur(0);
+  opacity: 1;
+  pointer-events: auto;
+  user-select: text;
+}
+
+/* ---------- a sticker in the line ---------- */
 
 /* The noun, written out when its sticker could not load. */
 .word {
@@ -64,6 +121,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .rest,
+  .lead {
+    transition: none;
+  }
+
   .slot:hover .art {
     scale: none;
   }

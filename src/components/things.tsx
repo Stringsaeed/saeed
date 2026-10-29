@@ -3,15 +3,24 @@
 import Image from "next/image";
 import {
   type CSSProperties,
+  type MouseEvent,
   type PointerEvent as ReactPointerEvent,
   useCallback,
   useState,
 } from "react";
 import { STICKERS, type StickerDefinition } from "@/components/sticker-data";
-import { playHoverSound } from "@/lib/sound";
+import { playHoverSound, playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import styles from "./things.module.css";
-import { SENTENCE, type ThingSlot, TITLE } from "./things-copy";
+import { CLAUSES, type ThingSlot, TITLE } from "./things-copy";
+
+// Things: one sentence about me with the eight stickers standing in for
+// its nouns, sized like inline icons. Each clause shows only its subject
+// and verb; press them and the rest of the clause, sticker included, comes
+// into focus. The stories behind them belong in a blog post
+// (docs/things-stories.md), not on the home page.
+
+type StickerId = StickerDefinition["id"];
 
 // Each sticker is fitted into a square exactly one text line tall, so it
 // sits in the sentence like an icon or an emoji, never taller than the type.
@@ -32,10 +41,6 @@ function slotStyle(sticker: StickerDefinition) {
     "--art-h": `${(sticker.height * fit).toFixed(3)}rem`,
   } as CSSProperties;
 }
-
-// Things: one sentence about me with the eight stickers standing in for
-// its nouns, sized like inline icons. The stories behind them belong in a
-// blog post (docs/things-stories.md), not on the home page.
 
 // One sticker in the line. If its image cannot load, the noun it stands for
 // is written out instead, so the sentence still reads in full.
@@ -81,6 +86,23 @@ function Slot({
 }
 
 export function Things() {
+  const [open, setOpen] = useState<ReadonlySet<StickerId>>(() => new Set());
+
+  const toggle = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    const id = event.currentTarget.dataset.clause as StickerId;
+    setOpen((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+        playSound("tap");
+      } else {
+        next.add(id);
+        playSound("select");
+      }
+      return next;
+    });
+  }, []);
+
   return (
     <div
       className={cn(styles.root, "max-w-152")}
@@ -95,14 +117,40 @@ export function Things() {
           "backdrop-plate mt-4 text-base leading-7 text-muted-foreground",
         )}
       >
-        {SENTENCE.map((token, index) => {
-          if (typeof token === "string") {
-            // biome-ignore lint/suspicious/noArrayIndexKey: the sentence is static.
-            return <span key={index}>{token}</span>;
-          }
-          const sticker = BY_ID.get(token.id);
-          if (!sticker) return <span key={token.id}>{token.word}</span>;
-          return <Slot key={token.id} slot={token} sticker={sticker} />;
+        {CLAUSES.map((clause, index) => {
+          const isOpen = open.has(clause.id);
+          const restId = `thing-${clause.id}`;
+          return (
+            <span key={clause.id} className={styles.clause}>
+              {index > 0 ? " " : null}
+              <button
+                type="button"
+                data-clause={clause.id}
+                aria-expanded={isOpen}
+                aria-controls={restId}
+                className={styles.lead}
+                data-sound-hover="hover"
+                onClick={toggle}
+              >
+                {clause.lead}
+              </button>
+              <span
+                id={restId}
+                className={styles.rest}
+                data-open={isOpen ? "" : undefined}
+              >
+                {clause.rest.map((token, tokenIndex) => {
+                  if (typeof token === "string") {
+                    // biome-ignore lint/suspicious/noArrayIndexKey: the sentence is static.
+                    return <span key={tokenIndex}>{token}</span>;
+                  }
+                  const sticker = BY_ID.get(token.id);
+                  if (!sticker) return <span key={token.id}>{token.word}</span>;
+                  return <Slot key={token.id} slot={token} sticker={sticker} />;
+                })}
+              </span>
+            </span>
+          );
         })}
       </p>
     </div>

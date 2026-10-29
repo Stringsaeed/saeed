@@ -9,54 +9,114 @@ export type ThingSlot = {
 
 export type ThingToken = string | ThingSlot;
 
+// One clause of the sentence. `lead` is its subject and verb, always
+// readable and pressable; `rest` is redacted until the lead is pressed.
+export type ThingClause = {
+  id: StickerDefinition["id"];
+  lead: string;
+  rest: ThingToken[];
+};
+
 // One word, set like the other section headings on the home page.
 export const TITLE = "Things";
 
-// Draft copy for Saeed to rewrite. The order is the reading order.
-export const SENTENCE: ThingToken[] = [
-  "I grew up beside the ",
+// Draft copy for Saeed to rewrite. The order is the reading order. Joiners
+// ("and", ".", ",") sit at the edges of the rest, so when a clause is
+// still redacted the leads read as a list: I grew up, and live, I listen…
+export const CLAUSES: ThingClause[] = [
   {
     id: "pyramids",
-    word: "pyramids",
+    lead: "I grew up",
+    rest: [
+      " beside the ",
+      {
+        id: "pyramids",
+        word: "pyramids",
+      },
+    ],
   },
-  " and live under the ",
   {
     id: "burj",
-    word: "Burj",
+    lead: "and live",
+    rest: [
+      " under the ",
+      {
+        id: "burj",
+        word: "Burj",
+      },
+      ".",
+    ],
   },
-  ". I listen for the ",
   {
     id: "bass",
-    word: "bass",
+    lead: "I listen",
+    rest: [
+      " for the ",
+      {
+        id: "bass",
+        word: "bass",
+      },
+      " first,",
+    ],
   },
-  " first, type on a ",
   {
     id: "keyboard",
-    word: "keyboard",
+    lead: "type",
+    rest: [
+      " on a ",
+      {
+        id: "keyboard",
+        word: "keyboard",
+      },
+      " because I’m a 90s kid,",
+    ],
   },
-  " because I’m a 90s kid, still play ",
   {
     id: "controller",
-    word: "PlayStation",
+    lead: "still play",
+    rest: [
+      " ",
+      {
+        id: "controller",
+        word: "PlayStation",
+      },
+      " since Winning Eleven,",
+    ],
   },
-  " since Winning Eleven, water two ",
   {
     id: "monstera",
-    word: "monsteras",
+    lead: "water",
+    rest: [
+      " two ",
+      {
+        id: "monstera",
+        word: "monsteras",
+      },
+      " every morning,",
+    ],
   },
-  " every morning, keep a ",
   {
     id: "pencil",
-    word: "pencil",
+    lead: "keep",
+    rest: [
+      " a ",
+      {
+        id: "pencil",
+        word: "pencil",
+      },
+      " that reminds me of my father,",
+    ],
   },
-  " that reminds me of my father, and leave rooms smelling of ",
   {
     id: "babylon",
-    word: "Babylon",
+    lead: "and leave rooms",
+    rest: [
+      " smelling of ",
+      {
+        id: "babylon",
+        word: "Babylon",
+      },
+      ".",
+    ],
   },
-  ".",
 ];
-
-export const SLOTS = SENTENCE.filter(
-  (token): token is ThingSlot => typeof token !== "string",
-);

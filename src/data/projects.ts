@@ -102,12 +102,15 @@ export const sideProjects: readonly SideProject[] = [
   },
   {
     name: "Sonar",
-    description: "Classic Battleship, one on one, in your browser.",
+    description:
+      "Classic Battleship, one on one, on Cloudflare Workers and Durable Objects.",
     href: assertHttpsUrl("https://sonar.saeed.sh"),
     type: "web",
     logo: "/projects/sonar.svg",
     brand: "#39ff88",
-    links: [source("Sonar", "https://github.com/stringsaeed/sonar")],
+    links: [
+      source("Sonar", "https://github.com/stringsaeed/sonar"),
+    ],
   },
   {
     name: "Jev demos",

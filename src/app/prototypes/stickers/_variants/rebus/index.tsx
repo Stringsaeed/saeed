@@ -52,7 +52,7 @@ export default function Variant() {
       <p
         className={cn(
           styles.sentence,
-          "backdrop-plate mt-4 text-base leading-7 text-foreground",
+          "backdrop-plate mt-4 text-base leading-7 text-muted-foreground",
         )}
       >
         {SENTENCE.map((token, index) => {

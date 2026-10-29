@@ -5,11 +5,12 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   useCallback,
+  useState,
 } from "react";
 import { STICKERS, type StickerDefinition } from "@/components/sticker-data";
 import { playHoverSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
-import { SENTENCE, TITLE } from "./copy";
+import { type RebusSlot, SENTENCE, TITLE } from "./copy";
 import styles from "./rebus.module.css";
 
 // biome-ignore lint/style/useComponentExportOnlyModules: read by the prototype registry.
@@ -37,14 +38,50 @@ function slotStyle(sticker: StickerDefinition) {
   } as CSSProperties;
 }
 
-export default function Variant() {
-  const onSlotPointerEnter = useCallback(
+// One sticker in the line. If its image cannot load, the noun it stands for
+// is written out instead, so the sentence still reads in full.
+function Slot({
+  slot,
+  sticker,
+}: {
+  slot: RebusSlot;
+  sticker: StickerDefinition;
+}) {
+  const [failed, setFailed] = useState(false);
+  const onPointerEnter = useCallback(
     (event: ReactPointerEvent<HTMLSpanElement>) => {
       if (event.pointerType === "mouse") playHoverSound("hover");
     },
     [],
   );
+  const onError = useCallback(() => setFailed(true), []);
 
+  if (failed) {
+    return <span className={styles.word}>{slot.word}</span>;
+  }
+  return (
+    <span
+      className={styles.slot}
+      style={slotStyle(sticker)}
+      onPointerEnter={onPointerEnter}
+    >
+      <span data-sticker-art={sticker.id} className={styles.art}>
+        <Image
+          src={sticker.src}
+          alt={slot.word}
+          width={sticker.width}
+          height={sticker.height}
+          sizes={ART_SIZES}
+          loading="eager"
+          draggable={false}
+          onError={onError}
+        />
+      </span>
+    </span>
+  );
+}
+
+export default function Variant() {
   return (
     <div className={cn(styles.root, "max-w-152")}>
       <h2 className="list-heading backdrop-plate">{TITLE}</h2>
@@ -61,27 +98,8 @@ export default function Variant() {
             return <span key={index}>{token}</span>;
           }
           const sticker = BY_ID.get(token.id);
-          if (!sticker) return null;
-          return (
-            <span
-              key={token.id}
-              className={styles.slot}
-              style={slotStyle(sticker)}
-              onPointerEnter={onSlotPointerEnter}
-            >
-              <span data-sticker-art={sticker.id} className={styles.art}>
-                <Image
-                  src={sticker.src}
-                  alt={token.word}
-                  width={sticker.width}
-                  height={sticker.height}
-                  sizes={ART_SIZES}
-                  loading="eager"
-                  draggable={false}
-                />
-              </span>
-            </span>
-          );
+          if (!sticker) return <span key={token.id}>{token.word}</span>;
+          return <Slot key={token.id} slot={token} sticker={sticker} />;
         })}
       </p>
     </div>

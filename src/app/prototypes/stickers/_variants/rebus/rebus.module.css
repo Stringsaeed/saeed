@@ -14,6 +14,12 @@
 
 /* ---------- a slot in the sentence ---------- */
 
+/* The noun, written out when its sticker could not load. */
+.word {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
 .slot {
   display: inline-flex;
   align-items: center;

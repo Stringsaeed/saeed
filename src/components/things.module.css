@@ -11,6 +11,27 @@
   text-wrap: pretty;
 }
 
+/* The heading is pressable (three times shows everything) but looks like
+   the other section headings. */
+.title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.title:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 /* ---------- a clause ---------- */
 
 /* Subject and verb, set as a quiet pill so they read as pressable. */

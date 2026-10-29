@@ -6,6 +6,8 @@ import {
   type MouseEvent,
   type PointerEvent as ReactPointerEvent,
   useCallback,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import { STICKERS, type StickerDefinition } from "@/components/sticker-data";
@@ -85,8 +87,20 @@ function Slot({
   );
 }
 
+// Pressing the heading three times in a row shows everything, so nobody has
+// to work through all eight pills; three more hide it again. The presses
+// have to come quickly, like a triple-click, or an old stray press would
+// count towards a later one.
+const TITLE_PRESSES = 3;
+const TITLE_PRESS_WINDOW_MS = 1500;
+const ALL_IDS: ReadonlySet<StickerId> = new Set(CLAUSES.map((c) => c.id));
+
 export function Things() {
   const [open, setOpen] = useState<ReadonlySet<StickerId>>(() => new Set());
+  const titlePresses = useRef(0);
+  const titleTimer = useRef(0);
+
+  useEffect(() => () => window.clearTimeout(titleTimer.current), []);
 
   const toggle = useCallback((event: MouseEvent<HTMLButtonElement>) => {
     const id = event.currentTarget.dataset.clause as StickerId;
@@ -103,13 +117,42 @@ export function Things() {
     });
   }, []);
 
+  const onTitlePress = useCallback(() => {
+    window.clearTimeout(titleTimer.current);
+    titlePresses.current += 1;
+    if (titlePresses.current < TITLE_PRESSES) {
+      playSound("tap");
+      titleTimer.current = window.setTimeout(() => {
+        titlePresses.current = 0;
+      }, TITLE_PRESS_WINDOW_MS);
+      return;
+    }
+    titlePresses.current = 0;
+    setOpen((current) => {
+      const everything = current.size === ALL_IDS.size;
+      playSound(everything ? "tap" : "select");
+      return everything ? new Set() : ALL_IDS;
+    });
+  }, []);
+
   return (
     <div
       className={cn(styles.root, "max-w-152")}
       data-analytics-view="Content Viewed"
       data-analytics-label="Things"
     >
-      <h2 className="list-heading backdrop-plate">{TITLE}</h2>
+      <h2 className="list-heading backdrop-plate">
+        <button
+          type="button"
+          className={styles.title}
+          aria-expanded={open.size === ALL_IDS.size}
+          aria-description="Press three times to show or hide everything"
+          data-sound-hover="hover"
+          onClick={onTitlePress}
+        >
+          {TITLE}
+        </button>
+      </h2>
 
       <p
         className={cn(

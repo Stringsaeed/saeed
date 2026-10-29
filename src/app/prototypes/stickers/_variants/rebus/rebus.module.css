@@ -1,16 +1,10 @@
-/* Rebus: eight stickers standing in for eight nouns in one paragraph. Each
-   slot is an inline box exactly one line tall, so a sticker can never push
-   its line apart or spill onto the lines around it. */
+/* Rebus: eight stickers standing in for eight nouns in one paragraph, each
+   sized like an inline icon. The slot is exactly one text line tall, so the
+   paragraph keeps its ordinary leading and nothing spills onto the lines
+   around it. */
 .root {
-  --line: 3rem;
+  --line: 1.75rem;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --art-scale: 0.85;
-}
-
-@media (min-width: 640px) {
-  .root {
-    --art-scale: 1;
-  }
 }
 
 .sentence {
@@ -24,39 +18,35 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* As wide as its own sticker, so a thin one (the Burj) does not open a
+     square-sized hole in the line. */
+  width: max(var(--art-w), 0.75rem);
   height: var(--line);
-  vertical-align: top;
-  /* A little air either side so the sticker does not touch its neighbours. */
-  padding-inline: 0.1em;
+  /* Centred on the x-height, where an icon beside text belongs. */
+  vertical-align: middle;
+  margin-inline: 0.1em;
 }
 
 .art {
   display: block;
-  width: calc(var(--art-w) * var(--art-scale));
-  height: calc(var(--art-h) * var(--art-scale));
-  rotate: var(--tilt);
-  /* Paper shadow plus a hairline so the white die-cut edge separates from
-     the light page. */
-  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.18))
-    drop-shadow(0 0 0.5px rgb(0 0 0 / 0.35));
+  width: var(--art-w);
+  height: var(--art-h);
+  filter: drop-shadow(0 0.5px 0 rgb(0 0 0 / 0.18));
   transform-origin: center;
   transition:
     scale 180ms var(--ease),
-    rotate 180ms var(--ease),
     filter 180ms var(--ease);
 }
 
 :global(.dark) .art {
-  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.4));
+  filter: drop-shadow(0 0.5px 0 rgb(0 0 0 / 0.4));
 }
 
-/* The sticker grows a touch under the pointer and straightens up. It scales
-   in place (no layout change), so the sentence never reflows. */
+/* Grows in place under the pointer; the sentence never reflows. */
 @media (hover: hover) {
   .slot:hover .art {
-    scale: 1.12;
-    rotate: 0deg;
-    filter: drop-shadow(0 4px 10px rgb(0 0 0 / 0.2));
+    scale: 1.3;
+    filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.2));
   }
 }
 
@@ -70,6 +60,5 @@
 @media (prefers-reduced-motion: reduce) {
   .slot:hover .art {
     scale: none;
-    rotate: var(--tilt);
   }
 }

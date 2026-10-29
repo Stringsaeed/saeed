@@ -17,55 +17,10 @@ export const kind = "inline";
 // biome-ignore lint/style/useComponentExportOnlyModules: read by the prototype registry.
 export const pickerPosition: "top" | "bottom" = "bottom";
 
-type StickerId = StickerDefinition["id"];
-
-// Rendered at most ~2x the tallest inline height.
-const ART_SIZES = "120px";
-
-// Inline height (px, before the phone scale) and a tilt per sticker, hand set
-// so the line reads as stickers pressed on at different moments. Every height
-// fits inside the line (see --line in the stylesheet) so nothing overshoots
-// into the lines above or below.
-const INLINE: Record<
-  StickerId,
-  {
-    height: number;
-    tilt: number;
-  }
-> = {
-  pyramids: {
-    height: 38,
-    tilt: -2,
-  },
-  burj: {
-    height: 46,
-    tilt: 2,
-  },
-  bass: {
-    height: 44,
-    tilt: -3,
-  },
-  keyboard: {
-    height: 34,
-    tilt: 2,
-  },
-  controller: {
-    height: 34,
-    tilt: -3,
-  },
-  monstera: {
-    height: 42,
-    tilt: 3,
-  },
-  pencil: {
-    height: 40,
-    tilt: -4,
-  },
-  babylon: {
-    height: 44,
-    tilt: 2,
-  },
-};
+// Each sticker is fitted into a square exactly one text line tall, so it
+// sits in the sentence like an icon or an emoji, never taller than the type.
+const BOX_REM = 1.75;
+const ART_SIZES = "64px";
 
 const BY_ID = new Map(
   STICKERS.map((sticker) => [
@@ -75,11 +30,10 @@ const BY_ID = new Map(
 );
 
 function slotStyle(sticker: StickerDefinition) {
-  const { height, tilt } = INLINE[sticker.id];
+  const fit = Math.min(BOX_REM / sticker.width, BOX_REM / sticker.height);
   return {
-    "--art-w": `${Math.round((sticker.width / sticker.height) * height)}px`,
-    "--art-h": `${height}px`,
-    "--tilt": `${tilt}deg`,
+    "--art-w": `${(sticker.width * fit).toFixed(3)}rem`,
+    "--art-h": `${(sticker.height * fit).toFixed(3)}rem`,
   } as CSSProperties;
 }
 
@@ -98,7 +52,7 @@ export default function Variant() {
       <p
         className={cn(
           styles.sentence,
-          "backdrop-plate mt-4 text-base text-foreground",
+          "backdrop-plate mt-4 text-base leading-7 text-foreground",
         )}
       >
         {SENTENCE.map((token, index) => {

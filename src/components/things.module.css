@@ -1,0 +1,153 @@
+/* Things: eight stickers standing in for eight nouns in one paragraph, each
+   sized like an inline icon. Every clause keeps its subject and verb in the
+   clear; the rest of it is out of focus until that lead is pressed. */
+.root {
+  --line: 1.75rem;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sentence {
+  line-height: var(--line);
+  text-wrap: pretty;
+}
+
+/* The heading is pressable (three times shows everything) but looks like
+   the other section headings. */
+.title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.title:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ---------- a clause ---------- */
+
+/* Subject and verb, set as a quiet pill so they read as pressable. */
+.lead {
+  display: inline;
+  margin: 0;
+  padding: 0.05em 0.5em;
+  border: 1px solid color-mix(in oklab, var(--foreground) 30%, transparent);
+  border-radius: 999px;
+  background: none;
+  color: var(--foreground);
+  font: inherit;
+  line-height: calc(var(--line) - 0.5em);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color 180ms var(--ease),
+    background-color 180ms var(--ease);
+}
+
+@media (hover: hover) {
+  .lead:hover {
+    border-color: color-mix(in oklab, var(--foreground) 55%, transparent);
+    background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  }
+}
+
+.lead:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Once its clause is open the pill fades back to the line. */
+.lead[aria-expanded="true"] {
+  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+/* The rest of the clause: present, readable to assistive tech, but out of
+   focus and untouchable until opened. Inline, so it wraps with the text. */
+.rest {
+  display: inline;
+  filter: blur(5px);
+  opacity: 0.75;
+  pointer-events: none;
+  user-select: none;
+  transition:
+    filter 480ms var(--ease),
+    opacity 480ms var(--ease);
+}
+
+.rest[data-open] {
+  filter: blur(0);
+  opacity: 1;
+  pointer-events: auto;
+  user-select: text;
+}
+
+/* ---------- a sticker in the line ---------- */
+
+/* The noun, written out when its sticker could not load. */
+.word {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* As wide as its own sticker, so a thin one (the Burj) does not open a
+     square-sized hole in the line. */
+  width: max(var(--art-w), 0.75rem);
+  height: var(--line);
+  /* Centred on the x-height, where an icon beside text belongs. */
+  vertical-align: middle;
+  margin-inline: 0.1em;
+}
+
+.art {
+  display: block;
+  width: var(--art-w);
+  height: var(--art-h);
+  filter: drop-shadow(0 0.5px 0 rgb(0 0 0 / 0.18));
+  transform-origin: center;
+  transition:
+    scale 180ms var(--ease),
+    filter 180ms var(--ease);
+}
+
+:global(.dark) .art {
+  filter: drop-shadow(0 0.5px 0 rgb(0 0 0 / 0.4));
+}
+
+/* Grows in place under the pointer; the sentence never reflows. */
+@media (hover: hover) {
+  .slot:hover .art {
+    scale: 1.3;
+    filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.2));
+  }
+}
+
+.art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rest,
+  .lead {
+    transition: none;
+  }
+
+  .slot:hover .art {
+    scale: none;
+  }
+}

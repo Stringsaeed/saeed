@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { setFavicon } from "@/lib/favicon";
 import { onIdle } from "@/lib/idle";
 
 const avatars = [
@@ -22,6 +23,16 @@ export function AnimatedAvatar() {
   const [allFaces, setAllFaces] = useState(false);
 
   useEffect(() => onIdle(() => setAllFaces(true)), []);
+
+  // The tab icon wears the same face as the avatar. The first face is already
+  // the static favicon, so nothing changes until the first swap.
+  useEffect(() => {
+    if (activeIndex === 0 && !allFaces) return;
+    setFavicon(avatars[activeIndex]);
+  }, [
+    activeIndex,
+    allFaces,
+  ]);
 
   useEffect(() => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");

@@ -10,18 +10,14 @@
 
 <picture>
 	<source media="(prefers-color-scheme: dark)" srcset=".github/readme/hero-dark.png" />
-	<img alt="The thisissaeed.com home page: desk stickers in the margins around a work history and a list of recent writing." src=".github/readme/hero-light.png" />
+	<img alt="The thisissaeed.com home page: an intro, a sentence with eight small stickers standing in for its nouns, a work history, and a list of recent writing." src=".github/readme/hero-light.png" />
 </picture>
 
-I'm Muhammed Ibrahim, a software engineer who works mostly in React Native. This is my corner of the internet. It has the usual parts: who I am, where I've worked, and what I've written. It also has a desk full of things you can play with.
+I'm Muhammed Ibrahim, a software engineer who works mostly in React Native. This is my corner of the internet. It has the usual parts: who I am, where I've worked, and what I've written. It also has a few things to play with.
 
-## What's on the desk
+## What's on the page
 
-**Six stickers you can throw around.** A mechanical keyboard, a monstera, a bass guitar, a PlayStation controller, a Uni pencil, and a bottle of Babylon perfume sit loose on the page. Drag one and flick it. It keeps sliding. Each one makes its own sound. The keyboard thocks, the plant rustles, the bass plucks an open E, and the perfume sprays. Tap a sticker to read why it's on my desk. The pencil one is about my father.
-
-<p align="center">
-	<img alt="A keyboard sticker and a perfume bottle sticker dragged across the home page while the dot grid ripples around them." src=".github/readme/sticker-drag.gif" width="720" />
-</p>
+**Eight things, in one sentence.** The pyramids, the Burj Khalifa, a bass guitar, a mechanical keyboard, a PlayStation controller, a monstera, a Uni pencil, and a bottle of Babylon perfume sit in a sentence about me, each one standing in for its noun like a small icon. Hover one and it leans in.
 
 **A shelf of books you can pull out.** *The Design of Everyday Things*, *Inspired*, *The Staff Engineer's Path*, *Scaling People*, *An Elegant Puzzle*, and *Where Is My Flying Car?*. Pick one off the shelf, turn it over in your hand, then let it go and watch it slide back into place.
 
@@ -35,15 +31,15 @@ I'm Muhammed Ibrahim, a software engineer who works mostly in React Native. This
 
 ## On your phone too
 
-On a small screen, the stickers gather on a desk of their own. Tap any of them for its story.
+Everything wraps to a small screen, the sentence of things included.
 
 <p align="center">
-	<img alt="The home page on a phone, with all six stickers arranged on a desk card under the intro." src=".github/readme/mobile.png" width="300" />
+	<img alt="The home page on a phone, with the intro and the sentence of eight stickers under it." src=".github/readme/mobile.png" width="300" />
 </p>
 
 <div align="center">
 
-### Go play with the stickers: [thisissaeed.com](https://thisissaeed.com)
+### Come say hi: [thisissaeed.com](https://thisissaeed.com)
 
 </div>
 

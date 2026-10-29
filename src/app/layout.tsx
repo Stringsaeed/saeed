@@ -29,45 +29,6 @@ const paperMono = localFont({
   preload: false,
 });
 
-// unicode-range so Arabic glyphs use this face even when Atkinson's fallback
-// would otherwise claim them (https://stackoverflow.com/a/6487102). Not
-// preloaded: the range means browsers only fetch a weight when a page
-// actually renders Arabic text.
-const ibmPlexSansArabic = localFont({
-  src: [
-    {
-      path: "../fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-arabic",
-  preload: false,
-  adjustFontFallback: false,
-  declarations: [
-    {
-      prop: "unicode-range",
-      value:
-        "U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC",
-    },
-  ],
-});
-
 // Lavishly Yours is split in two faces of the same font. The core face covers
 // ASCII plus the punctuation the site sets, and is the only one that is
 // preloaded; the original file stays behind it for every other Latin
@@ -165,7 +126,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${atkinson.variable} ${ibmPlexSansArabic.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} ${paperMono.variable} h-full antialiased`}
+      className={`${atkinson.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} ${paperMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>
     </html>

@@ -5,7 +5,6 @@ import { JsonLd } from "@/components/json-ld";
 import { SiteBackdrop } from "@/components/site-backdrop";
 import { SiteHeader, SiteSocialLinks } from "@/components/site-header";
 import { SiteSounds } from "@/components/site-sounds";
-import { StickerPile } from "@/components/sticker-pile";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getRootStructuredData } from "@/lib/structured-data";
 
@@ -25,7 +24,6 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           {children}
           <SiteSocialLinks />
         </div>
-        <StickerPile />
       </div>
       <DeferredAnalytics />
       <AnalyticsEvents />

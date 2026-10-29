@@ -11,8 +11,9 @@ a section inside the home column, no pile, no page lock.
 
 - `questions/` — Ask me a better question. Questions lead, the stickers arrive
   as answers, with two related questions after each story.
-- `rebus/` — Rebus. The stickers cover eight nouns in a second bio paragraph;
-  lift one to find the word and read its story inline. Copy lives in `copy.ts`.
+- `rebus/` — Rebus. A one-word "Things" heading over a bio paragraph in which
+  the stickers stand in for eight nouns. No stories here (those belong in a
+  blog post); hovering a sticker scales it up. Copy lives in `copy.ts`.
 - `portrait/` — A portrait in three objects. A place, a rhythm, and something
   kept close compose one of eighteen hand-placed impossible-scale portraits.
 - `backing-paper/` — Backing Paper. A die-cut sticker sheet; peel a sticker and

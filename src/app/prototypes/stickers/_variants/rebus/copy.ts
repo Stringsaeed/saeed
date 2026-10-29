@@ -1,23 +1,18 @@
 import type { StickerDefinition } from "@/components/sticker-data";
 
-// A sticker stuck over a noun. `word` is what the sticker hides and what the
-// accessibility tree reads; `wordArabic` is shown instead when the street
-// name is the real one.
+// A sticker standing in for a noun. `word` is what the sticker replaces; it
+// is read by assistive tech (as the image's alt) but never shown.
 export type RebusSlot = {
   id: StickerDefinition["id"];
   word: string;
-  wordArabic?: string;
 };
 
 export type RebusToken = string | RebusSlot;
 
-export const EYEBROW = {
-  arabic: "أشياء تشبهني",
-  gloss: "things that are like me",
-};
+// One word, set like the other section headings on the home page.
+export const TITLE = "Things";
 
-// Draft copy for Saeed to rewrite. The order is the reading order: the
-// pencil stays seventh so the father story lands before the perfume coda.
+// Draft copy for Saeed to rewrite. The order is the reading order.
 export const SENTENCE: RebusToken[] = [
   "I grew up beside the ",
   {
@@ -43,7 +38,6 @@ export const SENTENCE: RebusToken[] = [
   {
     id: "controller",
     word: "PlayStation",
-    wordArabic: "يابانية",
   },
   " since Winning Eleven, water two ",
   {

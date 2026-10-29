@@ -6,6 +6,7 @@ import * as mobile from "./mobile";
 import * as portrait from "./portrait";
 import * as questions from "./questions";
 import * as rebus from "./rebus";
+import * as shelf from "./shelf";
 import type { StickerDisplayProps, VariantKind, VariantModule } from "./types";
 
 export type PrototypeVariant = {
@@ -43,6 +44,11 @@ export const VARIANTS: PrototypeVariant[] = [
   variant("Mobile", "Balance: a hanging mobile with weight", mobile),
   variant("Questions", "Ask: questions lead, objects answer", questions),
   variant("Rebus", "Copy: stickers stuck over the nouns", rebus),
+  variant("Shelf", "Rail: eight equal things, nothing said", shelf),
   variant("Portrait", "Compose: a portrait in three objects", portrait),
-  variant("Backing Paper", "Sheet: peel a sticker, read the liner", backingPaper),
+  variant(
+    "Backing Paper",
+    "Sheet: peel a sticker, read the liner",
+    backingPaper,
+  ),
 ];

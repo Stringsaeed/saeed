@@ -1,0 +1,68 @@
+/* Shelf: eight stickers in eight equal cells on one hairline rail. Nothing
+   overlaps, nothing is bigger than its neighbour, nothing is said. */
+.shelf {
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --cell: 4.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 560px) {
+  .shelf {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+/* Each cell draws its own slice of the rail, so on a phone both rows get
+   one. The sticker stands on the rail, feet just over the line. */
+.cell {
+  display: grid;
+  place-items: end center;
+  height: var(--cell);
+  padding-bottom: 4px;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--foreground) 14%, transparent);
+}
+
+.art {
+  display: block;
+  width: var(--art-w);
+  height: var(--art-h);
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.18))
+    drop-shadow(0 0 0.5px rgb(0 0 0 / 0.35));
+  transition:
+    scale 180ms var(--ease),
+    translate 180ms var(--ease),
+    filter 180ms var(--ease);
+}
+
+:global(.dark) .art {
+  filter: drop-shadow(0 1px 0 rgb(0 0 0 / 0.4));
+}
+
+/* Grows up off the rail; the rail and its neighbours stay put. */
+@media (hover: hover) {
+  .cell:hover .art {
+    scale: 1.14;
+    translate: 0 -3px;
+    filter: drop-shadow(0 6px 12px rgb(0 0 0 / 0.2));
+  }
+}
+
+.art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell:hover .art {
+    scale: none;
+    translate: none;
+  }
+}

@@ -113,6 +113,16 @@ export const sideProjects: readonly SideProject[] = [
     ],
   },
   {
+    name: "Kudzu",
+    description:
+      "Free, open-source text expansion and clipboard history for macOS, built with Rust and Tauri.",
+    href: assertHttpsUrl("https://kudzu.site"),
+    type: "web",
+    logo: "/projects/kudzu.png",
+    brand: "#3255e7",
+    links: [source("Kudzu", "https://github.com/stringsaeed/kudzu")],
+  },
+  {
     name: "Jev demos",
     description: "Small demos built on TypeSafe’s Jev model.",
     href: assertHttpsUrl("https://lab.saeed.sh"),

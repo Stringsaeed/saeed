@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Atkinson_Hyperlegible_Next } from "next/font/google";
+import { Atkinson_Hyperlegible_Next, Inter, Roboto } from "next/font/google";
 import localFont from "next/font/local";
+import { PlatformScript } from "@/components/os/platform-script";
 import { getSiteOrigin, siteDescription, siteName } from "@/lib/site";
 import "./globals.css";
 
@@ -17,6 +18,25 @@ const atkinson = Atkinson_Hyperlegible_Next({
   fallback: [
     "Atkinson Hyperlegible Next Fallback",
   ],
+});
+
+// Inter stands in for SF Pro on machines without it, when the site is
+// dressed as iOS; Roboto when it is Android. Each is a variable font and is
+// only fetched once that platform is showing, so neither is preloaded.
+const inter = Inter({
+  subsets: [
+    "latin",
+  ],
+  variable: "--font-inter",
+  preload: false,
+});
+
+const roboto = Roboto({
+  subsets: [
+    "latin",
+  ],
+  variable: "--font-roboto",
+  preload: false,
 });
 
 // Paper Mono (paper.design/mono, SIL OFL 1.1), one variable file. Only small
@@ -126,8 +146,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${atkinson.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} ${paperMono.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      className={`${atkinson.variable} ${inter.variable} ${roboto.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} ${paperMono.variable} h-full antialiased`}
     >
+      <head>
+        <PlatformScript />
+      </head>
       <body className="min-h-full">{children}</body>
     </html>
   );

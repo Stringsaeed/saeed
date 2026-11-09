@@ -2,46 +2,38 @@
 
 # Saeed
 
-**A personal site you can pick things up from.**
+**A personal site that is a phone.**
 
 ### [thisissaeed.com →](https://thisissaeed.com)
 
 </div>
 
-<picture>
-	<source media="(prefers-color-scheme: dark)" srcset=".github/readme/hero-dark.png" />
-	<img alt="The thisissaeed.com home page: an intro, a sentence with eight small stickers standing in for its nouns, a work history, and a list of recent writing." src=".github/readme/hero-light.png" />
-</picture>
-
-I'm Muhammed Ibrahim, a software engineer who works mostly in React Native. This is my corner of the internet. It has the usual parts: who I am, where I've worked, and what I've written. It also has a few things to play with.
-
-## What's on the page
-
-**Eight things, in one sentence.** The pyramids, the Burj Khalifa, a bass guitar, a mechanical keyboard, a PlayStation controller, a monstera, a Uni pencil, and a bottle of Babylon perfume sit in a sentence about me, each one standing in for its noun like a small icon. Hover one and it leans in.
-
-**A shelf of books you can pull out.** *The Design of Everyday Things*, *Inspired*, *The Staff Engineer's Path*, *Scaling People*, *An Elegant Puzzle*, and *Where Is My Flying Car?*. Pick one off the shelf, turn it over in your hand, then let it go and watch it slide back into place.
-
 <p align="center">
-	<img alt="Scaling People by Claire Hughes Johnson pulled off the shelf as a 3D book, with the page faded behind it." src=".github/readme/bookshelf-open.png" width="720" />
+	<picture>
+		<source media="(prefers-color-scheme: dark)" srcset=".github/readme/mobile-dark.png" />
+		<img alt="The thisissaeed.com home screen on a phone: a widget with my face and title, the time in Dubai, my latest post, and a row of app icons above a dock." src=".github/readme/mobile-light.png" width="360" />
+	</picture>
 </p>
 
-**A page that answers back.** Links tick under your cursor. The face next to my name follows your pointer with its eyes. The dot grid behind everything moves out of your way. The speaker in the header mutes it all if you'd rather read in silence.
+I'm Muhammed Ibrahim, a software engineer who works mostly in React Native. The apps I build live on phones, so the site does too: on a desktop it stands in a room beside a few lines about me; on a phone it fills the screen and becomes the phone you are holding.
 
-**The rest of me.** Five companies I've shipped apps for, from Breadfast to Aquanow. Twelve posts on React Native and building software with coding agents. A list of 94 links I keep coming back to. Six side projects, like Azkarify and Trove.
+## What's on the phone
 
-## On your phone too
+**Three home-screen pages.** The first is about me: a widget with my face and title, the time in Dubai, and my latest post. The second holds the apps I shipped at work, Thndr, dubizzle cars, Nomo, Breadfast, du, Growth, Bird Nest, and Bynh, each opening to a screen with what I did on it and where to get it. The third holds my own apps, from Azkarify and Trove to PewPew and Kudzu.
 
-Everything wraps to a small screen, the sentence of things included.
+**Eight apps of my own making.** Work is my history, Apps the sixteen apps above, Writing the blog, Things the eight objects that say something about me with the stories behind them, Library the shelf of books you can still pull out, Links the saved links, Me the contact sheet, and Settings the phone's settings, which are the site's settings.
+
+**Pick a platform.** The switch beside the phone, and in Settings, re-dresses the whole thing. iOS gets the Dynamic Island, squircles, inset grouped lists, and SF or Inter. Android gets a punch-hole camera, round icons, Material lists, Roboto, and the search pill. Web drops the phone and lays the same screens out as a plain page. One codebase, three platforms, the way a React Native engineer would want it.
 
 <p align="center">
-	<img alt="The home page on a phone, with the intro and the sentence of eight stickers under it." src=".github/readme/mobile.png" width="300" />
+	<img alt="The same home screen dressed as Android: round icons, Material widgets, and a search pill above the dock." src=".github/readme/mobile-android.png" width="360" />
 </p>
 
-<div align="center">
+**Small things.** The phone tilts toward your pointer. The wallpaper is a live mesh gradient. Press the side button and it locks, with the latest posts as notifications. Open an app and it zooms out of its icon. Links tick under your cursor, and the speaker in the side panel mutes it all.
 
-### Come say hi: [thisissaeed.com](https://thisissaeed.com)
+## Reading
 
-</div>
+Posts open outside the phone in a full-width reader, with a way back into the Writing app.
 
 ---
 

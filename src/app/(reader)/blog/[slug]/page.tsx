@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
 import { PostBody } from "@/components/content/post-body";
@@ -71,21 +70,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
-      <main className="pb-24 pt-8 sm:pt-12">
+      <main className="pb-24 pt-2 sm:pt-4">
         <JsonLd data={getBlogPostStructuredData(post)} />
-        <Link
-          className="text-link backdrop-plate text-sm text-muted-foreground"
-          href="/blog"
-          data-analytics-event="Navigation Clicked"
-          data-analytics-destination="Blog"
-          data-analytics-location="Article"
-          data-sound="tap"
-        >
-          ← Blog
-        </Link>
 
         <article
-          className="mt-8"
+          className="mt-4"
           data-analytics-article={post.slug}
           data-analytics-slug={post.slug}
         >

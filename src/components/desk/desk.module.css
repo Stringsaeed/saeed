@@ -30,8 +30,7 @@
   transition: opacity 400ms steps(6);
 }
 
-.desk[data-ready] .canvas,
-.desk[data-ready] .edge {
+.desk[data-ready] .canvas {
   opacity: 1;
 }
 
@@ -41,24 +40,6 @@
 
 .desk[data-holding] .canvas {
   cursor: grabbing;
-}
-
-/* The line the things stand on. */
-.edge {
-  position: absolute;
-  left: 50%;
-  top: var(--desk-edge, 90%);
-  width: min(92%, 1040px);
-  height: 2px;
-  translate: -50% 0;
-  opacity: 0;
-  transition: opacity 400ms steps(6);
-  background: repeating-linear-gradient(
-    90deg,
-    var(--border) 0 4px,
-    transparent 4px 8px
-  );
-  pointer-events: none;
 }
 
 .labels {
@@ -126,4 +107,36 @@
   .label {
     transition: none;
   }
+}
+
+/* The shelf of cartridges is deeper than the desk of things. */
+.shelf {
+  height: clamp(280px, 34vw, 420px);
+}
+
+@media (max-width: 640px) {
+  .shelf {
+    height: clamp(420px, 120vw, 560px);
+  }
+}
+
+.caption {
+  flex-wrap: wrap;
+}
+
+.links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+}
+
+.links a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.links a:hover {
+  text-decoration-style: solid;
 }

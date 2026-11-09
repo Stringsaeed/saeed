@@ -1,11 +1,13 @@
 import * as THREE from "three";
+import { lowRes, redraw, snapVertices } from "./retro-material";
 import {
   disposeThing,
   disposeThingMaterials,
-  type ThingId,
   type ThingModel,
   type ThingSpec,
 } from "./things-models";
+
+type ThingId = string;
 
 // A desk with things on it, drawn the way a 1997 console would: a few
 // pixels per inch, flat colours, Bayer-dithered shading, and dithered
@@ -27,11 +29,20 @@ export type StageEvents = {
     >,
   ) => void;
   onReady: () => void;
+  /** A thing has come to rest on the desk after being in the air. */
+  onLand?: (id: ThingId) => void;
 };
 
 export type StageOptions = {
   pixelSize: number;
   reducedMotion: boolean;
+  /** Rows of things on a wide desk and on a narrow one. */
+  rows: {
+    wide: number;
+    narrow: number;
+  };
+  /** Room between things, in desk units, added to each footprint. */
+  spacing?: number;
 };
 
 type Body = {
@@ -46,9 +57,12 @@ type Body = {
   tilt: THREE.Vector2;
   held: boolean;
   grounded: boolean;
+  /** Set when the thing leaves the desk, so its landing can be heard. */
+  landed: boolean;
 };
 
 const GRAVITY = 42;
+const TAU = Math.PI * 2;
 const HOLD_HEIGHT = 1.6;
 
 const DITHER_VERT = /* glsl */ `
@@ -61,9 +75,20 @@ void main() {
 
 const DITHER_FRAG = /* glsl */ `
 precision highp float;
+#include <packing>
 uniform sampler2D tDiffuse;
+uniform sampler2D tDepth;
+uniform vec2 texel;
 uniform float levels;
+uniform float cameraNear;
+uniform float cameraFar;
+uniform vec3 ink;
 varying vec2 vUv;
+
+float viewDepth(vec2 uv) {
+  float d = texture2D(tDepth, uv).x;
+  return -perspectiveDepthToViewZ(d, cameraNear, cameraFar);
+}
 
 float bayer(vec2 p) {
   int x = int(mod(p.x, 4.0));
@@ -82,12 +107,22 @@ float bayer(vec2 p) {
 void main() {
   vec4 c = texture2D(tDiffuse, vUv);
   float t = bayer(gl_FragCoord.xy);
+  // A drawn line where the depth jumps: the edge of a thing against the
+  // desk, or the desk against the page.
+  float here = viewDepth(vUv);
+  float dl = viewDepth(vUv - vec2(texel.x, 0.0));
+  float dr = viewDepth(vUv + vec2(texel.x, 0.0));
+  float dd = viewDepth(vUv - vec2(0.0, texel.y));
+  float du = viewDepth(vUv + vec2(0.0, texel.y));
+  float jump = max(max(dl - here, dr - here), max(dd - here, du - here));
+  bool edge = jump > 0.45 + here * 0.012;
   // Coverage is dithered too: a half-transparent shadow becomes a stipple.
-  if (c.a <= t) discard;
+  if (c.a <= t && !edge) discard;
   vec3 rgb = c.a > 0.0 ? c.rgb / c.a : c.rgb;
   vec3 srgb = pow(clamp(rgb, 0.0, 1.0), vec3(1.0 / 2.2));
   float steps = levels - 1.0;
   vec3 q = floor(srgb * steps + t) / steps;
+  if (edge) q = ink;
   gl_FragColor = vec4(q, 1.0);
 }
 `;
@@ -117,13 +152,17 @@ export function createRetroStage(
   fill.position.set(6, 3, -4);
   scene.add(fill);
 
-  const camera = new THREE.PerspectiveCamera(28, 1, 1, 200);
+  const camera = new THREE.PerspectiveCamera(28, 1, 4, 120);
 
+  const depthTexture = new THREE.DepthTexture(2, 2);
+  depthTexture.minFilter = THREE.NearestFilter;
+  depthTexture.magFilter = THREE.NearestFilter;
   const target = new THREE.WebGLRenderTarget(2, 2, {
     minFilter: THREE.NearestFilter,
     magFilter: THREE.NearestFilter,
     depthBuffer: true,
     stencilBuffer: false,
+    depthTexture,
   });
   const postScene = new THREE.Scene();
   const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -134,8 +173,23 @@ export function createRetroStage(
       tDiffuse: {
         value: target.texture,
       },
+      tDepth: {
+        value: depthTexture,
+      },
+      texel: {
+        value: new THREE.Vector2(1 / 2, 1 / 2),
+      },
       levels: {
-        value: 6,
+        value: 5,
+      },
+      cameraNear: {
+        value: 1,
+      },
+      cameraFar: {
+        value: 200,
+      },
+      ink: {
+        value: new THREE.Color(0x1c1c1f),
       },
     },
     depthTest: false,
@@ -150,12 +204,23 @@ export function createRetroStage(
     opacity: 0.12,
     depthWrite: false,
   });
+  snapVertices(shadowMaterial);
+
+  // The desk itself: a slab the things stand on, coloured for the page.
+  const slabMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+  });
+  snapVertices(slabMaterial);
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), slabMaterial);
+  scene.add(slab);
 
   // Shadows are dark on a light page and light on a dark one.
   const applyTheme = () => {
     const dark = document.documentElement.classList.contains("dark");
     shadowMaterial.color.set(dark ? 0xffffff : 0x000000);
-    shadowMaterial.opacity = dark ? 0.1 : 0.12;
+    shadowMaterial.opacity = dark ? 0.05 : 0.14;
+    slabMaterial.color.set(dark ? 0x000000 : 0xffffff);
+    postMaterial.uniforms.ink.value.set(dark ? 0xd6d6dc : 0x1c1c1f);
     invalidate();
   };
   const theme = new MutationObserver(applyTheme);
@@ -187,6 +252,7 @@ export function createRetroStage(
       tilt: new THREE.Vector2(),
       held: false,
       grounded: true,
+      landed: false,
     };
   });
 
@@ -199,27 +265,28 @@ export function createRetroStage(
   let narrow = false;
 
   function layoutHomes() {
-    const count = bodies.length;
-    if (!narrow) {
-      // One row; the wide things get more room.
-      const weights = bodies.map((body) => body.model.radius + 0.9);
+    const rows = narrow ? options.rows.narrow : options.rows.wide;
+    const spacing = options.spacing ?? 0.9;
+    const perRow = Math.ceil(bodies.length / rows);
+    for (let row = 0; row < rows; row++) {
+      const members = bodies.slice(row * perRow, (row + 1) * perRow);
+      if (!members.length) continue;
+      // Each row shares its width by footprint, so wide things get room.
+      const weights = members.map((body) => body.model.radius + spacing);
       const total = weights.reduce((sum, w) => sum + w, 0);
-      let cursor = -halfWidth + 0.6;
       const span = halfWidth * 2 - 1.2;
-      bodies.forEach((body, index) => {
+      let cursor = -halfWidth + 0.6;
+      // Row 0 is the front row.
+      const z =
+        rows === 1 ? 0 : halfDepth - ((row + 0.5) / rows) * halfDepth * 2;
+      members.forEach((body, index) => {
         const slot = (weights[index] / total) * span;
-        const x = cursor + slot / 2;
+        body.home.set(
+          cursor + slot / 2,
+          0,
+          z + (rows === 1 ? (index % 2 === 0 ? 0.5 : -0.6) : 0),
+        );
         cursor += slot;
-        body.home.set(x, 0, (index % 2 === 0 ? 0.6 : -0.7) + (index % 3) * 0.2);
-      });
-    } else {
-      const perRow = Math.ceil(count / 2);
-      bodies.forEach((body, index) => {
-        const row = index < perRow ? 0 : 1;
-        const col = row === 0 ? index : index - perRow;
-        const n = row === 0 ? perRow : count - perRow;
-        const x = ((col + 0.5) / n) * (halfWidth * 2 - 1) - halfWidth + 0.5;
-        body.home.set(x, 0, row === 0 ? -halfDepth * 0.45 : halfDepth * 0.5);
       });
     }
     // A new layout is a resize: the things simply stand where they belong.
@@ -240,22 +307,29 @@ export function createRetroStage(
     const lh = Math.max(1, Math.round(height / options.pixelSize));
     renderer.setSize(lw, lh, false);
     target.setSize(lw, lh);
+    lowRes.value.set(lw, lh);
+    postMaterial.uniforms.texel.value.set(1 / lw, 1 / lh);
     camera.aspect = width / height;
     narrow = camera.aspect < 1.6;
     // The desk is as wide as the view at the far row; the camera backs off
     // until that many units fit.
-    halfWidth = narrow ? 6.2 : 8.6;
-    halfDepth = narrow ? 3.6 : 2.2;
+    const rows = narrow ? options.rows.narrow : options.rows.wide;
+    halfWidth = narrow ? 6.2 : 8.2;
+    halfDepth = rows === 1 ? 1.6 : 1.2 + rows * 1.3;
     const half = THREE.MathUtils.degToRad(camera.fov / 2);
     const distance = (halfWidth + 0.8) / (Math.tan(half) * camera.aspect);
-    const elevation = narrow ? 0.62 : 0.5;
+    const elevation = narrow ? 0.7 : 0.58;
     camera.position.set(
       0,
       Math.sin(elevation) * distance + 0.6,
       Math.cos(elevation) * distance,
     );
-    camera.lookAt(0, 0.4, 0);
+    camera.lookAt(0, 0.1, 0);
     camera.updateProjectionMatrix();
+    postMaterial.uniforms.cameraNear.value = camera.near;
+    postMaterial.uniforms.cameraFar.value = camera.far;
+    slab.scale.set(halfWidth * 2 + 1.6, 0.04, halfDepth * 2 + 1.8);
+    slab.position.set(0, -0.02, -0.2);
     layoutHomes();
     invalidate();
   }
@@ -356,7 +430,9 @@ export function createRetroStage(
               body.yawVel *= 0.6;
             } else {
               body.vel.y = 0;
+              if (!body.grounded && body.landed) events.onLand?.(body.spec.id);
               body.grounded = true;
+              body.landed = false;
             }
           }
           const friction = body.pos.y <= 0 ? Math.exp(-6 * dt) : 1;
@@ -377,6 +453,16 @@ export function createRetroStage(
         }
         body.tilt.x += (0 - body.tilt.x) * Math.min(1, 8 * dt);
         body.tilt.y += (0 - body.tilt.y) * Math.min(1, 8 * dt);
+      }
+      if (body.spec.settle && body.grounded && !body.held) {
+        // Shelved things turn back to face the front.
+        const turns = Math.round(body.yaw / TAU);
+        const rest = turns * TAU;
+        body.yawVel += (-(body.yaw - rest) * 60 - body.yawVel * 10) * dt;
+        if (Math.abs(body.yaw - rest) < 1e-3 && Math.abs(body.yawVel) < 1e-2) {
+          body.yaw = rest;
+          body.yawVel = 0;
+        }
       }
       if (Math.abs(body.yawVel) > 1e-3) {
         body.yaw += body.yawVel * dt;
@@ -429,12 +515,6 @@ export function createRetroStage(
   }
 
   function project() {
-    // The front edge of the desk, for the line drawn under the things.
-    tmp.set(0, 0, halfDepth + 0.4).project(camera);
-    canvas.parentElement?.style.setProperty(
-      "--desk-edge",
-      `${(((1 - tmp.y) / 2) * height).toFixed(1)}px`,
-    );
     projected.clear();
     for (const body of bodies) {
       tmp
@@ -480,6 +560,7 @@ export function createRetroStage(
 
   const resize = new ResizeObserver(() => fit());
   resize.observe(canvas);
+  redraw.add(invalidate);
   applyTheme();
   fit();
   // Everything arrives from above, one after another.
@@ -488,7 +569,8 @@ export function createRetroStage(
       body.pos.y = 5 + index * 0.9;
       body.vel.set(0, -2, 0);
       body.grounded = false;
-      body.yawVel = (index % 2 ? 1 : -1) * 1.4;
+      body.landed = true;
+      body.yawVel = body.spec.settle ? 0 : (index % 2 ? 1 : -1) * 1.4;
     });
   }
   frame = requestAnimationFrame(loop);
@@ -533,6 +615,7 @@ export function createRetroStage(
       if (!held) return;
       held.held = false;
       held.grounded = false;
+      held.landed = true;
       held = null;
       pointerTarget = null;
       invalidate();
@@ -544,6 +627,7 @@ export function createRetroStage(
       body.vel.y = Math.max(body.vel.y, 9);
       body.yawVel += 5.5;
       body.grounded = false;
+      body.landed = true;
       events.onActivate(id);
       invalidate();
     },
@@ -555,12 +639,16 @@ export function createRetroStage(
       disposed = true;
       cancelAnimationFrame(frame);
       resize.disconnect();
+      redraw.delete(invalidate);
       theme.disconnect();
       for (const body of bodies) {
         disposeThing(body.model);
         body.shadow.geometry.dispose();
       }
       shadowMaterial.dispose();
+      slab.geometry.dispose();
+      slabMaterial.dispose();
+      depthTexture.dispose();
       disposeThingMaterials();
       postMaterial.dispose();
       target.dispose();

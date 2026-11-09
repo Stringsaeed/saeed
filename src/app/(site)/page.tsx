@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ViewTransition } from "react";
 import { BookShelf } from "@/components/book-shelf";
 import { Desk } from "@/components/desk/desk";
-import { ProjectsSection } from "@/components/projects-section";
+import { ProjectsShelf } from "@/components/desk/projects-shelf";
 import { SaeedName } from "@/components/saeed-name";
 import {
   Card,
@@ -79,15 +79,16 @@ export default async function Home() {
             <span className="blueprint-dimension-tick" />
           </div>
           <h1
-            className="backdrop-plate max-w-136 text-xl leading-8 font-semibold tracking-tight sm:text-2xl sm:leading-9"
+            className="backdrop-plate max-w-152 text-[1.75rem] leading-[1.15] font-semibold tracking-tight text-balance sm:text-[2.5rem]"
             data-analytics-view="Content Viewed"
             data-analytics-label="Intro"
           >
-            I’m <SaeedName />, a software engineer.
+            I’m <SaeedName />. I build the apps on your phone.
           </h1>
-          <p className="backdrop-plate mt-3 max-w-152 text-base leading-7 text-muted-foreground">
-            I work on React Native, TypeScript, performance, accessibility,
-            native code, and agent-assisted engineering.
+          <p className="backdrop-plate mt-4 max-w-152 text-base leading-7 text-muted-foreground">
+            Senior software engineer in Dubai. Seven years of React Native,
+            TypeScript, Swift, and Kotlin for Thndr, Nomo, Dubizzle, Breadfast,
+            and du, plus a shelf of side projects and a desk of things.
           </p>
         </div>
 
@@ -168,16 +169,17 @@ export default async function Home() {
           </CardGroup>
         </div>
 
-        <div className="mt-12">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h2 className="list-heading backdrop-plate" data-bp-sec="03">
-              Projects
-            </h2>
-            <span aria-hidden="true" className="blueprint-redline">
-              ↙ stretched-link card matrix
-            </span>
+        <div
+          className="mt-12"
+          data-analytics-view="Content Viewed"
+          data-analytics-label="Projects"
+        >
+          <h2 className="list-heading backdrop-plate" data-bp-sec="03">
+            Projects
+          </h2>
+          <div className="mt-2">
+            <ProjectsShelf />
           </div>
-          <ProjectsSection />
         </div>
 
         <div

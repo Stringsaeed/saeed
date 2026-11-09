@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import type { StickerDefinition } from "@/components/sticker-data";
+import { disposeFlatMaterials, flat } from "./retro-material";
 
 // The eight things, modelled from a handful of primitives each: low-poly on
 // purpose, flat-shaded, in a few plain colours. The dithering pass does the
@@ -15,34 +16,20 @@ export type ThingModel = {
   height: number;
 };
 
-export type ThingSpec = {
-  id: ThingId;
+export type ThingSpec<Id extends string = string> = {
+  id: Id;
   name: string;
   /** Resting turn about y, in radians. */
   yaw: number;
+  /** Turn back to the resting yaw once on the desk, like a shelved thing. */
+  settle?: boolean;
   build: () => ThingModel;
 };
 
-type Mat = THREE.MeshLambertMaterial;
-const materials = new Map<number, Mat>();
-
-function mat(color: number): Mat {
-  let material = materials.get(color);
-  if (!material) {
-    material = new THREE.MeshLambertMaterial({
-      color,
-      flatShading: true,
-    });
-    materials.set(color, material);
-  }
-  return material;
-}
+const mat = flat;
 
 /** Releases the shared materials once no desk is using them. */
-export function disposeThingMaterials() {
-  for (const material of materials.values()) material.dispose();
-  materials.clear();
-}
+export const disposeThingMaterials = disposeFlatMaterials;
 
 export function disposeThing(model: ThingModel) {
   model.group.traverse((node) => {
@@ -137,25 +124,29 @@ function burj(): ThingModel {
   const group = new THREE.Group();
   const steel = 0xa8bccb;
   const glass = 0x8fa6b8;
-  group.add(cylinder(0.22, 0.3, 3.6, steel, 6));
+  group.add(cylinder(0.2, 0.26, 3.9, steel, 6));
   const spire = new THREE.Mesh(
     new THREE.ConeGeometry(0.08, 1.3, 6),
     mat(steel),
   );
-  spire.position.y = 3.6 + 0.65;
+  spire.position.y = 3.9 + 0.65;
   group.add(spire);
   const tiers = [
     [
-      2.5,
-      0.36,
+      3.0,
+      0.3,
     ],
     [
-      1.7,
-      0.58,
+      2.1,
+      0.5,
     ],
     [
-      1.0,
-      0.78,
+      1.3,
+      0.7,
+    ],
+    [
+      0.7,
+      0.9,
     ],
   ];
   for (const wing of [
@@ -165,7 +156,7 @@ function burj(): ThingModel {
   ]) {
     const angle = (wing / 3) * Math.PI * 2 + Math.PI / 6;
     for (const [height, distance] of tiers) {
-      const step = box(0.24, height, 0.24, glass);
+      const step = box(0.2, height, 0.2, glass);
       step.position.set(
         Math.cos(angle) * distance,
         height / 2,
@@ -178,7 +169,7 @@ function burj(): ThingModel {
   return {
     group,
     radius: 1.0,
-    height: 4.9,
+    height: 5.2,
   };
 }
 
@@ -560,7 +551,7 @@ function babylon(): ThingModel {
   };
 }
 
-export const THINGS: readonly ThingSpec[] = [
+export const THINGS: readonly ThingSpec<ThingId>[] = [
   {
     id: "pyramids",
     name: "Pyramids",

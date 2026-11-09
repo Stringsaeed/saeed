@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { BookShelf } from "@/components/book-shelf";
+import { Desk } from "@/components/desk/desk";
 import { ProjectsSection } from "@/components/projects-section";
 import { SaeedName } from "@/components/saeed-name";
-import { Things } from "@/components/things";
 import {
   Card,
   CardDescription,
@@ -91,8 +91,8 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="mt-12">
-          <Things />
+        <div className="mt-10 sm:mt-12">
+          <Desk />
         </div>
 
         <div

@@ -1,0 +1,129 @@
+/* The desk bleeds past the text column but never past the window. */
+.desk {
+  position: relative;
+  left: 50%;
+  width: min(100vw, 1180px);
+  translate: -50% 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stage {
+  position: relative;
+  height: clamp(240px, 30vw, 360px);
+  touch-action: none;
+}
+
+@media (max-width: 640px) {
+  .stage {
+    height: clamp(300px, 90vw, 420px);
+  }
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 400ms steps(6);
+}
+
+.desk[data-ready] .canvas,
+.desk[data-ready] .edge {
+  opacity: 1;
+}
+
+.desk[data-hover] .canvas {
+  cursor: grab;
+}
+
+.desk[data-holding] .canvas {
+  cursor: grabbing;
+}
+
+/* The line the things stand on. */
+.edge {
+  position: absolute;
+  left: 50%;
+  top: var(--desk-edge, 90%);
+  width: min(92%, 1040px);
+  height: 2px;
+  translate: -50% 0;
+  opacity: 0;
+  transition: opacity 400ms steps(6);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--border) 0 4px,
+    transparent 4px 8px
+  );
+  pointer-events: none;
+}
+
+.labels {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  translate: -50% 0;
+  padding: 2px 4px;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 160ms steps(4);
+}
+
+.label[data-show],
+.label:focus-visible {
+  opacity: 1;
+}
+
+.label:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+.caption {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  min-height: 1.5rem;
+  margin: 0.25rem auto 0;
+  max-width: 44rem;
+  padding: 0 1.5rem;
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.caption strong {
+  font-weight: 400;
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas,
+  .label {
+    transition: none;
+  }
+}

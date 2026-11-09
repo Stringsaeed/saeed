@@ -47,6 +47,7 @@
     monospace
   );
   --font-heading: var(--font-atkinson);
+  --font-pixel: var(--font-silkscreen), "Courier New", monospace;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);

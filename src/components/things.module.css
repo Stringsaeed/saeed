@@ -134,6 +134,30 @@
   filter: drop-shadow(0 0.5px 0 rgb(0 0 0 / 0.4));
 }
 
+:global([data-blueprint]) .lead {
+  border-radius: 2px;
+  border-style: dashed;
+  border-color: var(--bp-line);
+  font-family: var(--font-paper-mono);
+  font-size: 0.875em;
+}
+
+:global([data-blueprint]) .slot {
+  outline: 1px dashed var(--bp-line);
+  outline-offset: -1px;
+  padding-inline: 2px;
+}
+
+:global([data-blueprint]) .art {
+  filter: grayscale(1) contrast(1.25) sepia(0.35) hue-rotate(185deg)
+    saturate(2.2);
+}
+
+:global(.dark[data-blueprint]) .art {
+  filter: grayscale(1) brightness(1.25) contrast(1.2) sepia(0.4)
+    hue-rotate(180deg) saturate(2.4);
+}
+
 /* Grows in place under the pointer; the sentence never reflows. */
 @media (hover: hover) {
   .slot:hover .art {

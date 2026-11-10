@@ -290,6 +290,100 @@
     0 48px 48px -24px var(--dm-drop), 0 96px 96px -48px var(--dm-drop);
 }
 
+/* Blueprint mode — dual-substrate technical schematic:
+   Light = Warm architectural drafting vellum + cobalt ink + coral redlines.
+   Dark  = Prussian cyanotype + sun-bleached chalk + amber grease-pencil. */
+:root[data-blueprint] {
+  color-scheme: light;
+  --background: oklch(0.968 0.011 88);
+  --foreground: oklch(0.245 0.095 258);
+  --card: oklch(0.976 0.009 88);
+  --card-foreground: oklch(0.245 0.095 258);
+  --popover: oklch(0.976 0.009 88);
+  --popover-foreground: oklch(0.245 0.095 258);
+  --primary: oklch(0.53 0.21 25);
+  --primary-foreground: oklch(0.985 0.008 88);
+  --secondary: oklch(0.938 0.018 252);
+  --secondary-foreground: oklch(0.245 0.095 258);
+  --muted: oklch(0.938 0.018 252);
+  --muted-foreground: oklch(0.45 0.095 256);
+  --accent: oklch(0.928 0.024 254);
+  --accent-foreground: oklch(0.245 0.095 258);
+  --border: oklch(0.46 0.14 256 / 30%);
+  --input: oklch(0.46 0.14 256 / 34%);
+  --ring: oklch(0.48 0.165 256);
+  --radius: 0.15rem;
+  --hover: color-mix(in oklab, var(--foreground) 7%, var(--background));
+  --active: color-mix(in oklab, var(--foreground) 12%, var(--background));
+  --surface-1: #f2efe4;
+  --surface-2: #f5f2e8;
+  --surface-3: #f8f6ee;
+  --surface-4: #f8f6ee;
+  --surface-5: #faf8f2;
+  --surface-6: #faf8f2;
+  --surface-7: #fcfbf7;
+  --surface-8: #fcfbf7;
+  --shadow-color: oklch(0.44 0.15 256 / 35%);
+  --shadow-1: 0 0 0 1px var(--shadow-color);
+  --shadow-2: 0 0 0 1px var(--shadow-color);
+  --shadow-3: 0 0 0 1px var(--shadow-color);
+  --shadow-4: 0 0 0 1px var(--shadow-color);
+  --shadow-5: 0 0 0 1px var(--shadow-color);
+  --shadow-6: 0 0 0 1px var(--shadow-color);
+  --shadow-7: 0 0 0 1px var(--shadow-color);
+  --shadow-8: 0 0 0 1px var(--shadow-color);
+  --bp-line: oklch(0.44 0.15 256 / 52%);
+  --bp-grid-minor: oklch(0.48 0.14 256 / 8%);
+  --bp-grid-major: oklch(0.45 0.16 256 / 17%);
+  --bp-redline: oklch(0.53 0.215 25);
+  --bp-stamp-bg: oklch(0.968 0.011 88 / 88%);
+}
+
+.dark[data-blueprint] {
+  color-scheme: dark;
+  --background: oklch(0.225 0.068 252);
+  --foreground: oklch(0.955 0.018 235);
+  --card: oklch(0.252 0.072 252);
+  --card-foreground: oklch(0.955 0.018 235);
+  --popover: oklch(0.252 0.072 252);
+  --popover-foreground: oklch(0.955 0.018 235);
+  --primary: oklch(0.84 0.14 82);
+  --primary-foreground: oklch(0.225 0.068 252);
+  --secondary: oklch(0.28 0.075 250);
+  --secondary-foreground: oklch(0.955 0.018 235);
+  --muted: oklch(0.28 0.075 250);
+  --muted-foreground: oklch(0.77 0.068 236);
+  --accent: oklch(0.295 0.078 250);
+  --accent-foreground: oklch(0.955 0.018 235);
+  --border: oklch(0.82 0.075 236 / 28%);
+  --input: oklch(0.82 0.075 236 / 34%);
+  --ring: oklch(0.8 0.1 235);
+  --radius: 0.15rem;
+  --hover: color-mix(in oklab, var(--foreground) 8%, var(--background));
+  --active: color-mix(in oklab, var(--foreground) 14%, var(--background));
+  --surface-1: #0d2747;
+  --surface-2: #102d52;
+  --surface-3: #13335c;
+  --surface-4: #163966;
+  --surface-5: #193f70;
+  --surface-6: #1c457a;
+  --surface-7: #204c85;
+  --surface-8: #245390;
+  --shadow-1: inset 0 0 0 1px var(--bp-line);
+  --shadow-2: inset 0 0 0 1px var(--bp-line);
+  --shadow-3: inset 0 0 0 1px var(--bp-line);
+  --shadow-4: inset 0 0 0 1px var(--bp-line);
+  --shadow-5: inset 0 0 0 1px var(--bp-line);
+  --shadow-6: inset 0 0 0 1px var(--bp-line);
+  --shadow-7: inset 0 0 0 1px var(--bp-line);
+  --shadow-8: inset 0 0 0 1px var(--bp-line);
+  --bp-line: oklch(0.8 0.085 236 / 50%);
+  --bp-grid-minor: oklch(0.78 0.08 236 / 8.5%);
+  --bp-grid-major: oklch(0.82 0.095 236 / 18%);
+  --bp-redline: oklch(0.84 0.145 80);
+  --bp-stamp-bg: oklch(0.225 0.068 252 / 88%);
+}
+
 /* Text over the dithered backdrop sits on a plate of page color with a
    feathered edge, so the dither fades out around it instead of running
    through the letters. Follows the theme through --background. */
@@ -1014,6 +1108,288 @@
   .book-mover:active {
     cursor: grabbing;
   }
+
+  /* Blueprint annotations stay completely out of layout until blueprint mode
+     is active, so normal light and dark modes stay pixel-identical. */
+  .blueprint-dimension-bar,
+  .blueprint-redline,
+  .blueprint-spec-chip,
+  .blueprint-leader {
+    display: none;
+  }
+
+  [data-blueprint] .backdrop-plate {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .blueprint-grid {
+    background-image:
+      linear-gradient(to right, var(--bp-grid-major) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--bp-grid-major) 1px, transparent 1px),
+      linear-gradient(to right, var(--bp-grid-minor) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--bp-grid-minor) 1px, transparent 1px);
+    background-size:
+      120px 120px,
+      120px 120px,
+      24px 24px,
+      24px 24px;
+    background-position: center top;
+  }
+
+  .blueprint-frame {
+    border: 1px solid var(--bp-line);
+  }
+
+  .blueprint-corner {
+    position: absolute;
+    display: flex;
+    width: 0.75rem;
+    height: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-paper-mono);
+    font-size: 12px;
+    line-height: 1;
+    color: var(--bp-line);
+  }
+
+  .blueprint-ruler-x {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 8px;
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        var(--bp-line) 0 1px,
+        transparent 1px 60px
+      ),
+      repeating-linear-gradient(
+        to right,
+        var(--bp-grid-major) 0 1px,
+        transparent 1px 12px
+      );
+    background-size:
+      60px 8px,
+      12px 4px;
+    background-repeat: repeat-x;
+  }
+
+  .blueprint-ruler-y {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 8px;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        var(--bp-line) 0 1px,
+        transparent 1px 60px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        var(--bp-grid-major) 0 1px,
+        transparent 1px 12px
+      );
+    background-size:
+      8px 60px,
+      4px 12px;
+    background-repeat: repeat-y;
+  }
+
+  .blueprint-caliper-x,
+  .blueprint-caliper-y {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 150ms ease;
+    will-change: transform;
+  }
+
+  .blueprint-sheet[data-cursor="active"] .blueprint-caliper-x,
+  .blueprint-sheet[data-cursor="active"] .blueprint-caliper-y {
+    opacity: 1;
+  }
+
+  .blueprint-caliper-x {
+    top: 0;
+    left: -12px;
+    height: 12px;
+    border-left: 1px solid var(--bp-redline);
+    transform: translate3d(var(--bp-cx, -100px), 0, 0);
+  }
+
+  .blueprint-caliper-y {
+    top: -12px;
+    left: 0;
+    width: 12px;
+    border-top: 1px solid var(--bp-redline);
+    transform: translate3d(0, var(--bp-cy, -100px), 0);
+  }
+
+  .blueprint-caliper-tag {
+    padding-inline: 4px;
+    font-family: var(--font-paper-mono);
+    font-size: 9px;
+    line-height: 12px;
+    letter-spacing: 0.04em;
+    color: var(--bp-redline);
+    white-space: nowrap;
+  }
+
+  .blueprint-caliper-y .blueprint-caliper-tag {
+    transform: translateY(2px);
+  }
+
+  [data-blueprint] .blueprint-avatar {
+    border-radius: 9999px;
+    outline: 1px dashed var(--bp-line);
+    outline-offset: 2px;
+  }
+
+  [data-blueprint] .blueprint-hero-frame {
+    position: relative;
+    border: 1px dashed var(--bp-line);
+    padding: 0.875rem 1rem 1rem;
+    background-color: color-mix(in oklab, var(--background) 78%, transparent);
+  }
+
+  [data-blueprint] .blueprint-dimension-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .blueprint-dimension-line {
+    flex: 1;
+    height: 1px;
+    background-color: var(--bp-line);
+  }
+
+  .blueprint-dimension-tick {
+    width: 1px;
+    height: 7px;
+    background-color: var(--bp-line);
+  }
+
+  [data-blueprint] .blueprint-redline {
+    display: inline-block;
+    font-family: var(--font-paper-mono);
+    font-size: 11px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: var(--bp-redline);
+  }
+
+  [data-blueprint] [data-bp-sec]::before {
+    content: "SEC " attr(data-bp-sec) " // ";
+    font-family: var(--font-paper-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--bp-redline);
+    vertical-align: middle;
+  }
+
+  [data-blueprint] .blueprint-spec-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px dashed var(--bp-line);
+    padding: 1px 5px;
+    font-family: var(--font-paper-mono);
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--muted-foreground);
+  }
+
+  @media (width >= 40rem) {
+    [data-blueprint] .blueprint-leader {
+      display: block;
+      flex: 1;
+      min-width: 1.5rem;
+      border-bottom: 1px dashed var(--bp-line);
+      opacity: 0.55;
+      transform: translateY(-3px);
+    }
+  }
+
+  .blueprint-title-block {
+    border: 1px solid var(--bp-line);
+    background-color: var(--bp-stamp-bg);
+    backdrop-filter: blur(4px);
+  }
+
+  /* CardGroup & Card schematic overrides in blueprint mode */
+  [data-blueprint] [data-slot="card-group"] {
+    box-shadow: none !important;
+    border-color: var(--bp-line);
+    background-color: var(--bp-stamp-bg);
+  }
+
+  [data-blueprint] [data-slot="card"] > span.bg-border\/60 {
+    background: transparent;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  [data-blueprint] [data-slot="card"] img {
+    border-radius: 2px !important;
+    outline: 1px dashed var(--bp-line);
+    outline-offset: 1px;
+  }
+
+  /* Bookshelf CAD elevation treatment */
+  [data-blueprint] .bookshelf-board {
+    border-radius: 0;
+    border: 1px solid var(--bp-line);
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent 0 5px,
+      var(--bp-grid-major) 5px 6px
+    );
+    box-shadow: none;
+  }
+
+  [data-blueprint] .shelf-book {
+    border-radius: 0;
+  }
+
+  [data-blueprint] .shelf-book[data-bp-spec]::before {
+    content: attr(data-bp-spec);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    z-index: 20;
+    transform: translateX(-50%);
+    border: 1px solid var(--bp-line);
+    background-color: var(--background);
+    padding: 1px 5px;
+    font-family: var(--font-paper-mono);
+    font-size: 10px;
+    line-height: 1.4;
+    white-space: nowrap;
+    color: var(--foreground);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 140ms ease;
+  }
+
+  [data-blueprint] .shelf-book[data-bp-spec]:hover::before,
+  [data-blueprint] .shelf-book[data-bp-spec]:focus-visible::before {
+    opacity: 1;
+  }
+
+  [data-blueprint] .blueprint-spine {
+    background: color-mix(
+      in oklab,
+      var(--background) 88%,
+      var(--foreground)
+    ) !important;
+    box-shadow: inset 0 0 0 1px var(--bp-line);
+  }
+
+  [data-blueprint] .blueprint-spine::after {
+    display: none;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1060,6 +1436,30 @@
   from {
     opacity: 0;
     translate: 0 8px;
+  }
+}
+
+/* Circular drafting-compass wipe when toggling blueprint mode on or off. */
+html[data-blueprint-wipe] ::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+
+html[data-blueprint-wipe] ::view-transition-new(root) {
+  animation: 520ms cubic-bezier(0.22, 1, 0.36, 1) both blueprint-unfurl;
+  z-index: 2;
+}
+
+@keyframes blueprint-unfurl {
+  from {
+    clip-path: circle(
+      0px at var(--bp-x, calc(100vw - 3rem)) var(--bp-y, 2.25rem)
+    );
+  }
+  to {
+    clip-path: circle(
+      150vmax at var(--bp-x, calc(100vw - 3rem)) var(--bp-y, 2.25rem)
+    );
   }
 }
 

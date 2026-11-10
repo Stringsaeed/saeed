@@ -310,6 +310,172 @@ const definitions = {
       },
     ],
   },
+  // Drafting vellum unrolling across a desk with a crisp brass compass click.
+  blueprintOn: {
+    layers: [
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 620,
+          resonance: 1.8,
+        },
+        envelope: {
+          attack: 0.01,
+          decay: 0.09,
+        },
+        gain: 0.08,
+      },
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 1480,
+          resonance: 1.9,
+        },
+        envelope: {
+          attack: 0.014,
+          decay: 0.11,
+        },
+        gain: 0.075,
+        delay: 0.028,
+      },
+      {
+        source: {
+          type: "sine",
+          frequency: {
+            start: 2350,
+            end: 3120,
+          },
+        },
+        envelope: {
+          decay: 0.04,
+        },
+        gain: 0.045,
+        delay: 0.065,
+      },
+    ],
+  },
+  // Rolling the sheet back up with a quiet wooden straightedge settle.
+  blueprintOff: {
+    layers: [
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 1440,
+          resonance: 1.8,
+        },
+        envelope: {
+          attack: 0.008,
+          decay: 0.08,
+        },
+        gain: 0.075,
+      },
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 580,
+          resonance: 1.8,
+        },
+        envelope: {
+          attack: 0.01,
+          decay: 0.1,
+        },
+        gain: 0.07,
+        delay: 0.025,
+      },
+      {
+        source: {
+          type: "triangle",
+          frequency: {
+            start: 360,
+            end: 195,
+          },
+        },
+        envelope: {
+          decay: 0.024,
+        },
+        gain: 0.07,
+        delay: 0.055,
+      },
+    ],
+  },
+  // A 0.5mm mechanical drafting pencil click for taps in blueprint mode.
+  blueprintTap: {
+    layers: [
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "bandpass",
+          frequency: 5400,
+          resonance: 3.6,
+        },
+        envelope: {
+          decay: 0.004,
+        },
+        gain: 0.12,
+      },
+      {
+        source: {
+          type: "sine",
+          frequency: {
+            start: 3100,
+            end: 2050,
+          },
+        },
+        envelope: {
+          decay: 0.009,
+        },
+        gain: 0.042,
+      },
+    ],
+  },
+  // A fine vernier caliper tick on hover in blueprint mode.
+  blueprintHover: {
+    layers: [
+      {
+        source: {
+          type: "sine",
+          frequency: 2720,
+        },
+        envelope: {
+          decay: 0.005,
+        },
+        gain: 0.018,
+      },
+      {
+        source: {
+          type: "noise",
+          color: "white",
+        },
+        filter: {
+          type: "highpass",
+          frequency: 7400,
+        },
+        envelope: {
+          decay: 0.002,
+        },
+        gain: 0.015,
+      },
+    ],
+  },
 } satisfies Record<string, SoundDefinition>;
 
 export type SoundName = keyof typeof definitions;
@@ -405,10 +571,22 @@ export function subscribeSound(listener: () => void) {
   };
 }
 
+function resolveBlueprintCue(name: SoundName): SoundName {
+  if (
+    typeof document !== "undefined" &&
+    document.documentElement.hasAttribute("data-blueprint")
+  ) {
+    if (name === "tap") return "blueprintTap";
+    if (name === "hover") return "blueprintHover";
+  }
+  return name;
+}
+
 /** Plays a cue unless sound is off or the same cue just played. */
 export function playSound(name: SoundName) {
-  if (!isSoundEnabled() || throttled(name, MIN_GAP_MS)) return;
-  withPlayer(definitions[name], (play) =>
+  const cue = resolveBlueprintCue(name);
+  if (!isSoundEnabled() || throttled(cue, MIN_GAP_MS)) return;
+  withPlayer(definitions[cue], (play) =>
     play({
       jitter: {
         detune: 20,

@@ -1,7 +1,10 @@
 "use client";
 
 import { type MotionValue, motion } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useBlueprint } from "@/lib/blueprint";
+import type { BlueprintMeshPalette } from "@/lib/books-3d/model";
 import type { BookModel } from "@/lib/books-3d/types";
 import type { BookLibrary } from "@/lib/books-3d/viewer";
 
@@ -18,6 +21,18 @@ type Props = {
   onReady: () => void;
 };
 
+const DARK_CYANOTYPE_PALETTE: BlueprintMeshPalette = {
+  core: 0x0b223e,
+  edge: 0xe2f1ff,
+  facet: 0x56a8f5,
+};
+
+const LIGHT_VELLUM_PALETTE: BlueprintMeshPalette = {
+  core: 0xf6f4ec,
+  edge: 0x1d4ed8,
+  facet: 0x60a5fa,
+};
+
 export function BookModelView({
   model,
   getLibrary,
@@ -29,6 +44,19 @@ export function BookModelView({
   rotateY,
   onReady,
 }: Props) {
+  const blueprint = useBlueprint();
+  const { resolvedTheme } = useTheme();
+  const palette = useMemo<BlueprintMeshPalette | null>(() => {
+    if (!blueprint) return null;
+    return resolvedTheme === "light"
+      ? LIGHT_VELLUM_PALETTE
+      : DARK_CYANOTYPE_PALETTE;
+  }, [
+    blueprint,
+    resolvedTheme,
+  ]);
+  const paletteRef = useRef(palette);
+
   const host = useRef<HTMLDivElement>(null);
   const viewer = useRef<Viewer | null>(null);
   const [failed, setFailed] = useState(false);
@@ -50,6 +78,12 @@ export function BookModelView({
     perspective,
   ]);
   useLayoutEffect(() => {
+    paletteRef.current = palette;
+    viewer.current?.setBlueprint(palette);
+  }, [
+    palette,
+  ]);
+  useLayoutEffect(() => {
     const element = host.current;
     if (!element) return;
     let cancelled = false;
@@ -60,7 +94,12 @@ export function BookModelView({
     getLibrary()
       .then(async (library) => {
         if (cancelled) return;
-        instance = library.attach(element, model, dimensions.current);
+        instance = library.attach(
+          element,
+          model,
+          dimensions.current,
+          paletteRef.current,
+        );
         viewer.current = instance;
         update();
         await instance.ready;

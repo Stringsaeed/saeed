@@ -13,11 +13,13 @@ import {
   type CSSProperties,
   type PointerEvent,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import type { Book } from "@/data/books";
+import { useBlueprint } from "@/lib/blueprint";
 import {
   type PulledBookSize,
   REST_ROTATE_X,
@@ -114,6 +116,60 @@ type PulledBookProps = {
   slot: HTMLElement;
 };
 
+function formatSignedAngle(value: number) {
+  const rounded = Math.round(value);
+  const sign = rounded >= 0 ? "+" : "-";
+  return `${sign}${String(Math.abs(rounded)).padStart(2, "0")}°`;
+}
+
+function BlueprintBookTelemetry({
+  model,
+  rotateX,
+  rotateY,
+}: {
+  model: BookModel;
+  rotateX: ReturnType<typeof useMotionValue<number>>;
+  rotateY: ReturnType<typeof useMotionValue<number>>;
+}) {
+  const poseRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const sync = () => {
+      if (!poseRef.current) return;
+      poseRef.current.textContent = `PITCH ${formatSignedAngle(rotateX.get())} · YAW ${formatSignedAngle(rotateY.get())}`;
+    };
+    sync();
+    const stopX = rotateX.on("change", sync);
+    const stopY = rotateY.on("change", sync);
+    return () => {
+      stopX();
+      stopY();
+    };
+  }, [
+    rotateX,
+    rotateY,
+  ]);
+
+  const { width, height, depth } = model.dimensionsMm;
+  const binding =
+    model.kind === "bound" ? model.binding.toUpperCase() : "HARDCOVER MESH";
+
+  return (
+    <p
+      aria-hidden="true"
+      className="mt-2 inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 border border-dashed border-[var(--bp-line)] px-2.5 py-1 font-mono text-[10px] tracking-wider text-muted-foreground uppercase tabular-nums"
+    >
+      <span>
+        {Math.round(width)}×{Math.round(height)}×{Math.round(depth)}MM
+      </span>
+      <span>·</span>
+      <span>{binding}</span>
+      <span>·</span>
+      <span ref={poseRef}>PITCH +00° · YAW +00°</span>
+    </p>
+  );
+}
+
 function PulledBook({
   book,
   model,
@@ -126,6 +182,7 @@ function PulledBook({
   size,
   slot,
 }: PulledBookProps) {
+  const blueprint = useBlueprint();
   const stageRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
   const handleModelReady = useCallback(() => setReady(true), []);
@@ -446,7 +503,7 @@ function PulledBook({
             </p>
           )}
           <motion.div
-            className="max-w-72 text-center"
+            className="max-w-88 text-center"
             style={{
               // Perspective pushes the near corner below the stage; clear it.
               marginTop: size.height * 0.08 + 28,
@@ -460,6 +517,13 @@ function PulledBook({
             <Dialog.Description className="mt-0.5 text-sm text-muted-foreground">
               {book.author}
             </Dialog.Description>
+            {blueprint ? (
+              <BlueprintBookTelemetry
+                model={model}
+                rotateX={rotateX}
+                rotateY={rotateY}
+              />
+            ) : null}
           </motion.div>
 
           <Dialog.Close

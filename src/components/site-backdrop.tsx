@@ -3,6 +3,7 @@
 import { Dithering } from "@paper-design/shaders-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useBlueprint } from "@/lib/blueprint";
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -33,10 +34,19 @@ function useWebGL2() {
 // under the content; frozen for reduced motion.
 export function SiteBackdrop() {
   const { resolvedTheme } = useTheme();
+  const blueprint = useBlueprint();
   const reduced = usePrefersReducedMotion();
   const webgl = useWebGL2();
   if (!webgl) return null;
   const dark = resolvedTheme !== "light";
+  const colorFront = blueprint
+    ? dark
+      ? "#4da3ff"
+      : "#2563eb"
+    : dark
+      ? "#3a3a44"
+      : "#c9c9d2";
+  const opacity = blueprint ? (dark ? 0.24 : 0.16) : dark ? 0.55 : 0.4;
   return (
     <div
       aria-hidden="true"
@@ -44,13 +54,13 @@ export function SiteBackdrop() {
       style={{
         maskImage:
           "radial-gradient(ellipse 85% 60% at 50% 0%, black 10%, transparent 75%)",
-        opacity: dark ? 0.55 : 0.4,
+        opacity,
       }}
     >
       <Dithering
         className="size-full"
         colorBack="#00000000"
-        colorFront={dark ? "#3a3a44" : "#c9c9d2"}
+        colorFront={colorFront}
         shape="warp"
         type="4x4"
         size={2.5}

@@ -27,6 +27,7 @@ import {
 import { spring } from "@/lib/springs";
 import { cn } from "@/lib/utils";
 import { AnimatedAvatar } from "./animated-avatar";
+import { BlueprintToggle } from "./blueprint-toggle";
 import { SaeedName } from "./saeed-name";
 import { SoundToggle } from "./sound-toggle";
 import { ThemeSwitcher } from "./theme-switcher-trigger";
@@ -65,11 +66,14 @@ const socialLinks = [
   },
 ];
 
-// The header needs about 412px for the labelled Blog and Links buttons, so
-// below 420px they collapse to icon-only squares (the label stays in the DOM
-// for screen readers).
-const NAV_LINK_CLASS = "max-[419px]:w-9 max-[419px]:gap-0 max-[419px]:px-0";
-const NAV_LABEL_CLASS = "max-[419px]:sr-only";
+// The header needs about 454px for the labelled Blog and Links buttons plus
+// the three mode toggles, so below 464px they collapse to icon-only squares
+// (the label stays in the DOM for screen readers), and below 370px the icon
+// squares tighten from 36px to 32px so 320px phones keep breathing room.
+const NAV_LINK_CLASS =
+  "max-[463px]:w-9 max-[463px]:gap-0 max-[463px]:px-0 max-[369px]:size-8";
+const NAV_ICON_CLASS = "max-[369px]:size-8";
+const NAV_LABEL_CLASS = "max-[463px]:sr-only";
 
 export function SiteHeader() {
   return (
@@ -87,7 +91,7 @@ export function SiteHeader() {
       </Link>
 
       <nav
-        className="ml-auto flex items-center gap-1.5 sm:gap-2"
+        className="ml-auto flex items-center gap-1.5 max-[369px]:gap-1 sm:gap-2"
         aria-label="Site links"
       >
         <Button
@@ -124,8 +128,9 @@ export function SiteHeader() {
             <span className={NAV_LABEL_CLASS}>Links</span>
           </Link>
         </Button>
-        <ThemeSwitcher />
-        <SoundToggle />
+        <BlueprintToggle className={NAV_ICON_CLASS} />
+        <ThemeSwitcher className={NAV_ICON_CLASS} />
+        <SoundToggle className={NAV_ICON_CLASS} />
       </nav>
     </header>
   );

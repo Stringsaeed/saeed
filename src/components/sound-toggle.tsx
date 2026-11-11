@@ -8,7 +8,7 @@ import { isSoundEnabled, setSoundEnabled, subscribeSound } from "@/lib/sound";
 const serverSnapshot = () => true;
 const toggleSound = () => setSoundEnabled(!isSoundEnabled());
 
-export function SoundToggle() {
+export function SoundToggle({ className }: { className?: string }) {
   const enabled = useSyncExternalStore(
     subscribeSound,
     isSoundEnabled,
@@ -21,6 +21,7 @@ export function SoundToggle() {
       type="button"
       variant="surface"
       size="icon"
+      className={className}
       aria-label="Sound"
       aria-pressed={enabled}
       title={enabled ? "Turn sound off" : "Turn sound on"}

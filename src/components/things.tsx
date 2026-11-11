@@ -141,18 +141,23 @@ export function Things() {
       data-analytics-view="Content Viewed"
       data-analytics-label="Things"
     >
-      <h2 className="list-heading backdrop-plate">
-        <button
-          type="button"
-          className={styles.title}
-          aria-expanded={open.size === ALL_IDS.size}
-          aria-description="Press three times to show or hide everything"
-          data-sound-hover="hover"
-          onClick={onTitlePress}
-        >
-          {TITLE}
-        </button>
-      </h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2 className="list-heading backdrop-plate" data-bp-sec="01">
+          <button
+            type="button"
+            className={styles.title}
+            aria-expanded={open.size === ALL_IDS.size}
+            aria-description="Press three times to show or hide everything"
+            data-sound-hover="hover"
+            onClick={onTitlePress}
+          >
+            {TITLE}
+          </button>
+        </h2>
+        <span aria-hidden="true" className="blueprint-redline">
+          ↙ 3× press heading to reveal all [{open.size}/{ALL_IDS.size}]
+        </span>
+      </div>
 
       <p
         className={cn(

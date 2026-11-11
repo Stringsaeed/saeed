@@ -32,8 +32,10 @@ const themeOptions = [
 ] as const;
 
 export function ThemeSwitcher({
+  className,
   defaultOpen = false,
 }: {
+  className?: string;
   /** Opens on mount, for a press that landed before this module loaded. */
   defaultOpen?: boolean;
 }) {
@@ -75,6 +77,7 @@ export function ThemeSwitcher({
             type="button"
             variant="surface"
             size="icon"
+            className={className}
             active={open}
             aria-label={`Choose theme, current: ${selectedLabel}`}
             title={`Theme: ${selectedLabel}`}

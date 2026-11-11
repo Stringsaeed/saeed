@@ -19,18 +19,24 @@ export function ThemeIcon() {
 }
 
 type PlaceholderProps = {
+  className?: string;
   onActivate?: () => void;
   onIntent?: () => void;
 };
 
 // Same markup the menu's trigger renders while it is closed, so the swap is
 // invisible.
-function ThemeTriggerPlaceholder({ onActivate, onIntent }: PlaceholderProps) {
+function ThemeTriggerPlaceholder({
+  className,
+  onActivate,
+  onIntent,
+}: PlaceholderProps) {
   return (
     <Button
       type="button"
       variant="surface"
       size="icon"
+      className={className}
       aria-label="Choose theme, current: System"
       title="Theme: System"
       onClick={onActivate}
@@ -57,16 +63,21 @@ const ThemeSwitcherMenu = dynamic(
  * is needed to paint the header, so it loads once the page settles, or as
  * soon as someone reaches for the button.
  */
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ className }: { className?: string }) {
   const [ready, setReady] = useState(false);
   const [openOnMount, setOpenOnMount] = useState(false);
 
   useEffect(() => onIdle(() => setReady(true)), []);
 
-  if (ready) return <ThemeSwitcherMenu defaultOpen={openOnMount} />;
+  if (ready) {
+    return (
+      <ThemeSwitcherMenu className={className} defaultOpen={openOnMount} />
+    );
+  }
 
   return (
     <ThemeTriggerPlaceholder
+      className={className}
       onActivate={() => {
         setOpenOnMount(true);
         setReady(true);

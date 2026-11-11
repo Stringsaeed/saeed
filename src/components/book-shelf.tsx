@@ -11,11 +11,12 @@ import {
 } from "react";
 import { BOOKS } from "@/data/books";
 import { BOOK_MODELS } from "@/data/books-3d";
+import { useBlueprint } from "@/lib/blueprint";
 import { pulledBookSize } from "@/lib/book-geometry";
 import type { BookLibrary } from "@/lib/books-3d/viewer";
 import { onIdle } from "@/lib/idle";
 import { playSound } from "@/lib/sound";
-import { BookSpine } from "./book-spine";
+import { BlueprintBookSpine, BookSpine } from "./book-spine";
 import type { PulledState } from "./pulled-book-dialog";
 
 const loadPulledBookDialog = () => import("./pulled-book-dialog");
@@ -39,6 +40,7 @@ function viewportSize() {
 }
 
 export function BookShelf() {
+  const blueprint = useBlueprint();
   const library = useRef<Promise<BookLibrary> | null>(null);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const getLibrary = useCallback(() => {
@@ -182,6 +184,9 @@ export function BookShelf() {
           const depth = dimensions
             ? (book.height * dimensions.depth) / dimensions.height
             : book.depth;
+          const specLabel = dimensions
+            ? `${Math.round(dimensions.width)}×${Math.round(dimensions.height)}×${Math.round(dimensions.depth)}mm`
+            : undefined;
           return (
             <li key={book.id}>
               <button
@@ -190,6 +195,7 @@ export function BookShelf() {
                 aria-haspopup="dialog"
                 aria-label={`${book.title} by ${book.author}`}
                 data-book={book.id}
+                data-bp-spec={specLabel}
                 data-taken={takenId === book.id || undefined}
                 data-analytics-event="Book Opened"
                 data-analytics-label={book.title}
@@ -207,7 +213,9 @@ export function BookShelf() {
                 onFocus={loadPulledBookDialog}
                 onPointerEnter={loadPulledBookDialog}
               >
-                {previews[book.id] ? (
+                {blueprint ? (
+                  <BlueprintBookSpine book={book} index={index} />
+                ) : previews[book.id] ? (
                   // biome-ignore lint/performance/noImgElement: locally rendered model snapshot, not a remote image.
                   <img
                     src={previews[book.id]}

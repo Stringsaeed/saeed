@@ -88,6 +88,7 @@ export async function createBook(
   const group = new THREE.Group();
   group.name = spec.id;
   group.userData.bookId = spec.id;
+  group.userData.spec = spec;
   if (spec.kind === "stripe") {
     const [obj, vertexShader, fragmentShader] = await Promise.all([
       assets.text(spec.asset.mesh),
@@ -107,7 +108,9 @@ export async function createBook(
       ),
     );
     black.needsUpdate = true;
-    const uniforms: Record<string, THREE.IUniform> = THREE.UniformsUtils.clone(THREE.UniformsLib.lights);
+    const uniforms: Record<string, THREE.IUniform> = THREE.UniformsUtils.clone(
+      THREE.UniformsLib.lights,
+    );
     const defaults: Record<
       string,
       number | number[] | THREE.Texture | THREE.Color
@@ -296,11 +299,146 @@ export async function createBook(
   return group;
 }
 
+export type BlueprintMeshPalette = {
+  core: number;
+  edge: number;
+  facet: number;
+};
+
+type BlueprintRig = {
+  root: THREE.Group;
+  photorealMeshes: THREE.Mesh[];
+  coreMat: THREE.MeshBasicMaterial;
+  edgeMat: THREE.LineBasicMaterial;
+  facetMat: THREE.LineBasicMaterial;
+};
+
+// Matches `const float modelThickness = 3.374;` in book.vert.glsl so Stripe
+// Press CAD wireframes share the exact vertex displacement of the GLSL shader.
+const STRIPE_BASE_THICKNESS_CM = 3.374;
+
+function cloneGeometryForBlueprint(
+  geometry: THREE.BufferGeometry,
+  spec: BookModel | undefined,
+) {
+  const clone = geometry.clone();
+  if (spec?.kind === "stripe") {
+    const thickness =
+      typeof spec.finish.thickness === "number" ? spec.finish.thickness : 1.4;
+    const delta = (thickness - STRIPE_BASE_THICKNESS_CM) / 2;
+    const pos = clone.getAttribute("position");
+    if (pos) {
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        if (x > 1) pos.setX(i, x + delta);
+        else if (x < -1) pos.setX(i, x - delta);
+      }
+      pos.needsUpdate = true;
+      clone.computeBoundingBox();
+      clone.computeBoundingSphere();
+    }
+  }
+  return clone;
+}
+
+function getOrCreateBlueprintRig(
+  group: THREE.Group,
+  palette: BlueprintMeshPalette,
+): BlueprintRig {
+  const existing = group.userData.blueprintRig as BlueprintRig | undefined;
+  if (existing) return existing;
+
+  const photorealMeshes: THREE.Mesh[] = [];
+  group.traverse((object) => {
+    if (object instanceof THREE.Mesh) photorealMeshes.push(object);
+  });
+
+  const coreMat = new THREE.MeshBasicMaterial({
+    color: palette.core,
+    transparent: true,
+    opacity: 0.91,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+  const edgeMat = new THREE.LineBasicMaterial({
+    color: palette.edge,
+    transparent: true,
+    opacity: 0.96,
+  });
+  const facetMat = new THREE.LineBasicMaterial({
+    color: palette.facet,
+    transparent: true,
+    opacity: 0.22,
+  });
+
+  const root = new THREE.Group();
+  root.name = `${group.name}-blueprint`;
+  const spec = group.userData.spec as BookModel | undefined;
+
+  group.updateMatrixWorld(true);
+  const groupInverse = group.matrixWorld.clone().invert();
+
+  for (const mesh of photorealMeshes) {
+    const localMatrix = groupInverse.clone().multiply(mesh.matrixWorld);
+    const geom = cloneGeometryForBlueprint(mesh.geometry, spec);
+
+    const coreMesh = new THREE.Mesh(geom, coreMat);
+    coreMesh.applyMatrix4(localMatrix);
+    root.add(coreMesh);
+
+    const edges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(geom, 16),
+      edgeMat,
+    );
+    edges.applyMatrix4(localMatrix);
+    root.add(edges);
+
+    const facets = new THREE.LineSegments(
+      new THREE.WireframeGeometry(geom),
+      facetMat,
+    );
+    facets.applyMatrix4(localMatrix);
+    root.add(facets);
+  }
+
+  group.add(root);
+  const rig: BlueprintRig = {
+    root,
+    photorealMeshes,
+    coreMat,
+    edgeMat,
+    facetMat,
+  };
+  group.userData.blueprintRig = rig;
+  return rig;
+}
+
+export function applyBookBlueprint(
+  group: THREE.Group,
+  palette: BlueprintMeshPalette | null,
+) {
+  if (!palette) {
+    const rig = group.userData.blueprintRig as BlueprintRig | undefined;
+    if (!rig) return;
+    rig.root.visible = false;
+    for (const mesh of rig.photorealMeshes) mesh.visible = true;
+    return;
+  }
+
+  const rig = getOrCreateBlueprintRig(group, palette);
+  rig.coreMat.color.setHex(palette.core);
+  rig.edgeMat.color.setHex(palette.edge);
+  rig.facetMat.color.setHex(palette.facet);
+  for (const mesh of rig.photorealMeshes) mesh.visible = false;
+  rig.root.visible = true;
+}
+
 export function disposeModel(root: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
   root.traverse((object) => {
-    if (object instanceof THREE.Mesh) {
+    if (object instanceof THREE.Mesh || object instanceof THREE.LineSegments) {
       geometries.add(object.geometry);
       for (const material of Array.isArray(object.material)
         ? object.material

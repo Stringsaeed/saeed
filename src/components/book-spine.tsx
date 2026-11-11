@@ -426,3 +426,116 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
     </span>
   );
 }
+
+/**
+ * Vector CAD elevation spine used on the shelf in blueprint mode so every book
+ * reads as a crisp technical drawing in both cyanotype and vellum palettes.
+ */
+export function BlueprintBookSpine({
+  book,
+  index,
+}: {
+  book: Book;
+  index: number;
+}) {
+  const w = Math.max(20, Math.round(book.depth * 8));
+  const h = Math.round(book.height * 8);
+  const headY = Math.round(h * 0.08);
+  const footY = Math.round(h * 0.92);
+  const midX = w / 2;
+  const code = String(index + 1).padStart(2, "0");
+  const available = footY - headY - 80;
+  const maxByLength = available / Math.max(book.title.length * 0.68, 1);
+  const titleSize = Math.min(w * 0.44, maxByLength, 64);
+
+  return (
+    <span className="book-spine blueprint-spine">
+      <svg
+        aria-hidden="true"
+        className="book-spine-art"
+        viewBox={`0 0 ${w} ${h}`}
+        preserveAspectRatio="none"
+      >
+        {/* Headband & tailband construction seams */}
+        <line
+          x1={0}
+          y1={headY}
+          x2={w}
+          y2={headY}
+          stroke="var(--bp-line)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+        <line
+          x1={0}
+          y1={footY}
+          x2={w}
+          y2={footY}
+          stroke="var(--bp-line)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+        {/* Faint center datum line */}
+        <line
+          x1={midX}
+          y1={headY}
+          x2={midX}
+          y2={footY}
+          stroke="var(--bp-grid-major)"
+          strokeDasharray="4 4"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+        {/* Index stamp at head */}
+        <text
+          x={midX}
+          y={headY * 0.66}
+          textAnchor="middle"
+          fill="var(--muted-foreground)"
+          style={{
+            fontFamily: "var(--font-paper-mono)",
+            fontSize: `${Math.min(w * 0.42, headY * 0.48)}px`,
+          }}
+        >
+          {code}
+        </text>
+        {/* Rotated CAD spine title */}
+        <g transform={`translate(${midX} ${(headY + footY) / 2}) rotate(90)`}>
+          <text
+            x={0}
+            y={w * 0.14}
+            textAnchor="middle"
+            fill="var(--foreground)"
+            style={{
+              fontFamily: "var(--font-paper-mono)",
+              fontSize: `${titleSize}px`,
+              fontWeight: 500,
+              letterSpacing: "0.05em",
+            }}
+          >
+            {book.title.toUpperCase()}
+          </text>
+        </g>
+        {/* Hardcover/paperback X-brace in foot box */}
+        <line
+          x1={0}
+          y1={footY}
+          x2={w}
+          y2={h}
+          stroke="var(--bp-grid-major)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+        <line
+          x1={w}
+          y1={footY}
+          x2={0}
+          y2={h}
+          stroke="var(--bp-grid-major)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+    </span>
+  );
+}

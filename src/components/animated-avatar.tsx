@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useBlueprint } from "@/lib/blueprint";
 import { setFavicon } from "@/lib/favicon";
 import { onIdle } from "@/lib/idle";
 
@@ -14,9 +15,11 @@ const avatars = [
   "/static/line-blue.svg",
 ];
 
+const BLUEPRINT_AVATAR_INDEX = 5;
 const interval = 3000;
 
 export function AnimatedAvatar() {
+  const blueprint = useBlueprint();
   const [activeIndex, setActiveIndex] = useState(0);
   // Only the first face shows at load; the rest arrive once the page
   // settles, well before the first swap.
@@ -24,17 +27,21 @@ export function AnimatedAvatar() {
 
   useEffect(() => onIdle(() => setAllFaces(true)), []);
 
+  const displayedIndex = blueprint ? BLUEPRINT_AVATAR_INDEX : activeIndex;
+
   // The tab icon wears the same face as the avatar. The first face is already
-  // the static favicon, so nothing changes until the first swap.
+  // the static favicon, so nothing changes until the first swap or blueprint.
   useEffect(() => {
-    if (activeIndex === 0 && !allFaces) return;
-    setFavicon(avatars[activeIndex]);
+    if (displayedIndex === 0 && !allFaces && !blueprint) return;
+    setFavicon(avatars[displayedIndex]);
   }, [
-    activeIndex,
+    displayedIndex,
     allFaces,
+    blueprint,
   ]);
 
   useEffect(() => {
+    if (blueprint) return;
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let intervalId: ReturnType<typeof setInterval> | undefined;
 
@@ -64,15 +71,17 @@ export function AnimatedAvatar() {
       motionQuery.removeEventListener("change", start);
       document.removeEventListener("visibilitychange", start);
     };
-  }, []);
+  }, [
+    blueprint,
+  ]);
 
   return (
     <span
-      className="relative size-8 shrink-0 overflow-hidden rounded-full"
+      className="blueprint-avatar relative size-8 shrink-0 overflow-hidden rounded-full"
       aria-hidden="true"
     >
       {avatars.map((src, index) =>
-        index === 0 || allFaces ? (
+        index === 0 || allFaces || index === displayedIndex ? (
           <Image
             key={src}
             src={src}
@@ -80,7 +89,7 @@ export function AnimatedAvatar() {
             width={32}
             height={32}
             className={`absolute inset-0 transition-opacity duration-700 motion-reduce:transition-none ${
-              index === activeIndex ? "opacity-100" : "opacity-0"
+              index === displayedIndex ? "opacity-100" : "opacity-0"
             }`}
             priority={index === 0}
           />

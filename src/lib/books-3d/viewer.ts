@@ -1,5 +1,11 @@
 import * as THREE from "three";
-import { BookAssets, createBook, disposeModel } from "./model";
+import {
+  applyBookBlueprint,
+  type BlueprintMeshPalette,
+  BookAssets,
+  createBook,
+  disposeModel,
+} from "./model";
 import type { BookModel } from "./types";
 
 export type BookFrame = {
@@ -85,6 +91,7 @@ export function createBookLibrary(specs: readonly BookModel[]) {
         child.visible = false;
       }
     const rotation = model.rotation.clone();
+    applyBookBlueprint(model, null);
     model.visible = true;
     model.rotation.set(0, Math.PI / 2, 0);
     // A real render uploads textures and compiles the same materials used on opening.
@@ -116,12 +123,18 @@ export function createBookLibrary(specs: readonly BookModel[]) {
     }
   }
 
-  function attach(host: HTMLElement, spec: BookModel, initialFrame: BookFrame) {
+  function attach(
+    host: HTMLElement,
+    spec: BookModel,
+    initialFrame: BookFrame,
+    initialBlueprint: BlueprintMeshPalette | null = null,
+  ) {
     if (disposed) throw new Error("Book library disposed");
     active?.release();
     host.append(renderer.domElement);
     const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 300);
     let model: THREE.Group | null = null;
+    let blueprintPalette: BlueprintMeshPalette | null = initialBlueprint;
     let released = false,
       pendingFrame = 0;
     let frame = initialFrame;
@@ -143,7 +156,10 @@ export function createBookLibrary(specs: readonly BookModel[]) {
         (2 * Math.atan(height / (2 * frame.perspective)) * 180) / Math.PI;
       camera.position.z = frame.perspective / scale;
       camera.updateProjectionMatrix();
-      model?.rotation.set((-tilt * Math.PI) / 180, (turn * Math.PI) / 180, 0);
+      if (model) {
+        applyBookBlueprint(model, blueprintPalette);
+        model.rotation.set((-tilt * Math.PI) / 180, (turn * Math.PI) / 180, 0);
+      }
       renderer.render(scene, camera);
     }
     function render() {
@@ -160,7 +176,10 @@ export function createBookLibrary(specs: readonly BookModel[]) {
         released = true;
         cancelAnimationFrame(pendingFrame);
         document.removeEventListener("visibilitychange", render);
-        if (model) model.visible = false;
+        if (model) {
+          applyBookBlueprint(model, null);
+          model.visible = false;
+        }
         if (active === view) {
           active = null;
           renderer.domElement.remove();
@@ -172,6 +191,7 @@ export function createBookLibrary(specs: readonly BookModel[]) {
     const ready = load(spec).then((loaded) => {
       if (released || disposed) return;
       model = loaded;
+      applyBookBlueprint(model, blueprintPalette);
       model.visible = true;
       draw();
     });
@@ -185,6 +205,13 @@ export function createBookLibrary(specs: readonly BookModel[]) {
       resize(next: BookFrame) {
         frame = next;
         render();
+      },
+      setBlueprint(nextPalette: BlueprintMeshPalette | null) {
+        blueprintPalette = nextPalette;
+        if (model) {
+          applyBookBlueprint(model, nextPalette);
+          render();
+        }
       },
       dispose: view.release,
     };

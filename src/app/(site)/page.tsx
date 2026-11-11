@@ -68,17 +68,28 @@ export default async function Home() {
   return (
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
       <main className="pb-20 pt-10 sm:pt-14">
-        <h1
-          className="backdrop-plate max-w-136 text-xl leading-8 font-semibold tracking-tight sm:text-2xl sm:leading-9"
-          data-analytics-view="Content Viewed"
-          data-analytics-label="Intro"
-        >
-          I’m <SaeedName />, a software engineer.
-        </h1>
-        <p className="backdrop-plate mt-3 max-w-152 text-base leading-7 text-muted-foreground">
-          I work on React Native, TypeScript, performance, accessibility, native
-          code, and agent-assisted engineering.
-        </p>
+        <div className="blueprint-hero-frame">
+          <div aria-hidden="true" className="blueprint-dimension-bar mb-3">
+            <span className="blueprint-dimension-tick" />
+            <span className="blueprint-dimension-line" />
+            <span className="px-2 font-mono text-[10px] tracking-wider text-muted-foreground uppercase tabular-nums">
+              COL MAX-W: 704PX (44REM) · SCALE 1:1
+            </span>
+            <span className="blueprint-dimension-line" />
+            <span className="blueprint-dimension-tick" />
+          </div>
+          <h1
+            className="backdrop-plate max-w-136 text-xl leading-8 font-semibold tracking-tight sm:text-2xl sm:leading-9"
+            data-analytics-view="Content Viewed"
+            data-analytics-label="Intro"
+          >
+            I’m <SaeedName />, a software engineer.
+          </h1>
+          <p className="backdrop-plate mt-3 max-w-152 text-base leading-7 text-muted-foreground">
+            I work on React Native, TypeScript, performance, accessibility,
+            native code, and agent-assisted engineering.
+          </p>
+        </div>
 
         <div className="mt-12">
           <Things />
@@ -89,7 +100,14 @@ export default async function Home() {
           data-analytics-view="Content Viewed"
           data-analytics-label="Work"
         >
-          <h2 className="list-heading backdrop-plate">Work</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className="list-heading backdrop-plate" data-bp-sec="02">
+              Work
+            </h2>
+            <span aria-hidden="true" className="blueprint-redline">
+              ↙ oklab 12% proximity highlight
+            </span>
+          </div>
           <CardGroup
             className="mt-4 smooth-shadow-ring shadow-black smooth-ring-neutral-300/30 bg-background"
             orientation="inline"
@@ -123,6 +141,18 @@ export default async function Home() {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
+                  <span
+                    aria-hidden="true"
+                    className="blueprint-spec-chip mr-1.5"
+                  >
+                    <span
+                      className="size-1.5 rounded-full"
+                      style={{
+                        backgroundColor: item.brand,
+                      }}
+                    />
+                    {item.brand.toUpperCase()}
+                  </span>
                   <span className="shrink-0 font-mono text-[11px] text-muted-foreground tabular-nums">
                     {item.period}
                   </span>
@@ -133,7 +163,14 @@ export default async function Home() {
         </div>
 
         <div className="mt-12">
-          <h2 className="list-heading backdrop-plate">Projects</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className="list-heading backdrop-plate" data-bp-sec="03">
+              Projects
+            </h2>
+            <span aria-hidden="true" className="blueprint-redline">
+              ↙ stretched-link card matrix
+            </span>
+          </div>
           <ProjectsSection />
         </div>
 
@@ -143,7 +180,9 @@ export default async function Home() {
           data-analytics-label="Writing"
         >
           <div className="flex items-baseline justify-between gap-5">
-            <h2 className="list-heading backdrop-plate">Writing</h2>
+            <h2 className="list-heading backdrop-plate" data-bp-sec="04">
+              Writing
+            </h2>
             <Link
               className="text-link text-sm text-muted-foreground"
               href="/blog"
@@ -159,7 +198,7 @@ export default async function Home() {
             {posts.slice(0, 5).map((post) => (
               <li key={post.slug}>
                 <Link
-                  className="group flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
+                  className="group flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3"
                   href={`/blog/${post.slug}`}
                   data-analytics-event="Blog Post Clicked"
                   data-analytics-slug={post.slug}
@@ -169,6 +208,7 @@ export default async function Home() {
                   <span className="text-sm font-medium underline-offset-4 group-hover:underline">
                     {post.title}
                   </span>
+                  <span aria-hidden="true" className="blueprint-leader" />
                   <time
                     className="shrink-0 font-mono text-xs text-muted-foreground"
                     dateTime={post.date}
@@ -186,7 +226,14 @@ export default async function Home() {
           data-analytics-view="Content Viewed"
           data-analytics-label="Library"
         >
-          <h2 className="list-heading backdrop-plate">Library</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2 className="list-heading backdrop-plate" data-bp-sec="05">
+              Library
+            </h2>
+            <span aria-hidden="true" className="blueprint-redline">
+              ↙ pull any spine → 3D CAD mesh
+            </span>
+          </div>
           <div className="mt-5">
             <BookShelf />
           </div>

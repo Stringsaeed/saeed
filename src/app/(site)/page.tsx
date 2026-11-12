@@ -121,6 +121,7 @@ export default async function Home() {
                 label={`${item.company}, ${item.period}`}
                 size="compact"
                 highlightColor={`color-mix(in oklab, ${item.brand} 12%, var(--background))`}
+                className="flex-wrap sm:flex-nowrap"
                 data-analytics-event="Work Link Clicked"
                 data-analytics-company={item.company}
                 data-analytics-location="Home"
@@ -131,16 +132,21 @@ export default async function Home() {
                   logo={item.logo}
                   className="grayscale opacity-70 transition-[filter,opacity] duration-150 group-hover/card:grayscale-0 group-hover/card:opacity-100 group-focus-within/card:grayscale-0 group-focus-within/card:opacity-100"
                 />
-                <CardHeader>
+                {/* Like Projects: on phones the description wraps to two
+                    lines and the dates drop under it, since beside them it
+                    had room for about twenty characters. */}
+                <CardHeader className="max-sm:pr-3">
                   <CardTitle>{item.company}</CardTitle>
                   <CardDescription
-                    className="truncate leading-5"
+                    className="line-clamp-2 leading-5 sm:line-clamp-none sm:truncate"
                     title={item.description}
                   >
                     {item.description}
                   </CardDescription>
                 </CardHeader>
-                <CardFooter>
+                {/* The footer sits above the card's link and holds nothing
+                    to press, so it lets taps through to the card. */}
+                <CardFooter className="pointer-events-none max-sm:ml-0 max-sm:basis-full max-sm:-mt-4 max-sm:pb-2.5 max-sm:pl-8">
                   <span
                     aria-hidden="true"
                     className="blueprint-spec-chip mr-1.5"

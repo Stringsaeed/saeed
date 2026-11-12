@@ -281,10 +281,12 @@ export function SiteSocialLinks() {
     <footer className="mt-auto flex justify-end pb-6">
       {/* Touch screens have no hover to unfold the dock, so they get every
           link up front at a 44px tap size. CSS picks the layout, so there is
-          no collapsed flash before hydration. */}
+          no collapsed flash before hydration. Seven of them need 332px; on
+          narrower phones the row is capped at four, so it breaks four over
+          three instead of leaving the CV link alone on a second line. */}
       <ul
         aria-label="Contact links"
-        className="hidden flex-wrap justify-end gap-1 pointer-coarse:flex"
+        className="hidden flex-wrap justify-end gap-1 pointer-coarse:flex max-[379px]:max-w-[11.75rem]"
       >
         {dockLinks.map((item) => (
           <li key={item.label}>

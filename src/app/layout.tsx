@@ -128,7 +128,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${atkinson.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} ${paperMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {/* ARD discovery (agenticresourcediscovery.org/spec §5.1): consumers
+            resolve /.well-known/ard.json, and this link points them there. */}
+        <link rel="ard" href="/.well-known/ard.json" />
+        {children}
+      </body>
     </html>
   );
 }

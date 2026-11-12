@@ -68,10 +68,12 @@ const linkIcons = {
 } satisfies Record<ProjectLinkType, unknown>;
 
 function cardLabel(row: ProjectRow) {
-  return row.type === "app-store"
-    ? `${row.name} on the App Store`
-    : `${row.name}, ${new URL(row.href).hostname}`;
+  return `${row.name}, ${new URL(row.href).hostname}`;
 }
+
+// The footer's App Store icon names the store itself, so it does not repeat
+// the card's name in the accessibility tree.
+const appStoreLabel = (row: ProjectRow) => `${row.name} on the App Store`;
 
 function shippedAppRow(app: ShippedApp): ProjectRow {
   const links: ProjectLink[] = [
@@ -176,7 +178,7 @@ function projectCard(row: ProjectRow) {
           <ProjectFooterLink
             project={row.name}
             link={{
-              ariaLabel: cardLabel(row),
+              ariaLabel: appStoreLabel(row),
               href: row.href,
               type: "app-store",
             }}

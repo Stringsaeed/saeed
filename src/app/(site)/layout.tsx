@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AgentTools } from "@/components/agent-tools";
 import { AnalyticsEvents } from "@/components/analytics-events";
 import {
   BlueprintSheetBackdrop,
@@ -41,6 +42,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       <DeferredAnalytics />
       <AnalyticsEvents />
       <SiteSounds />
+      <AgentTools />
     </ThemeProvider>
   );
 }

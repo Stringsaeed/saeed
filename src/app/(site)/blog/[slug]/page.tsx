@@ -76,8 +76,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
       <main className="pb-24 pt-8 sm:pt-12">
         <JsonLd data={getBlogPostStructuredData(post)} />
+        {/* The invisible ::after grows the 18px-tall link to a 42px target
+            for a finger without moving anything. */}
         <Link
-          className="text-link backdrop-plate text-sm text-muted-foreground"
+          className="text-link backdrop-plate relative text-sm text-muted-foreground after:absolute after:-inset-3"
           href="/blog"
           data-analytics-event="Navigation Clicked"
           data-analytics-destination="Blog"

@@ -80,6 +80,11 @@ const EASE_OUT = [
   1,
 ] as const;
 
+// A warmed book is ready well inside this, even on the first pull, which
+// compiles the shaders (about 0.6s on a slow machine). Past it, the model is
+// still downloading, so the room around it opens without the book.
+const WAITING_DELAY_MS = 1000;
+
 const DRAG_SLOP = 6;
 const TURN_PER_PIXEL = 0.45;
 const TILT_PER_PIXEL = 0.2;
@@ -214,8 +219,52 @@ function PulledBook({
     const stage = stageRef.current;
     if (!stage) return;
     if (!ready) {
-      if (!open) onReturned();
-      return;
+      // On a slow connection the model can take seconds. Rather than leave
+      // the page untouched, dim it and show the title and the close button
+      // after a beat, so the tap reads as the dialog opening and can be
+      // undone; the book still flies out once it is ready.
+      if (open) {
+        let waiting: ReturnType<typeof animate>[] = [];
+        const timer = window.setTimeout(() => {
+          waiting = [
+            animate(scrim, 1, {
+              duration: 0.3,
+              ease: EASE_OUT,
+            }),
+            animate(detail, 1, {
+              duration: 0.3,
+              ease: EASE_OUT,
+            }),
+          ];
+        }, WAITING_DELAY_MS);
+        return () => {
+          window.clearTimeout(timer);
+          for (const control of waiting) control.stop();
+        };
+      }
+      // Closed while still waiting: fade the dim back out, then let go.
+      if (scrim.get() === 0 && detail.get() === 0) {
+        onReturned();
+        return;
+      }
+      let cancelled = false;
+      const leaving = [
+        animate(scrim, 0, {
+          duration: 0.2,
+          ease: EASE_OUT,
+        }),
+        animate(detail, 0, {
+          duration: 0.12,
+          ease: EASE_OUT,
+        }),
+      ];
+      Promise.all(leaving.map((control) => control.finished)).then(() => {
+        if (!cancelled) onReturned();
+      });
+      return () => {
+        cancelled = true;
+        for (const control of leaving) control.stop();
+      };
     }
 
     let cancelled = false;
@@ -497,10 +546,18 @@ function PulledBook({
             </motion.div>
           </div>
 
+          {/* Fades in with the dim, so a fast load never flashes it bare
+              over the page. */}
           {!ready && open && (
-            <p role="status" className="text-sm text-muted-foreground">
+            <motion.p
+              role="status"
+              className="text-sm text-muted-foreground"
+              style={{
+                opacity: detail,
+              }}
+            >
               Loading book…
-            </p>
+            </motion.p>
           )}
           <motion.div
             className="max-w-88 text-center"

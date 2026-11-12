@@ -204,12 +204,19 @@ export function AgentTools() {
 
     const controller = new AbortController();
     for (const tool of tools()) {
-      // Registration is async and may be refused; a refusal should not break the page.
-      context
-        .registerTool(tool, {
-          signal: controller.signal,
-        })
-        .catch(() => undefined);
+      // Registration is async and may be refused; a refusal should not break
+      // the page. An effect that throws takes the whole layout down, so an
+      // implementation that throws synchronously or returns no promise (an
+      // early build or a polyfill) is caught here too.
+      try {
+        Promise.resolve(
+          context.registerTool(tool, {
+            signal: controller.signal,
+          }),
+        ).catch(() => undefined);
+      } catch {
+        // Refused; the page works without it.
+      }
     }
     return () => controller.abort();
   }, []);

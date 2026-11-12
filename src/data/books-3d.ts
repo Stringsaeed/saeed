@@ -41,7 +41,7 @@ export const BOOK_MODELS: readonly BookModel[] = [
     binding: "paperback",
     artwork: {
       front: "/books/the-design-of-everyday-things.jpg",
-      back: "/books-3d/the-design-of-everyday-things/back-vector.png",
+      back: "/books-3d/the-design-of-everyday-things/back-vector.webp",
       spine: "/books-3d/the-design-of-everyday-things/spine-shelf.svg",
     },
     construction: {
@@ -66,7 +66,7 @@ export const BOOK_MODELS: readonly BookModel[] = [
     binding: "paperback",
     artwork: {
       front: "/books/the-staff-engineers-path.jpg",
-      back: "/books-3d/the-staff-engineers-path/back-art.png",
+      back: "/books-3d/the-staff-engineers-path/back-art.webp",
       spine: "/books-3d/the-staff-engineers-path/spine-shelf.svg",
     },
     construction: {

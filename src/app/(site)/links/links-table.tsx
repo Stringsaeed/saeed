@@ -215,12 +215,14 @@ function IndexRow({
           <span className="rounded bg-muted/80 px-1.5 py-0.5 font-mono text-[10.5px] text-muted-foreground">
             {entry.normalizedType}
           </span>
-          <span className="font-mono text-xs text-muted-foreground transition-colors group-hover:text-foreground">
+          {/* A long domain truncates rather than pushing the arrow past the
+              card's edge on a phone. */}
+          <span className="min-w-0 truncate font-mono text-xs text-muted-foreground transition-colors group-hover:text-foreground">
             {entry.domain}
           </span>
           <RiArrowRightUpLine
             aria-hidden="true"
-            className="size-3.5 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
+            className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
           />
         </div>
       </a>
@@ -381,7 +383,9 @@ export function LinksTable({ entries }: LinksTableProps) {
             onChange={handleQueryChange}
             placeholder="Find in index…"
             aria-label="Search links in editorial index"
-            className="h-7 w-full rounded-lg border border-border bg-muted/40 pr-7 pl-8 text-xs text-foreground placeholder:text-muted-foreground focus-visible:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-44"
+            // 16px on touch screens: iOS zooms the page into any field set
+            // smaller than that when it takes focus.
+            className="h-7 w-full rounded-lg border border-border bg-muted/40 pr-7 pl-8 text-xs pointer-coarse:text-base text-foreground placeholder:text-muted-foreground focus-visible:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-44"
           />
           {query ? (
             <button

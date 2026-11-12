@@ -30,7 +30,8 @@
     "back": {
       "source": "Vector reconstruction of user-supplied codex-clipboard-80bbaf93-6146-44fa-bac5-7a15d538f8ff.png",
       "editable": "the-design-of-everyday-things/back-vector.svg",
-      "output": "the-design-of-everyday-things/back-vector.png",
+      "output": "the-design-of-everyday-things/back-vector.webp",
+      "processing": "Raster of the SVG, saved as lossless WebP without the alpha channel (it was fully opaque); pixel-identical to the earlier PNG at half the size",
       "script": "scripts/prepare-everyday-back.py",
       "notes": "Retypeset wording and layout with flat colors; barcode rebuilt as EAN-13 plus EAN-5. Font/layout approximation, not original publisher artwork."
     },
@@ -48,8 +49,8 @@
     },
     "back": {
       "source": "User-supplied digital back cover, codex-clipboard-ff54cb50-c935-42c3-95e2-ac07c81c84bc.png",
-      "output": "the-staff-engineers-path/back-art.png",
-      "processing": "Copied unchanged"
+      "output": "the-staff-engineers-path/back-art.webp",
+      "processing": "Re-encoded from the supplied PNG as WebP at quality 85 (973 KB to 184 KB)"
     },
     "spine": {
       "source": "Existing bookshelf SVG art in src/components/book-spine.tsx",

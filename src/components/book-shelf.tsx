@@ -30,6 +30,30 @@ const PulledBookDialog = dynamic(
   },
 );
 
+// Rendering the shelf's 3D snapshots fetches every book's textures, about
+// 3.5 MB, so it skips Save-Data and 2G/3G connections. There the drawn
+// spines stay on the shelf and a pulled book fetches only its own model.
+// Safari reports neither, so iPhones still warm the shelf.
+function constrainedConnection() {
+  const connection = (
+    navigator as Navigator & {
+      connection?: {
+        effectiveType?: string;
+        saveData?: boolean;
+      };
+    }
+  ).connection;
+  if (!connection) return false;
+  return (
+    connection.saveData === true ||
+    [
+      "slow-2g",
+      "2g",
+      "3g",
+    ].includes(connection.effectiveType ?? "")
+  );
+}
+
 function viewportSize() {
   const viewport = window.visualViewport;
 
@@ -83,11 +107,16 @@ export function BookShelf() {
         });
       else timer = setTimeout(warm, 100);
     };
-    if (document.readyState === "complete") schedule();
-    else
-      window.addEventListener("load", schedule, {
-        once: true,
-      });
+    // Warming starts at load, not when the shelf comes near, because the
+    // snapshots replace the drawn spines without a fade: started late, the
+    // swap lands while a skimming reader is looking at the shelf.
+    if (!constrainedConnection()) {
+      if (document.readyState === "complete") schedule();
+      else
+        window.addEventListener("load", schedule, {
+          once: true,
+        });
+    }
     return () => {
       cancelled = true;
       window.removeEventListener("load", schedule);

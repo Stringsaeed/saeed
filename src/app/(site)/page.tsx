@@ -189,8 +189,10 @@ export default async function Home() {
             <h2 className="list-heading backdrop-plate" data-bp-sec="04">
               Writing
             </h2>
+            {/* The text is 20px tall; the invisible ::after grows the target
+                to 44px for a finger without moving anything. */}
             <Link
-              className="text-link text-sm text-muted-foreground"
+              className="text-link relative text-sm text-muted-foreground after:absolute after:-inset-3"
               href="/blog"
               data-analytics-event="Navigation Clicked"
               data-analytics-destination="Blog"

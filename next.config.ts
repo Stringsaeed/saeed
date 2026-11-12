@@ -56,6 +56,16 @@ const nextConfig: NextConfig = {
   // changes.
   async headers() {
     return [
+      // ARD discovery (spec §5.1): the home page points agents at the manifest.
+      {
+        source: "/",
+        headers: [
+          {
+            key: "Link",
+            value: '</.well-known/ard.json>; rel="ard"',
+          },
+        ],
+      },
       {
         source: "/static/:path*.svg",
         headers: [

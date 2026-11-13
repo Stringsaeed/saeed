@@ -1,6 +1,6 @@
 # Things: the stories behind the eight stickers
 
-Draft material for one blog post. These used to open from the sticker desks on the home page; the home page now shows only the stickers, inline in a sentence.
+Draft material for one blog post. These used to open from the sticker desks on the home page. The home page now shows one sentence: each clause keeps its subject and verb until it is pressed, and the sticker stands in for the noun. The stories stay here.
 
 ## Giza pyramids
 

@@ -13,13 +13,14 @@ import type { ProjectLinkType } from "@/data/projects";
 import { onIdle } from "@/lib/idle";
 import { playHoverSound, playSound } from "@/lib/sound";
 import type { CartridgeStage } from "./cartridge-stage";
-import { CARTRIDGES, type Cartridge, MAX_STICKERS } from "./cartridges";
+import { CARTRIDGES, MAX_STICKERS } from "./cartridges";
 import styles from "./shelf.module.css";
 
 // The apps as cartridges. The grid is ordinary buttons, one per app, so it
 // reads, tabs and wraps like any list; a single canvas draws a 3D cartridge
 // over each. Hover one and it turns to face the pointer, drag it sideways
-// to spin it, click it to pull it out and read what it is.
+// to spin it, press it to turn it over: what the app is, is printed on the
+// back. The stickers on the front are its links.
 
 const LINK_LABELS: Record<ProjectLinkType, string> = {
   "app-store": "App Store",
@@ -30,13 +31,6 @@ const LINK_LABELS: Record<ProjectLinkType, string> = {
   linkedin: "LinkedIn",
   testflight: "TestFlight",
 };
-
-const BY_ID = new Map(
-  CARTRIDGES.map((cartridge) => [
-    cartridge.id,
-    cartridge,
-  ]),
-);
 
 /** How far a press may travel and still be a click, in CSS pixels. */
 const CLICK_SLOP = 6;
@@ -53,36 +47,12 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-function Links({ cartridge }: { cartridge: Cartridge }) {
-  return (
-    <span className={styles.links}>
-      {cartridge.links.map((link) => (
-        <a
-          key={link.href}
-          href={link.href}
-          target="_blank"
-          rel="noreferrer noopener"
-          aria-label={link.ariaLabel}
-          data-sound="tap"
-          data-analytics-event="Project Link Clicked"
-          data-analytics-project={cartridge.name}
-          data-analytics-location="Home"
-        >
-          {LINK_LABELS[link.type]}
-          {link.platform ? ` ${link.platform}` : ""}
-        </a>
-      ))}
-    </span>
-  );
-}
-
 export function ProjectsShelf() {
   const reduced = usePrefersReducedMotion();
   const gridRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<CartridgeStage | null>(null);
   const [ready, setReady] = useState(false);
-  const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
 
   // three.js is fetched when the shelf is nearly in view, not before.
@@ -121,6 +91,13 @@ export function ProjectsShelf() {
               stage = createCartridgeStage(canvas, slots, CARTRIDGES, {
                 reducedMotion: reduced,
                 onReady: () => setReady(true),
+                // A drag that leaves one on its back has turned it over,
+                // the same as a press; one that leaves it on its front has
+                // put it back.
+                onFlip: (id, back) =>
+                  setSelected((current) =>
+                    back ? id : current === id ? null : current,
+                  ),
                 links,
               });
               stageRef.current = stage;
@@ -147,7 +124,8 @@ export function ProjectsShelf() {
     reduced,
   ]);
 
-  // What the stage shows as picked out follows what React has selected.
+  // Which cartridge the stage shows turned over follows what React has
+  // selected.
   useEffect(() => {
     if (ready) stageRef.current?.select(selected);
   }, [
@@ -202,9 +180,7 @@ export function ProjectsShelf() {
 
   const onPointerEnter = useCallback(
     (event: ReactPointerEvent<HTMLButtonElement>) => {
-      if (event.pointerType !== "mouse") return;
-      setHovered(event.currentTarget.dataset.cartridge ?? null);
-      playHoverSound("hover");
+      if (event.pointerType === "mouse") playHoverSound("hover");
     },
     [],
   );
@@ -216,7 +192,6 @@ export function ProjectsShelf() {
       // Onto one of its own stickers is not off the cartridge.
       const into = event.relatedTarget;
       if (into instanceof HTMLElement && into.dataset.cartridge === id) return;
-      setHovered((current) => (current === id ? null : current));
       if (press.current?.id !== id) stageRef.current?.leave(id);
     },
     [],
@@ -272,7 +247,6 @@ export function ProjectsShelf() {
   const onFocus = useCallback((event: { currentTarget: HTMLElement }) => {
     const id = event.currentTarget.dataset.cartridge;
     if (!id) return;
-    setHovered(id);
     // Focus with the keyboard brings it round to face front.
     if (event.currentTarget.matches(":focus-visible")) {
       stageRef.current?.point(id, 0, 0);
@@ -282,7 +256,6 @@ export function ProjectsShelf() {
   const onBlur = useCallback((event: { currentTarget: HTMLElement }) => {
     const id = event.currentTarget.dataset.cartridge;
     if (!id) return;
-    setHovered((current) => (current === id ? null : current));
     stageRef.current?.leave(id);
   }, []);
 
@@ -294,7 +267,6 @@ export function ProjectsShelf() {
       const { cartridge, sticker } = event.currentTarget.dataset;
       if (!cartridge) return;
       stageRef.current?.stick(cartridge, Number(sticker));
-      if (event.pointerType === "mouse") setHovered(cartridge);
     },
     [],
   );
@@ -309,10 +281,7 @@ export function ProjectsShelf() {
       const into = event.relatedTarget;
       const stays =
         into instanceof HTMLElement && into.dataset.cartridge === cartridge;
-      if (!stays) {
-        stage?.leave(cartridge);
-        setHovered((current) => (current === cartridge ? null : current));
-      }
+      if (!stays) stage?.leave(cartridge);
     },
     [],
   );
@@ -321,7 +290,6 @@ export function ProjectsShelf() {
     (event: { currentTarget: HTMLElement }) => {
       const { cartridge, sticker } = event.currentTarget.dataset;
       if (!cartridge) return;
-      setHovered(cartridge);
       stageRef.current?.point(cartridge, 0, 0);
       stageRef.current?.stick(cartridge, Number(sticker));
     },
@@ -331,7 +299,6 @@ export function ProjectsShelf() {
   const onStickerBlur = useCallback((event: { currentTarget: HTMLElement }) => {
     const { cartridge } = event.currentTarget.dataset;
     if (!cartridge) return;
-    setHovered((current) => (current === cartridge ? null : current));
     stageRef.current?.stick(cartridge, null);
     stageRef.current?.leave(cartridge);
   }, []);
@@ -340,7 +307,12 @@ export function ProjectsShelf() {
     if (event.key === "Escape") setSelected(null);
   }, []);
 
-  const shown = BY_ID.get(selected ?? hovered ?? "");
+  // Without the canvas there is no back to read and there are no stickers
+  // to press, so the chosen app's description and links are written out
+  // under the grid instead.
+  const fallback = ready
+    ? undefined
+    : CARTRIDGES.find((cartridge) => cartridge.id === selected);
 
   return (
     <section
@@ -416,30 +388,31 @@ export function ProjectsShelf() {
           </Fragment>
         ))}
       </div>
-      <div
-        className={styles.detail}
-        aria-live="polite"
-        data-open={shown ? "" : undefined}
-        data-pinned={selected ? "" : undefined}
-      >
-        {shown ? (
+      <p className={styles.hint} aria-live="polite">
+        {fallback ? (
           <>
-            <p className={styles.title}>
-              <strong>{shown.name}</strong>
-              <span>
-                {shown.kind === "shipped" ? "Shipped" : "Side project"}
-              </span>
-            </p>
-            <p className={styles.description}>{shown.description}</p>
-            <Links cartridge={shown} />
+            <strong>{fallback.name}.</strong> {fallback.description}{" "}
+            {fallback.links.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={link.ariaLabel}
+                data-sound="tap"
+                data-analytics-event="Project Link Clicked"
+                data-analytics-project={fallback.name}
+                data-analytics-location="Home"
+              >
+                {LINK_LABELS[link.type]}
+                {link.platform ? ` ${link.platform}` : ""}
+              </a>
+            ))}
           </>
         ) : (
-          <p className={styles.hint}>
-            Apps I shipped, then side projects. Drag one to spin it, press it to
-            pull it out, or press a sticker to go there.
-          </p>
+          "Apps I shipped, then side projects. Drag one to spin it, press it to read its back, press a sticker to go there."
         )}
-      </div>
+      </p>
     </section>
   );
 }

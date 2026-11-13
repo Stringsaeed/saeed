@@ -10,8 +10,9 @@ import {
 // same object; the label says which. This file is data only, so the page
 // can list the cartridges without loading three.js.
 
-/** Stickers that fit along the bottom of a cartridge. Any further links
- *  are in the panel under the shelf. */
+/** Stickers that fit along the bottom of a cartridge. No app has more
+ *  links than this today; a fifth would have no sticker and so no way to
+ *  reach it, and would need a place of its own. */
 export const MAX_STICKERS = 4;
 
 export type Cartridge = {

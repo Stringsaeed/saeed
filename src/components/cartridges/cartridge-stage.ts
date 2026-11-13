@@ -14,6 +14,8 @@ import { STICKER_ICONS } from "./sticker-icons";
 export type CartridgeStageOptions = {
   reducedMotion: boolean;
   onReady: () => void;
+  /** A drag left a cartridge showing its back, or its front again. */
+  onFlip: (id: string, back: boolean) => void;
   /** The link elements for each cartridge, in the order of its links. The
    *  stage keeps each one over the sticker that is drawn for it. */
   links: ReadonlyMap<string, readonly HTMLElement[]>;
@@ -42,6 +44,8 @@ type Item = {
   pressed: boolean;
   dragging: boolean;
   dragFrom: number;
+  /** When the hand last moved it, to tell a flick from a pause. */
+  turnedAt: number;
   /** Pointer position over the slot, -1 to 1 each way. */
   aim: THREE.Vector2;
   /** Draws the label again: when its icon or its typeface arrives. */
@@ -58,8 +62,9 @@ type Item = {
   }>;
 };
 
-const TAU = Math.PI * 2;
 const FOV = 16;
+/** How much larger one is while it is out and turned over to be read. */
+const PICKED = 1.3;
 /** How it sits when nobody is near: turned a little, as on a shelf. */
 const REST = {
   yaw: -0.3,
@@ -78,6 +83,14 @@ const LABEL = {
   /** Texture size; the same shape as the label. */
   px: 540,
   py: 510,
+};
+
+/** The printed side: what the app is, as on the back of a game. */
+const BACK = {
+  width: 0.84,
+  height: 0.96,
+  px: 600,
+  py: 686,
 };
 
 function spring(x: number): Spring {
@@ -184,6 +197,100 @@ function drawLabel(
   );
 }
 
+/** Breaks a sentence into lines no wider than `width`. */
+function wrap(context: CanvasRenderingContext2D, text: string, width: number) {
+  const lines: string[] = [];
+  let line = "";
+  for (const word of text.split(/\s+/)) {
+    const next = line ? `${line} ${word}` : word;
+    if (line && context.measureText(next).width > width) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+/** The back: the app's name, what it is, and a barcode for show. */
+function drawBack(
+  context: CanvasRenderingContext2D,
+  cartridge: Cartridge,
+  number: string,
+  pixel: string,
+  text: string,
+) {
+  const { px, py } = BACK;
+  const margin = 44;
+  const inner = px - margin * 2;
+  context.fillStyle = "#f6f0e1";
+  context.fillRect(0, 0, px, py);
+  context.textAlign = "left";
+  context.textBaseline = "alphabetic";
+
+  context.fillStyle = "#1b1b1f";
+  let title = 42;
+  const name = cartridge.name.toUpperCase();
+  context.font = `${title}px ${pixel}`;
+  while (title > 22 && context.measureText(name).width > inner) {
+    title -= 2;
+    context.font = `${title}px ${pixel}`;
+  }
+  context.fillText(name, margin, 92);
+  // A rule in the app's own colour.
+  context.fillStyle = cartridge.brand;
+  context.fillRect(margin, 114, inner, 8);
+  context.fillStyle = "#8a8474";
+  context.font = `21px ${pixel}`;
+  context.fillText(
+    `${cartridge.kind === "shipped" ? "SHIPPED" : "SIDE PROJECT"}  /  NO. ${number}`,
+    margin,
+    160,
+  );
+
+  // The description, as large as fits between the heading and the barcode.
+  const top = 226;
+  const room = py - 150 - top;
+  let size = 48;
+  let lines: string[] = [];
+  for (; size >= 28; size -= 2) {
+    context.font = `${size}px ${text}`;
+    lines = wrap(context, cartridge.description, inner);
+    if ((lines.length - 1) * size * 1.28 + size <= room) break;
+  }
+  context.fillStyle = "#26262b";
+  lines.forEach((line, index) => {
+    context.fillText(line, margin, top + size * 0.8 + index * size * 1.28);
+  });
+
+  // Bars from the letters of the name: no scanner will read it.
+  context.fillStyle = "#1b1b1f";
+  let x = margin;
+  let seed = 7;
+  for (const char of `${cartridge.id}${cartridge.id}`) {
+    seed = (seed * 31 + char.charCodeAt(0)) % 997;
+    const bar = 2 + (seed % 4) * 2;
+    if (x + bar > margin + 230) break;
+    context.fillRect(x, py - 104, bar, 58);
+    x += bar + 3 + (seed % 3) * 2;
+  }
+  context.textAlign = "right";
+  context.fillStyle = "#8a8474";
+  context.font = `21px ${pixel}`;
+  context.fillText(
+    `${number} / ${String(TOTAL.count).padStart(2, "0")}`,
+    px - margin,
+    py - 52,
+  );
+}
+
+/** How many cartridges there are, for the number printed on each. */
+const TOTAL = {
+  count: 0,
+};
+
 /** A blurred oval, for the shadow under each cartridge. */
 function shadowTexture() {
   const canvas = document.createElement("canvas");
@@ -272,6 +379,8 @@ export function createCartridgeStage(
   let arrived = options.reducedMotion;
   let disposed = false;
   let font = "monospace";
+  let textFont = "sans-serif";
+  TOTAL.count = cartridges.length;
 
   // ---------------------------------------------------------- the model
 
@@ -297,7 +406,8 @@ export function createCartridgeStage(
     ),
     trough: new RoundedBoxGeometry(0.7, 0.07, 0.02, 3, 0.01),
     ridge: new RoundedBoxGeometry(0.013, 0.052, 0.016, 2, 0.005),
-    back: new RoundedBoxGeometry(0.84, 0.52, 0.02, 5, 0.036),
+    back: new RoundedBoxGeometry(0.9, 1.02, 0.02, 5, 0.036),
+    info: new THREE.PlaneGeometry(BACK.width, BACK.height),
     shadow: new THREE.PlaneGeometry(1.25, 0.3),
   };
   const shadowMap = shadowTexture();
@@ -332,7 +442,11 @@ export function createCartridgeStage(
     return material;
   }
 
-  function build(cartridge: Cartridge, slot: HTMLElement): Item {
+  function build(
+    cartridge: Cartridge,
+    slot: HTMLElement,
+    number: string,
+  ): Item {
     const color = pastel(cartridge.brand);
     const plastic = new THREE.MeshStandardMaterial({
       color,
@@ -354,11 +468,24 @@ export function createCartridgeStage(
       map: texture,
       roughness: 0.62,
     });
+    const backCanvas = document.createElement("canvas");
+    backCanvas.width = BACK.px;
+    backCanvas.height = BACK.py;
+    const backContext = backCanvas.getContext("2d");
+    const backTexture = new THREE.CanvasTexture(backCanvas);
+    backTexture.colorSpace = THREE.SRGBColorSpace;
+    backTexture.anisotropy = anisotropy;
+    const print = new THREE.MeshStandardMaterial({
+      map: backTexture,
+      roughness: 0.7,
+    });
     let icon: HTMLImageElement | null = null;
     const paint = () => {
-      if (!context || disposed) return;
+      if (!context || !backContext || disposed) return;
       drawLabel(context, cartridge, icon, font);
       texture.needsUpdate = true;
+      drawBack(backContext, cartridge, number, font, textFont);
+      backTexture.needsUpdate = true;
       wake();
     };
     paint();
@@ -430,7 +557,9 @@ export function createCartridgeStage(
     for (let i = 0; i < 24; i++) {
       add(geometry.ridge, plastic, -0.33 + i * 0.027, -0.505, front + 0.003);
     }
-    add(geometry.back, recess, 0, 0.12, -front + 0.004);
+    // The back: a recess, and the printed side turned to face out of it.
+    add(geometry.back, recess, 0, 0, -front + 0.004);
+    add(geometry.info, print, 0, 0, -front - 0.0075).rotation.y = Math.PI;
 
     const shadow = new THREE.Mesh(geometry.shadow, shadowMaterial);
     shadow.position.set(0, -SHELL.height / 2 - 0.08, -0.4);
@@ -453,6 +582,7 @@ export function createCartridgeStage(
       pressed: false,
       dragging: false,
       dragFrom: 0,
+      turnedAt: 0,
       aim: new THREE.Vector2(),
       paint,
       stickers,
@@ -461,6 +591,8 @@ export function createCartridgeStage(
         recess,
         art,
         texture,
+        print,
+        backTexture,
       ],
     };
   }
@@ -468,25 +600,26 @@ export function createCartridgeStage(
   const items = new Map<string, Item>();
   for (const cartridge of cartridges) {
     const slot = slots.get(cartridge.id);
-    if (slot) items.set(cartridge.id, build(cartridge, slot));
+    const number = String(items.size + 1).padStart(2, "0");
+    if (slot) items.set(cartridge.id, build(cartridge, slot, number));
   }
 
-  // The label's typeface is the site's pixel face, once it has loaded.
-  const face = getComputedStyle(document.documentElement)
-    .getPropertyValue("--font-silkscreen")
-    .trim();
-  if (face) {
-    document.fonts
-      .load(`40px ${face}`)
-      .then(() => {
-        if (disposed) return;
-        font = face;
-        for (const item of items.values()) item.paint();
-      })
-      .catch(() => {
-        // The fallback face is already drawn.
-      });
-  }
+  // The labels use the site's own faces, once they have loaded: the pixel
+  // face for names, the text face for the description on the back.
+  const root = getComputedStyle(document.documentElement);
+  const faces = {
+    pixel: root.getPropertyValue("--font-silkscreen").trim(),
+    text: root.getPropertyValue("--font-atkinson").trim(),
+  };
+  Promise.allSettled([
+    faces.pixel ? document.fonts.load(`40px ${faces.pixel}`) : null,
+    faces.text ? document.fonts.load(`40px ${faces.text}`) : null,
+  ]).then(([pixel, text]) => {
+    if (disposed) return;
+    if (faces.pixel && pixel.status === "fulfilled") font = faces.pixel;
+    if (faces.text && text.status === "fulfilled") textFont = faces.text;
+    for (const item of items.values()) item.paint();
+  });
 
   // ------------------------------------------------------------- layout
 
@@ -506,7 +639,7 @@ export function createCartridgeStage(
     const ratio = Math.min(
       window.devicePixelRatio || 1,
       2,
-      Math.sqrt(5_000_000 / (width * height)),
+      Math.sqrt(7_000_000 / (width * height)),
     );
     renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
@@ -536,9 +669,24 @@ export function createCartridgeStage(
   function aimFor(item: Item) {
     const chosen = selected === item.cartridge.id;
     const near = item.hovered || item.dragging;
-    item.yaw.target = near ? item.aim.x * 0.5 : chosen ? 0 : REST.yaw;
-    item.pitch.target = near ? item.aim.y * 0.32 : chosen ? 0 : REST.pitch;
-    item.scale.target = item.pressed ? 0.96 : chosen ? 1.1 : near ? 1.06 : 1;
+    // Turned over to be read, it leans only a little toward the pointer,
+    // and the other way, because its back is what faces out.
+    const lean = chosen ? -0.14 : 0.5;
+    item.yaw.target = near ? item.aim.x * lean : chosen ? 0 : REST.yaw;
+    item.pitch.target = near
+      ? item.aim.y * (chosen ? 0.1 : 0.32)
+      : chosen
+        ? 0
+        : REST.pitch;
+    item.scale.target = item.pressed
+      ? chosen
+        ? PICKED - 0.04
+        : 0.96
+      : chosen
+        ? PICKED
+        : near
+          ? 1.06
+          : 1;
   }
 
   function step(dt: number) {
@@ -563,6 +711,8 @@ export function createCartridgeStage(
       }
       const size = (item.holder.userData.size as number) ?? 100;
       item.holder.scale.setScalar(size * item.scale.x);
+      // Out of the row as it grows, so it passes in front of its neighbours.
+      item.holder.position.z = Math.max(0, item.scale.x - 1) * size * 1.6;
       item.body.rotation.set(item.pitch.x, item.yaw.x + item.spin.x, 0, "YXZ");
       for (const sticker of item.stickers) {
         if (options.reducedMotion) sticker.pop.x = sticker.pop.target;
@@ -616,8 +766,10 @@ export function createCartridgeStage(
         }
         // One world unit is one CSS pixel, with y turned over.
         sticker.mesh.getWorldPosition(point).project(camera);
-        const x = ((point.x + 1) / 2) * viewport.width;
-        const y = ((1 - point.y) / 2) * viewport.height;
+        // The links are placed from the grid's corner, and the canvas
+        // starts a little outside it.
+        const x = ((point.x + 1) / 2) * viewport.width + canvas.offsetLeft;
+        const y = ((1 - point.y) / 2) * viewport.height + canvas.offsetTop;
         style.visibility = "visible";
         style.width = `${size.toFixed(1)}px`;
         style.height = `${size.toFixed(1)}px`;
@@ -697,18 +849,24 @@ export function createCartridgeStage(
       const next = item.dragFrom + dx * 0.012;
       item.spin.v = (next - item.spin.x) * 60;
       item.spin.x = next;
+      item.turnedAt = performance.now();
       wake();
     },
-    /** Let go: it carries on round to face front, a turn further if flicked. */
+    /** Let go: it carries on to whichever side is nearer, a half turn
+     *  further if flicked, and says which side that is. */
     drop(id: string) {
       const item = items.get(id);
       if (!item?.dragging) return;
       item.dragging = false;
+      // Held still before letting go, it was placed, not thrown.
+      if (performance.now() - item.turnedAt > 90) item.spin.v = 0;
       const flick = Math.abs(item.spin.v) > 7 ? Math.sign(item.spin.v) : 0;
-      item.spin.target = (Math.round(item.spin.x / TAU) + flick) * TAU;
+      const halves = Math.round(item.spin.x / Math.PI) + flick;
+      item.spin.target = halves * Math.PI;
       item.spin.v = THREE.MathUtils.clamp(item.spin.v, -14, 14);
       aimFor(item);
       wake();
+      options.onFlip(id, Math.abs(halves) % 2 === 1);
     },
     /** The pointer or the focus is on one of its stickers, or on none. */
     stick(id: string, index: number | null) {
@@ -719,14 +877,13 @@ export function createCartridgeStage(
       });
       wake();
     },
-    /** Picks one out, or puts it back. A newly picked one turns once. */
+    /** Turns one over to show its back, and any other back to its front. */
     select(id: string | null) {
-      const before = selected;
       selected = id;
-      for (const item of items.values()) aimFor(item);
-      const item = id ? items.get(id) : undefined;
-      if (item && id !== before && !options.reducedMotion) {
-        item.spin.target += TAU;
+      for (const item of items.values()) {
+        const back = Math.abs(Math.round(item.spin.target / Math.PI)) % 2 === 1;
+        if (back !== (item.cartridge.id === id)) item.spin.target += Math.PI;
+        aimFor(item);
       }
       wake();
     },

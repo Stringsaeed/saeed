@@ -1,9 +1,8 @@
-/* The shelf bleeds a little past the text column, never past the window. */
+/* The shelf is as wide as the page's column; on the home page the column
+   is widened to suit it (see data-layout-wide in globals.css). */
 .shelf {
   position: relative;
-  left: 50%;
-  width: min(100vw - 2rem, 940px);
-  translate: -50% 0;
+  width: 100%;
 }
 
 .grid {
@@ -25,13 +24,18 @@
   }
 }
 
-/* One canvas over the whole grid. It draws; the buttons under it listen. */
+/* One canvas over the whole grid. It draws; the buttons under it listen.
+   It reaches past the grid on every side, because a cartridge that is
+   turned over grows, and one in an outside column would be cut off. */
 .canvas {
+  --reach: 5rem;
+
   position: absolute;
-  inset: 0;
+  inset: calc(var(--reach) * -1);
   z-index: 1;
-  width: 100%;
-  height: 100%;
+  width: calc(100% + var(--reach) * 2);
+  height: calc(100% + var(--reach) * 2);
+  max-width: none;
   pointer-events: none;
   opacity: 0;
   transition: opacity 300ms ease;
@@ -145,79 +149,28 @@
   color: var(--foreground);
 }
 
-/* What the picked cartridge is. While one is shown it rides the bottom of
-   the window, so it is next to whichever row was touched; with nothing
-   shown it is a line of help under the shelf. */
-.detail {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+/* A line of help under the shelf. If the cartridges could not be drawn, it
+   reads out the chosen app instead, since there is no back to turn to. */
+.hint {
   max-width: 44rem;
-  margin: 0.75rem auto 0;
-  padding: 0.75rem 1rem;
+  margin: 0.75rem 0 0;
   font-size: 0.875rem;
   line-height: 1.5rem;
-  background: color-mix(in oklab, var(--background) 88%, transparent);
-  border: 1px solid var(--border);
-  border-radius: 0.9rem;
-  box-shadow: 0 8px 30px -12px rgb(0 0 0 / 0.25);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  color: var(--muted-foreground);
 }
 
-.detail[data-open] {
-  position: sticky;
-  bottom: 1rem;
-}
-
-/* While it only previews what the pointer is over, the pointer goes
-   through it: otherwise it would slide in under the pointer, take the
-   hover from the cartridge beneath, and vanish again. */
-.detail[data-open]:not([data-pinned]) {
-  pointer-events: none;
-}
-
-.title {
-  display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
-}
-
-.title strong {
+.hint strong {
   font-weight: 600;
+  color: var(--foreground);
 }
 
-.title span {
-  font-family: var(--font-paper-mono, ui-monospace, monospace);
-  font-size: 0.6875rem;
-  letter-spacing: 0.04em;
-  color: var(--muted-foreground);
-  text-transform: uppercase;
-}
-
-.description,
-.hint {
-  color: var(--muted-foreground);
-}
-
-.links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
-  margin-top: 0.125rem;
-}
-
-.links a {
+.hint a {
+  margin-right: 0.75rem;
   color: var(--foreground);
   text-decoration: underline;
   text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
   text-underline-offset: 3px;
-}
-
-.links a:hover {
-  text-decoration-color: currentColor;
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

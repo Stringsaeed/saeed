@@ -80,7 +80,10 @@ export function BookShelf() {
     return library.current;
   }, []);
 
+  const shelfRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    const shelf = shelfRef.current;
+    if (!shelf || constrainedConnection()) return;
     let cancelled = false;
     let idle: number | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -100,26 +103,29 @@ export function BookShelf() {
           /* The shelf and dialog retain their accessible fallbacks. */
         });
     };
-    const schedule = () => {
-      if ("requestIdleCallback" in window)
-        idle = window.requestIdleCallback(warm, {
-          timeout: 1500,
-        });
-      else timer = setTimeout(warm, 100);
-    };
-    // Warming starts at load, not when the shelf comes near, because the
-    // snapshots replace the drawn spines without a fade: started late, the
-    // swap lands while a skimming reader is looking at the shelf.
-    if (!constrainedConnection()) {
-      if (document.readyState === "complete") schedule();
-      else
-        window.addEventListener("load", schedule, {
-          once: true,
-        });
-    }
+    // The snapshots are a WebGL render plus a synchronous readback of every
+    // book. Doing that at load kept the main thread busy long after first
+    // paint. Two viewports of lead time is enough for a normal scroll to
+    // finish the swap before the shelf arrives; a fast fling can still meet
+    // the drawn spines for a moment, since they do not crossfade.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        if ("requestIdleCallback" in window)
+          idle = window.requestIdleCallback(warm, {
+            timeout: 1500,
+          });
+        else timer = setTimeout(warm, 100);
+      },
+      {
+        rootMargin: "200% 0px",
+      },
+    );
+    observer.observe(shelf);
     return () => {
       cancelled = true;
-      window.removeEventListener("load", schedule);
+      observer.disconnect();
       if (idle !== undefined) window.cancelIdleCallback(idle);
       if (timer !== undefined) clearTimeout(timer);
       const pending = library.current;
@@ -129,7 +135,6 @@ export function BookShelf() {
   }, [
     getLibrary,
   ]);
-  const shelfRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [open, setOpen] = useState(false);
   const [pulled, setPulled] = useState<PulledState | null>(null);

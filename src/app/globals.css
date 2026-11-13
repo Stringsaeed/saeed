@@ -1610,3 +1610,9 @@ html[data-blueprint-wipe] ::view-transition-new(root) {
     animation-range-end: var(--scroll-fade-size), 100%;
   }
 }
+
+/* The backdrop shader draws below device resolution and is scaled up.
+   Pixelated keeps the Bayer cells hard instead of blurring them into gray. */
+[data-paper-shader] canvas {
+  image-rendering: pixelated;
+}

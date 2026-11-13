@@ -79,9 +79,14 @@ export function createBookLibrary(specs: readonly BookModel[]) {
     );
     camera.position.z = 80;
     renderer.setPixelRatio(1);
+    // The shelf is about 320px tall, so 640 covers a 2× screen. The old 1024px
+    // readback was a long task per book and a few hundred kilobytes of PNG.
+    const previewHeight = 640;
     renderer.setSize(
-      Math.ceil((1024 * (depth + 2 * padding)) / (height + 2 * padding)),
-      1024,
+      Math.ceil(
+        (previewHeight * (depth + 2 * padding)) / (height + 2 * padding),
+      ),
+      previewHeight,
       false,
     );
     const visible: THREE.Object3D[] = [];

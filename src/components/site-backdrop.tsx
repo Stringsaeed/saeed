@@ -29,6 +29,26 @@ function useWebGL2() {
   return supported;
 }
 
+// About a fifth of the CSS viewport. The warp is a masked, low-contrast
+// dither already quantized to 2.5px cells, and a full-viewport canvas took
+// ~30ms a frame, which simulated mobile throttling turns into long tasks
+// for the whole trace. This budget stays inside one frame.
+function shaderPixelBudget() {
+  const area = window.innerWidth * window.innerHeight;
+  return Math.max(60_000, Math.min(Math.round(area * 0.22), 300_000));
+}
+
+function useShaderPixelBudget() {
+  const [budget, setBudget] = useState(80_000);
+  useEffect(() => {
+    const apply = () => setBudget(shaderPixelBudget());
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, []);
+  return budget;
+}
+
 // Paper's dithering shader: a slow 4×4 Bayer-dithered warp glowing behind
 // the header, masked away before the content gets dense. Fixed and inert,
 // under the content; frozen for reduced motion.
@@ -37,6 +57,7 @@ export function SiteBackdrop() {
   const blueprint = useBlueprint();
   const reduced = usePrefersReducedMotion();
   const webgl = useWebGL2();
+  const pixelBudget = useShaderPixelBudget();
   if (!webgl) return null;
   const dark = resolvedTheme !== "light";
   const colorFront = blueprint
@@ -66,6 +87,7 @@ export function SiteBackdrop() {
         size={2.5}
         speed={reduced ? 0 : 0.18}
         scale={1.1}
+        maxPixelCount={pixelBudget}
       />
     </div>
   );

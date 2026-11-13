@@ -37,8 +37,12 @@
   --sh-property: #0e7490;
   --sh-entity: #a16207;
   --sh-num: #c2410c;
-  --pp-mono:
-    var(--font-paper-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --pp-mono: var(
+    --font-paper-mono,
+    "Paper Mono Fallback",
+    ui-monospace,
+    monospace
+  );
   --pp-ui: var(--font-sans);
 }
 

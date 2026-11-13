@@ -79,6 +79,9 @@ function Slot({
           height={sticker.height}
           sizes={ART_SIZES}
           loading="eager"
+          // Not the LCP element. High priority would put these on the
+          // simulated LCP path ahead of the intro text.
+          fetchPriority="low"
           draggable={false}
           onError={onError}
         />

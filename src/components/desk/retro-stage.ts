@@ -43,6 +43,12 @@ export type StageOptions = {
   };
   /** Room between things, in desk units, added to each footprint. */
   spacing?: number;
+  /**
+   * Equal slots. Each thing is scaled into one shared box, long objects
+   * lie the same way, and the camera keeps the whole desk in frame.
+   * The shelf leaves this off and keeps the weighted rows below.
+   */
+  grid?: boolean;
 };
 
 type Body = {
@@ -53,6 +59,8 @@ type Body = {
   pos: THREE.Vector3;
   vel: THREE.Vector3;
   yaw: number;
+  /** Resting turn about y. The grid sets one family; the shelf uses spec.yaw. */
+  restYaw: number;
   yawVel: number;
   tilt: THREE.Vector2;
   held: boolean;
@@ -126,6 +134,76 @@ void main() {
   gl_FragColor = vec4(q, 1.0);
 }
 `;
+
+// One cubby for every thing. Footprint and height are capped to the same
+// box, then a needle is widened and a flat cluster is given a little height
+// so both still read at this pixel size.
+const GRID_CELL = 2.2;
+const GRID_GAP = 0.64;
+const GRID_PAD_X = 0.74;
+const GRID_PAD_BACK = 1.85;
+const GRID_PAD_FRONT = 0.64;
+const GRID_HEIGHT = 1.92;
+const GRID_ROOM = GRID_CELL - 0.28;
+const GRID_NARROW_AT = 700;
+/** Shared turn so every object presents the same face to the camera. */
+const GRID_YAW = 0.36;
+
+function fitGridModel(model: ThingModel) {
+  const group = model.group;
+  group.position.set(0, 0, 0);
+  group.rotation.set(0, 0, 0);
+  group.scale.set(1, 1, 1);
+  group.updateMatrixWorld(true);
+  const local = new THREE.Box3().setFromObject(group);
+  const center = local.getCenter(new THREE.Vector3());
+  const shift = new THREE.Vector3(-center.x, -local.min.y, -center.z);
+  for (const child of group.children) {
+    child.position.add(shift);
+  }
+  group.updateMatrixWorld(true);
+  const aligned = new THREE.Box3().setFromObject(group);
+  const alignedSize = aligned.getSize(new THREE.Vector3());
+  // Lay the long axis across the desk, then add the shared turn.
+  const restYaw =
+    (alignedSize.z > alignedSize.x * 1.25 ? -Math.PI / 2 : 0) + GRID_YAW;
+  group.rotation.y = restYaw;
+  group.updateMatrixWorld(true);
+  const turned = new THREE.Box3().setFromObject(group);
+  const size = turned.getSize(new THREE.Vector3());
+  const footprint = Math.max(size.x, size.z, 1e-4);
+  const scaleXZ = GRID_ROOM / footprint;
+  const scaleY = GRID_HEIGHT / Math.max(size.y, 1e-4);
+  const uniform = Math.min(scaleXZ, scaleY);
+  let xz = uniform;
+  let y = uniform;
+  const footAfter = footprint * uniform;
+  const heightAfter = size.y * uniform;
+  // The tower's shaft would be a pixel wide if it only grew in height.
+  if (heightAfter > footAfter * 2.6) {
+    xz = Math.min(
+      scaleXZ,
+      uniform * Math.min(2.2, (heightAfter * 0.7) / footAfter),
+    );
+  }
+  // The pyramids are a low cluster. A little extra height keeps them in the set.
+  if (size.y > 0.45 && footAfter > heightAfter * 3) {
+    y = Math.min(
+      scaleY,
+      uniform * Math.min(2.2, (footAfter * 0.62) / heightAfter),
+    );
+  }
+  group.scale.set(xz, y, xz);
+  group.rotation.set(0, 0, 0);
+  model.radius = 0.5 * footprint * xz;
+  model.height = size.y * y;
+  const hx = Math.max(size.x * xz * 0.5, 0.05);
+  const hz = Math.max(size.z * xz * 0.5, 0.05);
+  return {
+    restYaw,
+    shadowRadius: Math.max(0.14, Math.sqrt(hx * hz) * 0.9),
+  };
+}
 
 export function createRetroStage(
   canvas: HTMLCanvasElement,
@@ -231,10 +309,16 @@ export function createRetroStage(
     ],
   });
 
+  const grid = options.grid ?? false;
+
   const bodies: Body[] = things.map((spec) => {
     const model = spec.build();
+    const fitted = grid ? fitGridModel(model) : null;
     const shadow = new THREE.Mesh(
-      new THREE.CircleGeometry(model.radius * 0.7, 12),
+      new THREE.CircleGeometry(
+        fitted ? fitted.shadowRadius : model.radius * 0.7,
+        12,
+      ),
       shadowMaterial,
     );
     shadow.rotation.x = -Math.PI / 2;
@@ -248,6 +332,7 @@ export function createRetroStage(
       pos: new THREE.Vector3(),
       vel: new THREE.Vector3(),
       yaw: 0,
+      restYaw: fitted?.restYaw ?? spec.yaw,
       yawVel: 0,
       tilt: new THREE.Vector2(),
       held: false,
@@ -263,6 +348,96 @@ export function createRetroStage(
   let halfWidth = 8;
   let halfDepth = 3;
   let narrow = false;
+
+  function layoutGrid() {
+    const rowCount = Math.max(
+      1,
+      narrow ? options.rows.narrow : options.rows.wide,
+    );
+    const cols = Math.max(1, Math.ceil(bodies.length / rowCount));
+    const width =
+      cols * GRID_CELL + Math.max(0, cols - 1) * GRID_GAP + GRID_PAD_X * 2;
+    const depth =
+      rowCount * GRID_CELL +
+      Math.max(0, rowCount - 1) * GRID_GAP +
+      GRID_PAD_BACK +
+      GRID_PAD_FRONT;
+    halfWidth = width / 2;
+    halfDepth = depth / 2;
+    for (let index = 0; index < bodies.length; index++) {
+      const body = bodies[index];
+      const row = Math.floor(index / cols);
+      const col = index % cols;
+      const count = Math.min(cols, bodies.length - row * cols);
+      const rowSpan = count * GRID_CELL + Math.max(0, count - 1) * GRID_GAP;
+      const x = -rowSpan / 2 + GRID_CELL / 2 + col * (GRID_CELL + GRID_GAP);
+      // Row 0 is the far row. The camera sits on +z.
+      const z =
+        -halfDepth +
+        GRID_PAD_BACK +
+        GRID_CELL / 2 +
+        row * (GRID_CELL + GRID_GAP);
+      body.home.set(x, 0, z);
+      if (body.held) continue;
+      body.pos.x = x;
+      body.pos.z = z;
+      body.vel.x = 0;
+      body.vel.z = 0;
+    }
+  }
+
+  function frameGrid() {
+    const elevation = narrow ? 1.2 : 0.84;
+    const lookY = 0.34;
+    const yTop = GRID_HEIGHT + 0.16;
+    const margin = narrow ? 0.86 : 0.9;
+    const corner = new THREE.Vector3();
+    const place = (distance: number) => {
+      camera.position.set(
+        0,
+        lookY + Math.sin(elevation) * distance,
+        Math.cos(elevation) * distance,
+      );
+      camera.lookAt(0, lookY, 0);
+      camera.updateProjectionMatrix();
+      camera.updateMatrixWorld();
+    };
+    const inside = (distance: number) => {
+      place(distance);
+      for (const x of [
+        -halfWidth,
+        halfWidth,
+      ]) {
+        for (const y of [
+          0,
+          yTop,
+        ]) {
+          for (const z of [
+            -halfDepth,
+            halfDepth,
+          ]) {
+            corner.set(x, y, z).project(camera);
+            if (corner.z < -1 || corner.z > 1) return false;
+            if (Math.abs(corner.x) > margin || Math.abs(corner.y) > margin) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    };
+    let lo = 6;
+    let hi = 36;
+    while (!inside(hi) && hi < 220) hi *= 1.4;
+    for (let step = 0; step < 18; step++) {
+      const mid = (lo + hi) / 2;
+      if (inside(mid)) hi = mid;
+      else lo = mid;
+    }
+    place(hi);
+    postMaterial.uniforms.cameraNear.value = camera.near;
+    postMaterial.uniforms.cameraFar.value = camera.far;
+  }
 
   function layoutHomes() {
     const rows = narrow ? options.rows.narrow : options.rows.wide;
@@ -310,27 +485,35 @@ export function createRetroStage(
     lowRes.value.set(lw, lh);
     postMaterial.uniforms.texel.value.set(1 / lw, 1 / lh);
     camera.aspect = width / height;
-    narrow = camera.aspect < 1.6;
-    // The desk is as wide as the view at the far row; the camera backs off
-    // until that many units fit.
-    const rows = narrow ? options.rows.narrow : options.rows.wide;
-    halfWidth = narrow ? 6.2 : 8.2;
-    halfDepth = rows === 1 ? 1.6 : 1.2 + rows * 1.3;
-    const half = THREE.MathUtils.degToRad(camera.fov / 2);
-    const distance = (halfWidth + 0.8) / (Math.tan(half) * camera.aspect);
-    const elevation = narrow ? 0.7 : 0.58;
-    camera.position.set(
-      0,
-      Math.sin(elevation) * distance + 0.6,
-      Math.cos(elevation) * distance,
-    );
-    camera.lookAt(0, 0.1, 0);
-    camera.updateProjectionMatrix();
-    postMaterial.uniforms.cameraNear.value = camera.near;
-    postMaterial.uniforms.cameraFar.value = camera.far;
-    slab.scale.set(halfWidth * 2 + 1.6, 0.04, halfDepth * 2 + 1.8);
-    slab.position.set(0, -0.02, -0.2);
-    layoutHomes();
+    if (grid) {
+      narrow = width < GRID_NARROW_AT;
+      layoutGrid();
+      frameGrid();
+      slab.scale.set(halfWidth * 2, 0.04, halfDepth * 2);
+      slab.position.set(0, -0.02, 0);
+    } else {
+      narrow = camera.aspect < 1.6;
+      // The desk is as wide as the view at the far row; the camera backs off
+      // until that many units fit.
+      const rows = narrow ? options.rows.narrow : options.rows.wide;
+      halfWidth = narrow ? 6.2 : 8.2;
+      halfDepth = rows === 1 ? 1.6 : 1.2 + rows * 1.3;
+      const half = THREE.MathUtils.degToRad(camera.fov / 2);
+      const distance = (halfWidth + 0.8) / (Math.tan(half) * camera.aspect);
+      const elevation = narrow ? 0.7 : 0.58;
+      camera.position.set(
+        0,
+        Math.sin(elevation) * distance + 0.6,
+        Math.cos(elevation) * distance,
+      );
+      camera.lookAt(0, 0.1, 0);
+      camera.updateProjectionMatrix();
+      postMaterial.uniforms.cameraNear.value = camera.near;
+      postMaterial.uniforms.cameraFar.value = camera.far;
+      slab.scale.set(halfWidth * 2 + 1.6, 0.04, halfDepth * 2 + 1.8);
+      slab.position.set(0, -0.02, -0.2);
+      layoutHomes();
+    }
     invalidate();
   }
 
@@ -454,7 +637,7 @@ export function createRetroStage(
         body.tilt.x += (0 - body.tilt.x) * Math.min(1, 8 * dt);
         body.tilt.y += (0 - body.tilt.y) * Math.min(1, 8 * dt);
       }
-      if (body.spec.settle && body.grounded && !body.held) {
+      if ((grid || body.spec.settle) && body.grounded && !body.held) {
         // Shelved things turn back to face the front.
         const turns = Math.round(body.yaw / TAU);
         const rest = turns * TAU;
@@ -477,7 +660,7 @@ export function createRetroStage(
       group.position.copy(body.pos);
       group.rotation.set(
         body.tilt.x,
-        body.spec.yaw + body.yaw,
+        body.restYaw + body.yaw,
         body.tilt.y,
         "YXZ",
       );
@@ -517,9 +700,10 @@ export function createRetroStage(
   function project() {
     projected.clear();
     for (const body of bodies) {
-      tmp
-        .set(body.pos.x, 0, body.pos.z + body.model.radius * 0.55)
-        .project(camera);
+      const lead = grid
+        ? Math.min(body.model.radius * 0.35, 0.28)
+        : body.model.radius * 0.55;
+      tmp.set(body.pos.x, 0, body.pos.z + lead).project(camera);
       projected.set(body.spec.id, {
         x: ((tmp.x + 1) / 2) * width,
         y: ((1 - tmp.y) / 2) * height,
@@ -570,7 +754,7 @@ export function createRetroStage(
       body.vel.set(0, -2, 0);
       body.grounded = false;
       body.landed = true;
-      body.yawVel = body.spec.settle ? 0 : (index % 2 ? 1 : -1) * 1.4;
+      body.yawVel = body.spec.settle || grid ? 0 : (index % 2 ? 1 : -1) * 1.4;
     });
   }
   frame = requestAnimationFrame(loop);

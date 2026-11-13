@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { BookShelf } from "@/components/book-shelf";
-import { Desk } from "@/components/desk/desk";
-import { ProjectsShelf } from "@/components/desk/projects-shelf";
+import { ProjectsShelf } from "@/components/cartridges/projects-shelf";
 import { SaeedName } from "@/components/saeed-name";
 import {
   Card,
@@ -92,9 +91,19 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="mt-10 sm:mt-12">
-          <Desk />
-        </div>
+        {/* The office has its own page now, where it has room. */}
+        <p className="mt-5">
+          <Link
+            className="text-link relative font-(family-name:--font-pixel) text-[11px] tracking-wide text-muted-foreground uppercase after:absolute after:-inset-3"
+            href="/office"
+            data-analytics-event="Navigation Clicked"
+            data-analytics-destination="Office"
+            data-analytics-location="Home"
+            data-sound="tap"
+          >
+            Step into my office →
+          </Link>
+        </p>
 
         <div
           className="mt-12"
@@ -177,7 +186,7 @@ export default async function Home() {
           <h2 className="list-heading backdrop-plate" data-bp-sec="03">
             Projects
           </h2>
-          <div className="mt-2">
+          <div className="mt-4">
             <ProjectsShelf />
           </div>
         </div>

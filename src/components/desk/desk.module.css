@@ -140,3 +140,63 @@
 .links a:hover {
   text-decoration-style: solid;
 }
+
+/* The office is the whole window: the scene lies behind the header and
+   runs edge to edge, and whoever is looking stands inside it. */
+.scene {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -1;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 420px;
+  translate: -50% 0;
+  pointer-events: auto;
+}
+
+/* A finger on empty floor scrolls the page instead of being held. */
+.view {
+  height: 100%;
+  touch-action: pan-y;
+}
+
+.office .canvas {
+  outline: none;
+}
+
+.office[data-hover] .canvas {
+  cursor: pointer;
+}
+
+/* Labels sit on a picture here, so each carries its own bit of page. They
+   float over things that stand close together, so the pointer passes
+   through them to the thing beneath; the keyboard still reaches them. */
+.office .label {
+  color: var(--foreground);
+  background: var(--background);
+  box-shadow: 0 0 0 1px var(--foreground);
+  pointer-events: none;
+}
+
+/* The caption is a plate at the foot of the scene. */
+.scene .caption {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  width: max-content;
+  max-width: min(44rem, calc(100vw - 2rem));
+  min-height: 0;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  translate: -50% 0;
+  color: var(--foreground);
+  background: var(--background);
+  box-shadow: 0 0 0 1px var(--foreground);
+  pointer-events: none;
+}
+
+.scene .caption strong {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

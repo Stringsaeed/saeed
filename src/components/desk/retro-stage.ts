@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { lowRes, redraw, snapVertices } from "./retro-material";
+import { redraw, snapVertices } from "./retro-material";
+import { createRetroPass } from "./retro-pass";
 import {
   disposeThing,
   disposeThingMaterials,
@@ -72,68 +73,6 @@ type Body = {
 const GRAVITY = 42;
 const TAU = Math.PI * 2;
 const HOLD_HEIGHT = 1.6;
-
-const DITHER_VERT = /* glsl */ `
-varying vec2 vUv;
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position.xy, 0.0, 1.0);
-}
-`;
-
-const DITHER_FRAG = /* glsl */ `
-precision highp float;
-#include <packing>
-uniform sampler2D tDiffuse;
-uniform sampler2D tDepth;
-uniform vec2 texel;
-uniform float levels;
-uniform float cameraNear;
-uniform float cameraFar;
-uniform vec3 ink;
-varying vec2 vUv;
-
-float viewDepth(vec2 uv) {
-  float d = texture2D(tDepth, uv).x;
-  return -perspectiveDepthToViewZ(d, cameraNear, cameraFar);
-}
-
-float bayer(vec2 p) {
-  int x = int(mod(p.x, 4.0));
-  int y = int(mod(p.y, 4.0));
-  int i = x + y * 4;
-  // The 4×4 ordered-dither matrix, flattened.
-  float m[16];
-  m[0] = 0.0; m[1] = 8.0; m[2] = 2.0; m[3] = 10.0;
-  m[4] = 12.0; m[5] = 4.0; m[6] = 14.0; m[7] = 6.0;
-  m[8] = 3.0; m[9] = 11.0; m[10] = 1.0; m[11] = 9.0;
-  m[12] = 15.0; m[13] = 7.0; m[14] = 13.0; m[15] = 5.0;
-  for (int k = 0; k < 16; k++) if (k == i) return (m[k] + 0.5) / 16.0;
-  return 0.5;
-}
-
-void main() {
-  vec4 c = texture2D(tDiffuse, vUv);
-  float t = bayer(gl_FragCoord.xy);
-  // A drawn line where the depth jumps: the edge of a thing against the
-  // desk, or the desk against the page.
-  float here = viewDepth(vUv);
-  float dl = viewDepth(vUv - vec2(texel.x, 0.0));
-  float dr = viewDepth(vUv + vec2(texel.x, 0.0));
-  float dd = viewDepth(vUv - vec2(0.0, texel.y));
-  float du = viewDepth(vUv + vec2(0.0, texel.y));
-  float jump = max(max(dl - here, dr - here), max(dd - here, du - here));
-  bool edge = jump > 0.45 + here * 0.012;
-  // Coverage is dithered too: a half-transparent shadow becomes a stipple.
-  if (c.a <= t && !edge) discard;
-  vec3 rgb = c.a > 0.0 ? c.rgb / c.a : c.rgb;
-  vec3 srgb = pow(clamp(rgb, 0.0, 1.0), vec3(1.0 / 2.2));
-  float steps = levels - 1.0;
-  vec3 q = floor(srgb * steps + t) / steps;
-  if (edge) q = ink;
-  gl_FragColor = vec4(q, 1.0);
-}
-`;
 
 // One cubby for every thing. Footprint and height are capped to the same
 // box, then a needle is widened and a flat cluster is given a little height
@@ -211,15 +150,7 @@ export function createRetroStage(
   events: StageEvents,
   options: StageOptions,
 ) {
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: false,
-    alpha: true,
-    premultipliedAlpha: true,
-    powerPreference: "low-power",
-  });
-  renderer.setPixelRatio(1);
-  renderer.setClearColor(0x000000, 0);
+  const pass = createRetroPass(canvas);
 
   const scene = new THREE.Scene();
   scene.add(new THREE.HemisphereLight(0xfff6e8, 0x8b7d6b, 2.1));
@@ -231,50 +162,6 @@ export function createRetroStage(
   scene.add(fill);
 
   const camera = new THREE.PerspectiveCamera(28, 1, 4, 120);
-
-  const depthTexture = new THREE.DepthTexture(2, 2);
-  depthTexture.minFilter = THREE.NearestFilter;
-  depthTexture.magFilter = THREE.NearestFilter;
-  const target = new THREE.WebGLRenderTarget(2, 2, {
-    minFilter: THREE.NearestFilter,
-    magFilter: THREE.NearestFilter,
-    depthBuffer: true,
-    stencilBuffer: false,
-    depthTexture,
-  });
-  const postScene = new THREE.Scene();
-  const postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  const postMaterial = new THREE.ShaderMaterial({
-    vertexShader: DITHER_VERT,
-    fragmentShader: DITHER_FRAG,
-    uniforms: {
-      tDiffuse: {
-        value: target.texture,
-      },
-      tDepth: {
-        value: depthTexture,
-      },
-      texel: {
-        value: new THREE.Vector2(1 / 2, 1 / 2),
-      },
-      levels: {
-        value: 5,
-      },
-      cameraNear: {
-        value: 1,
-      },
-      cameraFar: {
-        value: 200,
-      },
-      ink: {
-        value: new THREE.Color(0x1c1c1f),
-      },
-    },
-    depthTest: false,
-    depthWrite: false,
-    transparent: true,
-  });
-  postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), postMaterial));
 
   const shadowMaterial = new THREE.MeshBasicMaterial({
     color: 0x000000,
@@ -298,7 +185,7 @@ export function createRetroStage(
     shadowMaterial.color.set(dark ? 0xffffff : 0x000000);
     shadowMaterial.opacity = dark ? 0.05 : 0.14;
     slabMaterial.color.set(dark ? 0x000000 : 0xffffff);
-    postMaterial.uniforms.ink.value.set(dark ? 0xd6d6dc : 0x1c1c1f);
+    pass.setInk(dark ? 0xd6d6dc : 0x1c1c1f);
     invalidate();
   };
   const theme = new MutationObserver(applyTheme);
@@ -435,8 +322,6 @@ export function createRetroStage(
       else lo = mid;
     }
     place(hi);
-    postMaterial.uniforms.cameraNear.value = camera.near;
-    postMaterial.uniforms.cameraFar.value = camera.far;
   }
 
   function layoutHomes() {
@@ -480,10 +365,7 @@ export function createRetroStage(
     height = Math.max(1, Math.round(rect.height));
     const lw = Math.max(1, Math.round(width / options.pixelSize));
     const lh = Math.max(1, Math.round(height / options.pixelSize));
-    renderer.setSize(lw, lh, false);
-    target.setSize(lw, lh);
-    lowRes.value.set(lw, lh);
-    postMaterial.uniforms.texel.value.set(1 / lw, 1 / lh);
+    pass.setSize(lw, lh);
     camera.aspect = width / height;
     if (grid) {
       narrow = width < GRID_NARROW_AT;
@@ -508,8 +390,6 @@ export function createRetroStage(
       );
       camera.lookAt(0, 0.1, 0);
       camera.updateProjectionMatrix();
-      postMaterial.uniforms.cameraNear.value = camera.near;
-      postMaterial.uniforms.cameraFar.value = camera.far;
       slab.scale.set(halfWidth * 2 + 1.6, 0.04, halfDepth * 2 + 1.8);
       slab.position.set(0, -0.02, -0.2);
       layoutHomes();
@@ -714,12 +594,7 @@ export function createRetroStage(
   }
 
   function render() {
-    renderer.setRenderTarget(target);
-    renderer.clear();
-    renderer.render(scene, camera);
-    renderer.setRenderTarget(null);
-    renderer.clear();
-    renderer.render(postScene, postCamera);
+    pass.render(scene, camera);
     project();
     if (!ready) {
       ready = true;
@@ -832,11 +707,8 @@ export function createRetroStage(
       shadowMaterial.dispose();
       slab.geometry.dispose();
       slabMaterial.dispose();
-      depthTexture.dispose();
       disposeThingMaterials();
-      postMaterial.dispose();
-      target.dispose();
-      renderer.dispose();
+      pass.dispose();
     },
   };
   return api;

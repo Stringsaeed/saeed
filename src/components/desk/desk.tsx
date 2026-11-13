@@ -1,31 +1,33 @@
 "use client";
 
 import { useCallback } from "react";
-import { CLAUSES } from "@/components/things-copy";
-import { RetroView } from "./retro-view";
+import { RetroView, type StageFactory } from "./retro-view";
+import {
+  THING_CAPTIONS as CAPTIONS,
+  thingName as nameOf,
+} from "./thing-captions";
 import { THINGS, type ThingId } from "./things-models";
 
 // Things I keep around, as objects on a desk. Hover to read what one is,
 // pick it up and drop it, tap it to make it hop. The sentence about each
 // one comes from the same copy the sticker line used.
 
-const CAPTIONS = new Map<ThingId, string>(
-  CLAUSES.map((clause) => {
-    const rest = clause.rest
-      .map((token) => (typeof token === "string" ? token : token.word))
-      .join("");
-    const sentence = `${clause.lead}${rest}`.replace(/[,.]\s*$/, "");
-    return [
-      clause.id,
-      `${sentence[0].toUpperCase()}${sentence.slice(1)}.`,
-    ];
-  }),
-);
-
 const ROWS = {
   wide: 2,
   narrow: 4,
 };
+
+// Equal slots: every thing is scaled into one shared box.
+const loadStage = () =>
+  import("./retro-stage").then(
+    ({ createRetroStage }): StageFactory =>
+      (canvas, things, events, options) =>
+        createRetroStage(canvas, things, events, {
+          ...options,
+          rows: ROWS,
+          grid: true,
+        }),
+  );
 
 // Places along the back, things you pick up along the front. A narrow
 // window keeps this order and wraps it into two columns.
@@ -46,9 +48,6 @@ const ON_DESK = ORDER.map((id) => {
   return found;
 });
 
-const nameOf = (id: ThingId) =>
-  THINGS.find((thing) => thing.id === id)?.name ?? id;
-
 export function Desk() {
   const describe = useCallback(
     (id: ThingId) => `${nameOf(id)}. ${CAPTIONS.get(id) ?? ""}`,
@@ -67,8 +66,7 @@ export function Desk() {
     <RetroView
       things={ON_DESK}
       label="Things I keep around"
-      rows={ROWS}
-      grid
+      load={loadStage}
       describe={describe}
       caption={caption}
     />

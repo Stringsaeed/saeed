@@ -10,20 +10,42 @@ import {
 } from "react";
 import { playHoverSound, playSound } from "@/lib/sound";
 import styles from "./desk.module.css";
-import type { RetroStage, StageOptions } from "./retro-stage";
+import type { RetroStage, StageEvents } from "./retro-stage";
 import type { ThingSpec } from "./things-models";
 
 // A desk of things drawn by the retro stage, with the DOM around it: a
 // label under whichever thing the pointer is on, and a caption line that
 // says more about the one last touched. Any set of things can use it.
 
+/** What the view needs from whatever draws the things. */
+export type Stage = Pick<
+  RetroStage,
+  "hover" | "leave" | "grab" | "move" | "release" | "poke" | "dispose"
+> & {
+  /** A drag that starts on nothing does something, so the view follows it. */
+  pans?: boolean;
+  /** A tap that lands on nothing. */
+  tap?: (clientX: number, clientY: number) => void;
+};
+
+export type StageFactory = (
+  canvas: HTMLCanvasElement,
+  things: readonly ThingSpec[],
+  events: StageEvents,
+  options: {
+    pixelSize: number;
+    reducedMotion: boolean;
+  },
+) => Stage;
+
 export type RetroViewProps<Id extends string> = {
   things: readonly ThingSpec<Id>[];
   label: string;
-  rows: StageOptions["rows"];
-  /** Even slots with a shared scale. The shelf leaves this off. */
-  grid?: boolean;
-  spacing?: number;
+  /** Loads the scene: the desk and shelf, or the office. Keeps three.js
+   *  off the first paint. Must be the same function on every render. */
+  load: () => Promise<StageFactory>;
+  /** CSS pixels per drawn texel. */
+  pixelSize?: number;
   /** What to read for a thing, in the label and the caption. */
   describe: (id: Id) => string;
   /** The caption line for the shown thing, or the resting line. */
@@ -47,9 +69,8 @@ function usePrefersReducedMotion() {
 export function RetroView<Id extends string>({
   things,
   label,
-  rows,
-  grid,
-  spacing,
+  load,
+  pixelSize = 3,
   describe,
   caption,
   className,
@@ -57,7 +78,7 @@ export function RetroView<Id extends string>({
 }: RetroViewProps<Id>) {
   const reduced = usePrefersReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const stageRef = useRef<RetroStage | null>(null);
+  const stageRef = useRef<Stage | null>(null);
   const labelRefs = useRef(new Map<string, HTMLButtonElement>());
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -69,11 +90,11 @@ export function RetroView<Id extends string>({
     const canvas = canvasRef.current;
     if (!canvas) return;
     let cancelled = false;
-    let stage: RetroStage | null = null;
-    import("./retro-stage")
-      .then(({ createRetroStage }) => {
+    let stage: Stage | null = null;
+    load()
+      .then((create) => {
         if (cancelled) return;
-        stage = createRetroStage(
+        stage = create(
           canvas,
           things,
           {
@@ -90,11 +111,8 @@ export function RetroView<Id extends string>({
             onLand: () => playSound("bookTap"),
           },
           {
-            pixelSize: 3,
+            pixelSize,
             reducedMotion: reduced,
-            rows,
-            spacing,
-            grid,
           },
         );
         stageRef.current = stage;
@@ -110,9 +128,8 @@ export function RetroView<Id extends string>({
   }, [
     reduced,
     things,
-    rows,
-    spacing,
-    grid,
+    load,
+    pixelSize,
   ]);
 
   const drag = useRef<{
@@ -157,13 +174,14 @@ export function RetroView<Id extends string>({
         moved: false,
         thing,
       };
-      if (!thing) return;
+      if (!thing && !stage.pans) return;
       event.preventDefault();
       try {
         event.currentTarget.setPointerCapture(event.pointerId);
       } catch {
         // Fine without capture; moves over the canvas still arrive.
       }
+      if (!thing) return;
       setHolding(thing);
       setActive(thing);
       playSound("select");
@@ -179,9 +197,12 @@ export function RetroView<Id extends string>({
       drag.current = null;
       stage.release();
       setHolding(null);
-      if (current.thing && !current.moved) {
+      if (current.moved) return;
+      if (current.thing) {
         stage.poke(current.thing);
         playSound("tap");
+      } else if (event.type === "pointerup") {
+        stage.tap?.(event.clientX, event.clientY);
       }
     },
     [],

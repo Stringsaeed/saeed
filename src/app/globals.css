@@ -1669,3 +1669,10 @@ html[data-blueprint-wipe] ::view-transition-new(root) {
 [data-paper-shader] canvas {
   image-rendering: pixelated;
 }
+
+/* A page that asks for it gets a wider column: the home page, so that its
+   text, its lists and its shelf of cartridges share one pair of edges.
+   Unlayered, so it wins over the max-width utility on the layout itself. */
+.site-layout:has(> [data-layout-wide]) {
+  max-width: 63rem;
+}

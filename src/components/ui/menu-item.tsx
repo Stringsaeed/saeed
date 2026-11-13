@@ -44,7 +44,12 @@ export interface MenuItemRenderOptions {
   disabled?: boolean;
   label: string;
   closeOnClick: boolean;
-  element: ReactElement;
+  /** Row element, or a render function that receives the primitive's props.
+   *  The function form lets those props (roving tabIndex, keyboard activation)
+   *  win over the row's own fallbacks. */
+  element:
+    | ReactElement
+    | ((props: React.ComponentPropsWithRef<"div">) => ReactElement);
   children: ReactNode;
 }
 
@@ -104,6 +109,7 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
       closeOnClick,
       className,
       onClick,
+      onKeyDown: onKeyDownProp,
       ...props
     },
     ref
@@ -229,55 +235,117 @@ const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(
       </>
     );
 
+    // Render function so the menu primitive's props are applied on the DOM
+    // node. tabIndex={-1} is only the fallback the linter can see; the
+    // primitive's roving tabIndex is spread over it. Enter and Space stay
+    // the primitive's job (it clicks the row). Our click handler selects,
+    // then calls the primitive's.
+    const attachPopupRef = (
+      baseProps: React.ComponentPropsWithRef<"div">,
+      node: HTMLDivElement | null,
+    ) => {
+      if (typeof baseProps.ref === "function") baseProps.ref(node);
+      else if (baseProps.ref) baseProps.ref.current = node;
+      mergeRef(node);
+    };
+
     if (renderMenuItem) {
-      // Inside DropdownContent, the menu-item primitive (supplied by the
-      // surrounding DropdownContent through context) owns the role,
-      // aria-checked, tabIndex, roving highlight, typeahead, and Enter/Space/
-      // click activation (activation synthesizes a click, so handleActivate
-      // also fires for keyboard). The styled div carries the Fluid
-      // Functionalism visuals and the proximity-hover registration; MenuItem
-      // itself imports no primitive.
+      const popupClassName = (baseProps: React.ComponentPropsWithRef<"div">) =>
+        cn(itemClassName, baseProps.className);
+      const onPopupClick =
+        (baseProps: React.ComponentPropsWithRef<"div">) =>
+        (event: React.MouseEvent<HTMLDivElement>) => {
+          handleActivate?.(event);
+          baseProps.onClick?.(event);
+        };
+      const onPopupKeyDown =
+        (baseProps: React.ComponentPropsWithRef<"div">) =>
+        (event: React.KeyboardEvent<HTMLDivElement>) => {
+          onKeyDownProp?.(event);
+          baseProps.onKeyDown?.(event);
+        };
       return renderMenuItem({
         radio: typeof checked === "boolean",
         value: index,
         disabled,
         label,
         closeOnClick: closeOnClick ?? true,
-        element: (
-          <div
-            ref={mergeRef}
-            data-proximity-index={index}
-            aria-label={label}
-            onClick={handleActivate}
-            className={itemClassName}
-            {...props}
-          />
-        ),
+        element:
+          typeof checked === "boolean"
+            ? (baseProps) => (
+                <div
+                  tabIndex={-1}
+                  role="menuitemradio"
+                  aria-checked={checked}
+                  {...props}
+                  {...baseProps}
+                  ref={(node) => attachPopupRef(baseProps, node)}
+                  data-proximity-index={index}
+                  aria-disabled={disabled || undefined}
+                  aria-label={label}
+                  onClick={onPopupClick(baseProps)}
+                  onKeyDown={onPopupKeyDown(baseProps)}
+                  className={popupClassName(baseProps)}
+                >
+                  {baseProps.children}
+                </div>
+              )
+            : (baseProps) => (
+                <div
+                  tabIndex={-1}
+                  role="menuitem"
+                  {...props}
+                  {...baseProps}
+                  ref={(node) => attachPopupRef(baseProps, node)}
+                  data-proximity-index={index}
+                  aria-disabled={disabled || undefined}
+                  aria-label={label}
+                  onClick={onPopupClick(baseProps)}
+                  onKeyDown={onPopupKeyDown(baseProps)}
+                  className={popupClassName(baseProps)}
+                >
+                  {baseProps.children}
+                </div>
+              ),
         children: content,
       });
     }
 
+    const rowTabIndex = !disabled && index === (checkedIndex ?? 0) ? 0 : -1;
+    const onInlineKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      onKeyDownProp?.(event);
+      if (disabled || event.defaultPrevented) return;
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        onSelect?.();
+      }
+    };
+    const inlineProps = {
+      ref: mergeRef,
+      "data-proximity-index": index,
+      "aria-disabled": disabled || undefined,
+      "aria-label": label,
+      onClick: handleActivate,
+      onKeyDown: onInlineKeyDown,
+      className: itemClassName,
+      ...props,
+    };
+
+    if (typeof checked === "boolean") {
+      return (
+        <div
+          {...inlineProps}
+          tabIndex={rowTabIndex}
+          role="menuitemradio"
+          aria-checked={checked}
+        >
+          {content}
+        </div>
+      );
+    }
+
     return (
-      <div
-        ref={mergeRef}
-        data-proximity-index={index}
-        // Disabled items are never the roving tab stop.
-        tabIndex={!disabled && index === (checkedIndex ?? 0) ? 0 : -1}
-        role={typeof checked === "boolean" ? "menuitemradio" : "menuitem"}
-        aria-checked={typeof checked === "boolean" ? checked : undefined}
-        aria-disabled={disabled || undefined}
-        aria-label={label}
-        onClick={handleActivate}
-        onKeyDown={(e) => {
-          if (disabled) return;
-          if (e.key === " " || e.key === "Enter") {
-            e.preventDefault();
-            onSelect?.();
-          }
-        }}
-        className={itemClassName}
-        {...props}
-      >
+      <div {...inlineProps} tabIndex={rowTabIndex} role="menuitem">
         {content}
       </div>
     );

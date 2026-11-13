@@ -3,7 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "127.0.0.1",
-    "192.168.1.123",
   ],
   images: {
     // AVIF first: the stickers are transparent PNGs, where it saves the most.

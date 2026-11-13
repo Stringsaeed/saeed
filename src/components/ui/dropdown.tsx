@@ -81,9 +81,12 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       measureItems,
     } = useProximityHover(containerRef);
 
+    // Registration remeasures when rows mount or swap. This publishes
+    // rects once that has happened, without listing `children` (it is not
+    // read here, and a fresh element each render would measure every time).
     useEffect(() => {
       measureItems();
-    }, [measureItems, children]);
+    }, [measureItems]);
 
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
@@ -669,13 +672,12 @@ DropdownLabel.displayName = "DropdownLabel";
 // ---------------------------------------------------------------------------
 
 const DropdownSeparator = forwardRef<
-  HTMLDivElement,
-  HTMLAttributes<HTMLDivElement>
+  HTMLHRElement,
+  HTMLAttributes<HTMLHRElement>
 >(({ className, ...props }, ref) => (
-  <div
+  <hr
     ref={ref}
-    role="separator"
-    className={cn("my-1 -mx-1 h-px shrink-0 bg-border/60", className)}
+    className={cn("my-1 -mx-1 h-px shrink-0 border-0 bg-border/60", className)}
     {...props}
   />
 ));

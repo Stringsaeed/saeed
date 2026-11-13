@@ -10,13 +10,13 @@
 
 .stage {
   position: relative;
-  height: clamp(240px, 30vw, 360px);
+  height: clamp(360px, 40vw, 500px);
   touch-action: none;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   .stage {
-    height: clamp(300px, 90vw, 420px);
+    height: clamp(560px, 165vw, 740px);
   }
 }
 

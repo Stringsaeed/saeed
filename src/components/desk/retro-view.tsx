@@ -21,6 +21,8 @@ export type RetroViewProps<Id extends string> = {
   things: readonly ThingSpec<Id>[];
   label: string;
   rows: StageOptions["rows"];
+  /** Even slots with a shared scale. The shelf leaves this off. */
+  grid?: boolean;
   spacing?: number;
   /** What to read for a thing, in the label and the caption. */
   describe: (id: Id) => string;
@@ -46,6 +48,7 @@ export function RetroView<Id extends string>({
   things,
   label,
   rows,
+  grid,
   spacing,
   describe,
   caption,
@@ -91,6 +94,7 @@ export function RetroView<Id extends string>({
             reducedMotion: reduced,
             rows,
             spacing,
+            grid,
           },
         );
         stageRef.current = stage;
@@ -108,6 +112,7 @@ export function RetroView<Id extends string>({
     things,
     rows,
     spacing,
+    grid,
   ]);
 
   const drag = useRef<{

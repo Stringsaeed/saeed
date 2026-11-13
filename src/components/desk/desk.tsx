@@ -23,9 +23,28 @@ const CAPTIONS = new Map<ThingId, string>(
 );
 
 const ROWS = {
-  wide: 1,
-  narrow: 2,
+  wide: 2,
+  narrow: 4,
 };
+
+// Places along the back, things you pick up along the front. A narrow
+// window keeps this order and wraps it into two columns.
+const ORDER: ThingId[] = [
+  "pyramids",
+  "burj",
+  "monstera",
+  "babylon",
+  "bass",
+  "keyboard",
+  "controller",
+  "pencil",
+];
+
+const ON_DESK = ORDER.map((id) => {
+  const found = THINGS.find((thing) => thing.id === id);
+  if (!found) throw new Error(`Missing desk thing: ${id}`);
+  return found;
+});
 
 const nameOf = (id: ThingId) =>
   THINGS.find((thing) => thing.id === id)?.name ?? id;
@@ -46,9 +65,10 @@ export function Desk() {
   }, []);
   return (
     <RetroView
-      things={THINGS}
+      things={ON_DESK}
       label="Things I keep around"
       rows={ROWS}
+      grid
       describe={describe}
       caption={caption}
     />

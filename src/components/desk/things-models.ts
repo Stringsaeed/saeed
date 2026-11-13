@@ -75,6 +75,7 @@ function pyramids(): ThingModel {
   const group = new THREE.Group();
   const sand = 0xd9b56e;
   const shade = 0xc9a25c;
+  // Clustered so the three cones read as one desk object, not a landscape.
   const spots: Array<
     [
       number,
@@ -84,22 +85,22 @@ function pyramids(): ThingModel {
     ]
   > = [
     [
-      1.35,
-      1.1,
-      -0.35,
+      0.78,
+      1.28,
+      -0.06,
       0.1,
     ],
     [
-      1.05,
-      0.86,
-      0.95,
-      -0.35,
+      0.58,
+      1.0,
+      0.52,
+      -0.18,
     ],
     [
+      0.36,
       0.62,
-      0.5,
-      -1.35,
-      -0.75,
+      -0.46,
+      -0.26,
     ],
   ];
   spots.forEach(([radius, height, x, z], index) => {
@@ -113,8 +114,8 @@ function pyramids(): ThingModel {
   });
   return {
     group,
-    radius: 1.7,
-    height: 0.95,
+    radius: 1.05,
+    height: 1.28,
   };
 }
 

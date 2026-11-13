@@ -1,7 +1,19 @@
 import * as THREE from "three";
 import { film } from "./office-film";
-import { flat, glow, paper, redraw, snapVertices } from "./retro-material";
-import type { ThingId, ThingModel, ThingSpec } from "./things-models";
+import {
+  flat,
+  glow,
+  inkable,
+  paper,
+  redraw,
+  snapVertices,
+} from "./retro-material";
+import {
+  THINGS,
+  type ThingId,
+  type ThingModel,
+  type ThingSpec,
+} from "./things-models";
 
 // The office the things live in. The room and its furniture are drawn like
 // a pen sketch: faces in the page colour, a stipple on the sides turned
@@ -72,30 +84,48 @@ export type Placement = {
   pitch?: number;
 };
 
+/** Where the couch stands and where the flower cushion lies. The cats'
+ *  paths go round both. */
+export const COUCH = {
+  x: -8.4,
+  /** Its back is against the wall behind whoever is looking. */
+  z: ROOM.front - 0.8,
+  /** The top of its seat cushions. */
+  seat: 0.84,
+} as const;
+
 // Where each thing lives. Placed by hand: a pencil and a tower do not
 // share a box.
-export type PropId = "clapper" | "popcorn";
+export type PropId = "clapper" | "popcorn" | "mouse";
 
 export const PLACEMENT: Record<ThingId | PropId, Placement> = {
   clapper: {
     at: [
-      CINEMA.x - 0.1,
+      CINEMA.x - 1.15,
       ROOM.cabinet,
       -3.4,
     ],
     yaw: 0.25,
   },
+  mouse: {
+    at: [
+      2.65,
+      ROOM.desk,
+      -1.8,
+    ],
+    yaw: -0.12,
+  },
   popcorn: {
     at: [
-      -7.5,
-      1.56,
-      2.5,
+      COUCH.x + 0.7,
+      COUCH.seat,
+      COUCH.z - 0.15,
     ],
     yaw: 0.5,
   },
   pyramids: {
     at: [
-      3.3,
+      2.95,
       ROOM.shelf,
       -3.45,
     ],
@@ -104,18 +134,18 @@ export const PLACEMENT: Record<ThingId | PropId, Placement> = {
   },
   burj: {
     at: [
-      5.9,
-      0,
-      -2.6,
+      4.15,
+      ROOM.shelf,
+      -3.45,
     ],
     yaw: 0.2,
-    scale: 0.82,
+    scale: 0.36,
   },
   monstera: {
     at: [
-      -5.3,
+      6.1,
       0,
-      -2.4,
+      -2.9,
     ],
     yaw: 0.6,
     scale: 1.45,
@@ -148,21 +178,21 @@ export const PLACEMENT: Record<ThingId | PropId, Placement> = {
   },
   controller: {
     at: [
-      3.9,
-      0.04,
-      2.3,
+      CINEMA.x + 0.85,
+      ROOM.cabinet,
+      -3.25,
     ],
-    yaw: -0.5,
-    scale: 1.2,
+    yaw: -0.3,
+    scale: 0.5,
   },
   pencil: {
     at: [
-      3.55,
+      3.5,
       ROOM.desk,
-      -1.95,
+      -1.9,
     ],
     yaw: 0.6,
-    scale: 0.7,
+    scale: 0.42,
   },
 };
 
@@ -203,17 +233,9 @@ export const FIXTURE_PLACEMENT = {
 
 export type FixtureId = keyof typeof FIXTURE_PLACEMENT;
 
-/** Where the director's chair stands and where the flower cushion lies.
- *  The cats know both. */
-export const DIRECTOR = {
-  x: -7.5,
-  z: 2.5,
-  seat: 1.56,
-} as const;
-
 export const CUSHION = {
-  x: -2.6,
-  z: 3.3,
+  x: -4.7,
+  z: -3.0,
 } as const;
 
 // ------------------------------------------------------------ primitives
@@ -280,13 +302,6 @@ function shell(
   return inked(mesh);
 }
 
-/** Something upholstered: fabric on every face. */
-function cushioned(w: number, h: number, d: number, x = 0, y = 0, z = 0) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), paper().soft);
-  mesh.position.set(x, y + h / 2, z);
-  return inked(mesh);
-}
-
 function tube(
   rTop: number,
   rBottom: number,
@@ -345,6 +360,104 @@ function block(
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), flat(color));
   mesh.position.set(x, y + h / 2, z);
   return mesh;
+}
+
+/** A coloured box with its edges inked, standing on `y`. */
+function piece(
+  w: number,
+  h: number,
+  d: number,
+  color: number,
+  x = 0,
+  y = 0,
+  z = 0,
+) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), inkable(color));
+  mesh.position.set(x, y + h / 2, z);
+  return inked(mesh);
+}
+
+/** A coloured cylinder standing on `y`. */
+function post(
+  radius: number,
+  h: number,
+  color: number,
+  x = 0,
+  y = 0,
+  z = 0,
+  segments = 8,
+) {
+  const mesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(radius, radius, h, segments),
+    flat(color),
+  );
+  mesh.position.set(x, y + h / 2, z);
+  return mesh;
+}
+
+/** A photo a few pixels across, for a card pinned to the board. */
+function photo(kind: "sono" | "bosha" | "pyramids") {
+  const size = 12;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d");
+  if (context) {
+    const dot = (color: string, x: number, y: number, w = 1, h = 1) => {
+      context.fillStyle = color;
+      context.fillRect(x, y, w, h);
+    };
+    if (kind === "pyramids") {
+      dot("#f0a868", 0, 0, size, size);
+      dot("#f6c98a", 0, 0, size, 4);
+      dot("#fff4cf", 8, 3, 2, 2);
+      for (let row = 0; row < 5; row++)
+        dot("#5a3b2e", 4 - row, 4 + row, 1 + row * 2, 1);
+      for (let row = 0; row < 3; row++)
+        dot("#6f4a38", 9 - row, 6 + row, 1 + row * 2, 1);
+      dot("#3a2622", 0, 9, size, 3);
+    } else {
+      // A cat's face: ears, eyes, and a white muzzle with a pink nose.
+      const fur = kind === "sono" ? "#dc8a3c" : "#2a2a30";
+      dot(kind === "sono" ? "#8fd3c8" : "#f3c2cf", 0, 0, size, size);
+      dot(fur, 2, 4, 8, 7);
+      dot(fur, 2, 2, 2, 2);
+      dot(fur, 8, 2, 2, 2);
+      dot("#f4eee2", 4, 8, 4, 3);
+      if (kind === "sono") dot("#f4eee2", 5, 4, 2, 4);
+      dot(kind === "sono" ? "#4a3524" : "#d9c33c", 3, 6);
+      dot(kind === "sono" ? "#4a3524" : "#d9c33c", 8, 6);
+      dot("#e79aa2", 5, 8, 2, 1);
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
+  return texture;
+}
+
+/** The holes of a pegboard: a grid of dots on nothing. */
+function pegHoles(across: number, down: number) {
+  const cell = 6;
+  const canvas = document.createElement("canvas");
+  canvas.width = across * cell;
+  canvas.height = down * cell;
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.fillStyle = "#8d8f97";
+    for (let row = 0; row < down; row++) {
+      for (let column = 0; column < across; column++) {
+        context.fillRect(column * cell + 2, row * cell + 1, 2, 4);
+      }
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
+  return texture;
 }
 
 /** Light is drawn as a mesh, but a pointer goes straight through it. */
@@ -513,21 +626,44 @@ export function buildRoom(): Room {
   group.add(slab(0.08, WIN.h, 0.08, midWin, WIN.y, back + 0.28));
   group.add(slab(WIN.w, 0.08, 0.08, midWin, WIN.y + WIN.h * 0.55, back + 0.28));
 
-  // The desk: a top, one slab leg, and a drawer unit.
-  const top = 0.18;
+  // The desk: a white top on two telescoping legs, each on a long foot. It
+  // could go up and down; here it is at sitting height.
+  const top = 0.12;
   group.add(slab(6.8, top, 2.8, 1.2, desk - top, -2.6));
-  group.add(slab(0.18, desk - top, 2.5, -2.0, 0, -2.65));
-  group.add(slab(1.6, desk - top, 2.5, 3.7, 0, -2.65));
-  for (let i = 0; i < 3; i++) {
-    const y = 0.16 + i * 0.82;
-    group.add(slab(1.36, 0.68, 0.04, 3.7, y, -1.38));
-    group.add(slab(0.3, 0.07, 0.07, 3.7, y + 0.36, -1.33));
+  for (const x of [
+    -1.5,
+    3.9,
+  ]) {
+    group.add(slab(0.36, 0.08, 2.3, x, 0, -2.6));
+    // Three lengths of column, each one sliding inside the last.
+    let y = 0.08;
+    for (const [side, tall] of [
+      [
+        0.3,
+        0.95,
+      ],
+      [
+        0.25,
+        0.9,
+      ],
+      [
+        0.2,
+        desk - top - 0.08 - 0.95 - 0.9,
+      ],
+    ]) {
+      group.add(slab(side, tall, side, x, y, -2.75));
+      y += tall;
+    }
   }
+  // The rail that joins the legs, the cable tray behind it, and the keypad.
+  group.add(slab(5.2, 0.1, 0.2, 1.2, desk - top - 0.1, -2.75));
+  group.add(slab(4.4, 0.28, 0.34, 1.2, desk - top - 0.4, -3.62));
+  group.add(slab(0.5, 0.06, 0.14, 3.3, desk - top - 0.06, -1.29));
 
   // A shelf over the desk, and a few books that stay put.
   group.add(slab(4.8, 0.14, 1.1, 2.2, ROOM.shelf - 0.14, -3.45));
-  group.add(slab(0.1, 0.5, 0.9, 0.3, ROOM.shelf - 0.64, -3.55));
-  group.add(slab(0.1, 0.5, 0.9, 4.1, ROOM.shelf - 0.64, -3.55));
+  group.add(slab(0.1, 0.3, 0.9, 0.3, ROOM.shelf - 0.44, -3.55));
+  group.add(slab(0.1, 0.3, 0.9, 4.1, ROOM.shelf - 0.44, -3.55));
   const books: Array<
     [
       number,
@@ -694,49 +830,75 @@ export function buildRoom(): Room {
     group.add(slab(1.76, 0.86, 0.03, CINEMA.x + side * 0.92, 0.12, -2.94));
     group.add(slab(0.07, 0.24, 0.06, CINEMA.x + side * 0.16, 0.44, -2.9));
   }
-  for (let i = 0; i < 3; i++) {
-    group.add(
-      tube(
-        0.46,
-        0.46,
-        0.13,
-        CINEMA.x - 1.32 + (i === 2 ? 0.08 : 0),
-        ROOM.cabinet + i * 0.13,
-        -3.45,
-        12,
-      ),
-    );
+  // On it, the console standing on end, and the second of two controllers.
+  // The first is one of the things, and can be picked up.
+  const GREY = 0x9b9eab;
+  const consoleBox = new THREE.Group();
+  consoleBox.add(post(0.36, 0.04, 0x7d8089, 0, 0, 0, 12));
+  consoleBox.add(piece(0.24, 1.42, 0.9, 0x666a78, 0, 0.04, 0));
+  for (const side of [
+    -1,
+    1,
+  ]) {
+    consoleBox.add(piece(0.07, 1.5, 1.0, GREY, side * 0.155, 0.04, 0));
+    // The four colours of the old logo, small, near the top corner.
+    [
+      0xe24a55,
+      0xf2c14e,
+      0x5b88dc,
+      0x53b36a,
+    ].forEach((color, index) => {
+      consoleBox.add(
+        block(
+          0.012,
+          0.05,
+          0.05,
+          color,
+          side * 0.195,
+          1.24 + (index >> 1) * 0.055,
+          0.3 + (index & 1) * 0.055,
+        ),
+      );
+    });
   }
-  for (let i = 0; i < 4; i++) {
-    group.add(
-      slab(
-        0.95,
-        0.16,
-        0.6,
-        CINEMA.x + 1.28 + (i % 2 ? 0.05 : -0.03),
-        ROOM.cabinet + i * 0.16,
-        -3.45,
-      ),
-    );
+  consoleBox.position.set(CINEMA.x + 0.2, ROOM.cabinet, -3.45);
+  // Turned so its broad side faces into the room.
+  consoleBox.rotation.y = -0.6;
+  group.add(consoleBox);
+  const second = THINGS.find((thing) => thing.id === "controller")?.build();
+  if (second) {
+    second.group.scale.setScalar(0.5);
+    second.group.position.set(CINEMA.x + 1.48, ROOM.cabinet, -3.58);
+    second.group.rotation.y = 0.45;
+    group.add(second.group);
   }
 
-  // A director's chair, turned to the screen.
-  const seat = new THREE.Group();
-  for (const side of [
-    -0.6,
-    0.6,
+  // A wide leather couch across the room from the screen, its back to the
+  // wall, the projector between the two. Built facing -z.
+  const hide = 0xa4612f;
+  const couch = new THREE.Group();
+  for (const x of [
+    -2.1,
+    2.1,
   ]) {
-    seat.add(rod(-0.55, 0, 0.55, 1.5, 0.07, side));
-    seat.add(rod(0.55, 0, -0.55, 1.5, 0.07, side));
-    seat.add(slab(0.07, 1.4, 0.07, -0.55, 1.5, side));
-    seat.add(slab(1.1, 0.06, 0.12, 0, 2.05, side));
-    seat.add(slab(0.07, 0.55, 0.07, 0.5, 1.5, side));
+    for (const z of [
+      -0.5,
+      0.5,
+    ]) {
+      couch.add(block(0.14, 0.14, 0.14, 0x26262b, x, 0, z));
+    }
   }
-  seat.add(slab(1.15, 0.06, 1.24, 0, 1.5, 0, "soft"));
-  seat.add(slab(0.05, 0.5, 1.2, -0.55, 2.35, 0));
-  seat.position.set(DIRECTOR.x, 0, DIRECTOR.z);
-  seat.rotation.y = 1.87;
-  group.add(seat);
+  couch.add(piece(4.7, 0.5, 1.3, hide, 0, 0.14, 0));
+  couch.add(piece(4.7, 1.15, 0.32, hide, 0, 0.64, 0.49));
+  for (const side of [
+    -1,
+    1,
+  ]) {
+    couch.add(piece(0.32, 0.5, 1.3, hide, side * 2.19, 0.64, 0));
+    couch.add(piece(2.0, 0.2, 0.92, 0xb56e37, side * 1.02, 0.64, -0.17));
+  }
+  couch.position.set(COUCH.x, 0, COUCH.z);
+  group.add(couch);
 
   // The cushion the tuxedo sleeps on: a flower, pink.
   const cushion = new THREE.Group();
@@ -758,6 +920,130 @@ export function buildRoom(): Room {
   cushion.position.set(CUSHION.x, 0, CUSHION.z);
   group.add(cushion);
 
+  // A pegboard on the right wall: pens, a notebook, tape, a ruler, notes,
+  // and three photos. Built facing +z, then turned to face into the room.
+  const PEG = {
+    wide: 3.4,
+    tall: 3.0,
+  };
+  const pegboard = new THREE.Group();
+  pegboard.add(slab(PEG.wide, PEG.tall, 0.06, 0, 0, 0.03));
+  const holeMap = pegHoles(24, 16);
+  const holes = snapVertices(
+    new THREE.MeshBasicMaterial({
+      map: holeMap,
+      transparent: true,
+      alphaTest: 0.5,
+    }),
+  ) as THREE.MeshBasicMaterial;
+  const grid = new THREE.Mesh(
+    new THREE.PlaneGeometry(PEG.wide - 0.3, PEG.tall - 0.3),
+    holes,
+  );
+  grid.position.set(0, PEG.tall / 2, 0.066);
+  pegboard.add(grid);
+  // A small shelf with a cup of pens and a notebook leaning beside it.
+  pegboard.add(slab(1.15, 0.05, 0.38, -0.95, 0.7, 0.25));
+  pegboard.add(post(0.16, 0.36, 0x3d80bf, -1.25, 0.75, 0.27));
+  [
+    [
+      0xe24a55,
+      -0.06,
+      0.5,
+    ],
+    [
+      0xf2c14e,
+      0.04,
+      0.58,
+    ],
+    [
+      0x26262b,
+      0.09,
+      0.46,
+    ],
+  ].forEach(([color, lean, tall]) => {
+    const pen = post(0.028, tall, color, -1.25 + lean, 0.8, 0.27, 6);
+    pen.rotation.z = -lean * 2.2;
+    pegboard.add(pen);
+  });
+  const notebook = piece(0.42, 0.56, 0.07, 0x26262b, -0.72, 0.75, 0.22);
+  notebook.rotation.z = -0.12;
+  pegboard.add(notebook);
+  // Two rolls of tape on a peg, a ruler on a hook, a pair of notes.
+  for (const [color, x] of [
+    [
+      0x53b36a,
+      0.2,
+    ],
+    [
+      0xe68bc0,
+      0.52,
+    ],
+  ]) {
+    const roll = post(0.15, 0.1, color, x, 0, 0, 10);
+    roll.rotation.x = Math.PI / 2;
+    roll.position.set(x, 0.95, 0.12);
+    pegboard.add(roll);
+  }
+  pegboard.add(piece(0.11, 1.3, 0.02, 0xf2c14e, 1.35, 0.35, 0.08));
+  const notes: Array<
+    [
+      number,
+      number,
+      number,
+      number,
+    ]
+  > = [
+    [
+      0xffe066,
+      0.95,
+      1.95,
+      0.07,
+    ],
+    [
+      0xff9fb5,
+      1.25,
+      2.2,
+      -0.09,
+    ],
+  ];
+  for (const [color, x, y, turn] of notes) {
+    const note = piece(0.36, 0.36, 0.012, color, x, y, 0.075);
+    note.rotation.z = turn;
+    pegboard.add(note);
+  }
+  // The photos: the two cats, and where I grew up.
+  const photos = (
+    [
+      "sono",
+      "bosha",
+      "pyramids",
+    ] as const
+  ).map((kind, index) => {
+    const map = photo(kind);
+    const picture = snapVertices(
+      new THREE.MeshBasicMaterial({
+        map,
+      }),
+    ) as THREE.MeshBasicMaterial;
+    const card = new THREE.Group();
+    card.add(piece(0.58, 0.68, 0.014, 0xfbf8f0, 0, 0, 0));
+    const image = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.46), picture);
+    image.position.set(0, 0.39, 0.012);
+    card.add(image);
+    card.add(block(0.14, 0.09, 0.04, 0x26262b, 0, 0.64, 0.01));
+    card.position.set(-1.1 + index * 0.74, 1.85 + (index % 2) * 0.16, 0.075);
+    card.rotation.z = (index - 1) * 0.07;
+    pegboard.add(card);
+    return [
+      map,
+      picture,
+    ];
+  });
+  pegboard.position.set(right - 0.01, 2.75, -1.0);
+  pegboard.rotation.y = -Math.PI / 2;
+  group.add(pegboard);
+
   return {
     group,
     setTheme(dark) {
@@ -776,60 +1062,106 @@ export function buildRoom(): Room {
       lamps.dispose();
       lit.dispose();
       light.dispose();
+      holeMap.dispose();
+      holes.dispose();
+      for (const pair of photos) for (const thing of pair) thing.dispose();
+      if (second) disposeMeshes(second.group);
     },
   };
 }
 
 // -------------------------------------------------------------- fixtures
 
-const SCREEN_W = 40;
-const SCREEN_H = 30;
+const SCREEN_W = 96;
+const SCREEN_H = 54;
 
-/** A screen of code, at a size where a line of code is a line. */
+/** An editor window, at a size where a line of code is a line. */
 function screenTexture() {
   const canvas = document.createElement("canvas");
   canvas.width = SCREEN_W;
   canvas.height = SCREEN_H;
   const context = canvas.getContext("2d");
   if (context) {
-    context.fillStyle = "#06220f";
+    // The desktop, then a dark window with its three buttons.
+    context.fillStyle = "#5f6ad6";
     context.fillRect(0, 0, SCREEN_W, SCREEN_H);
-    context.fillStyle = "#62ff8f";
+    context.fillStyle = "#e9e9ee";
+    context.fillRect(0, 0, SCREEN_W, 3);
+    context.fillStyle = "#1c1d27";
+    context.fillRect(8, 7, SCREEN_W - 16, SCREEN_H - 13);
+    context.fillStyle = "#2a2c3a";
+    context.fillRect(8, 7, SCREEN_W - 16, 5);
+    [
+      "#ff5f57",
+      "#febc2e",
+      "#28c840",
+    ].forEach((color, index) => {
+      context.fillStyle = color;
+      context.fillRect(11 + index * 4, 8, 2, 2);
+    });
+    // Lines of code: an indent, then a few words in different colours.
+    const words = [
+      "#c792ea",
+      "#82aaff",
+      "#f6f1e6",
+      "#ffcb6b",
+      "#7fdc9a",
+    ];
     const lines = [
       [
-        2,
-        9,
-      ],
-      [
-        4,
+        0,
+        10,
         16,
       ],
       [
         4,
-        22,
-      ],
-      [
-        6,
-        12,
+        8,
+        20,
+        9,
       ],
       [
         4,
-        19,
-      ],
-      [
-        2,
-        5,
-      ],
-      [
-        2,
         14,
+        12,
+      ],
+      [
+        8,
+        22,
+        7,
+        11,
+      ],
+      [
+        8,
+        9,
+        18,
+      ],
+      [
+        4,
+        6,
+      ],
+      [
+        0,
+        4,
+      ],
+      [
+        0,
+        12,
+        9,
+        15,
+      ],
+      [
+        4,
+        17,
       ],
     ];
-    lines.forEach(([indent, length], row) => {
-      context.fillRect(indent + 1, 3 + row * 3.5, length, 1.5);
+    lines.forEach(([indent, ...lengths], row) => {
+      let x = 12 + indent;
+      lengths.forEach((length, word) => {
+        context.fillStyle = words[(row + word * 2) % words.length];
+        context.fillRect(x, 15 + row * 3.5, length, 1.6);
+        x += length + 2;
+      });
     });
-    // The cursor, waiting.
-    context.fillRect(18, 3 + lines.length * 3.5 - 3.5, 2, 2.5);
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -839,29 +1171,53 @@ function screenTexture() {
   return texture;
 }
 
+// The display: a thin slab of aluminium with glass to its edges, on a
+// bent plate of a stand. It faces +z and leans back a little.
 function computer(): OfficeModel {
   const group = new THREE.Group();
-  group.add(slab(1.1, 0.1, 0.9));
-  group.add(tube(0.3, 0.36, 0.16, 0, 0.1, 0));
-  group.add(slab(2.0, 1.6, 1.3, 0, 0.26, 0));
-  group.add(slab(1.4, 1.1, 0.22, 0, 0.5, -0.76));
-  group.add(slab(1.72, 1.3, 0.03, 0, 0.45, 0.665));
-  group.add(slab(0.12, 0.06, 0.03, 0.72, 0.31, 0.665));
+  const wide = 2.6;
+  const tall = 1.46;
+  const thin = 0.07;
+  /** How high the panel's lower edge is off the desk. */
+  const up = 0.3;
+  // The stand: a foot flat on the desk and a plate rising to the panel.
+  group.add(slab(0.9, 0.03, 0.8, 0, 0, 0.05));
+  const arm = slab(0.9, 0.74, 0.03, 0, 0, 0);
+  arm.position.set(0, 0.36, -0.26);
+  arm.rotation.x = 0.14;
+  group.add(arm);
+
+  const panel = new THREE.Group();
+  panel.position.set(0, up, -0.08);
+  panel.rotation.x = -0.08;
+  panel.add(slab(wide, tall, thin, 0, 0, 0));
+  // Glass over the whole front, and the picture inside its black border.
+  const glass = basic(0x101014);
+  const face = new THREE.Mesh(
+    new THREE.PlaneGeometry(wide - 0.06, tall - 0.06),
+    glass,
+  );
+  face.position.set(0, tall / 2, thin / 2 + 0.006);
+  panel.add(face);
   const texture = screenTexture();
   const on = snapVertices(
     new THREE.MeshBasicMaterial({
       map: texture,
     }),
   ) as THREE.MeshBasicMaterial;
-  const off = basic(0x1a1d1b);
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.1), on);
-  screen.position.set(0, 1.1, 0.69);
-  group.add(screen);
+  const off = basic(0x1a1b20);
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(wide - 0.22, tall - 0.22),
+    on,
+  );
+  screen.position.set(0, tall / 2, thin / 2 + 0.014);
+  panel.add(screen);
+  group.add(panel);
   let lit = true;
   return {
     group,
-    radius: 1.1,
-    height: 1.86,
+    radius: 1.3,
+    height: up + tall,
     act() {
       lit = !lit;
       screen.material = lit ? on : off;
@@ -871,6 +1227,7 @@ function computer(): OfficeModel {
       texture.dispose();
       on.dispose();
       off.dispose();
+      glass.dispose();
     },
   };
 }
@@ -923,23 +1280,50 @@ function lamp(): OfficeModel {
   };
 }
 
+// The chair: tan leather with two buttons in its back, padded arms on a
+// black tube frame, a five-star base on casters. It faces -z.
 function chair(): OfficeModel {
   const group = new THREE.Group();
+  const leather = 0xd98a45;
+  const button = 0xb0692f;
+  const frame = 0x26262b;
   for (let i = 0; i < 5; i++) {
-    const angle = (i / 5) * Math.PI * 2;
-    const leg = slab(0.9, 0.1, 0.14);
-    leg.position.set(Math.cos(angle) * 0.45, 0.05, Math.sin(angle) * 0.45);
+    const angle = (i / 5) * Math.PI * 2 + 0.3;
+    const leg = block(0.85, 0.1, 0.14, frame);
+    leg.position.set(Math.cos(angle) * 0.43, 0.17, Math.sin(angle) * 0.43);
     leg.rotation.y = -angle;
     group.add(leg);
+    group.add(
+      post(
+        0.09,
+        0.12,
+        frame,
+        Math.cos(angle) * 0.84,
+        0,
+        Math.sin(angle) * 0.84,
+      ),
+    );
   }
-  group.add(tube(0.09, 0.09, 1.2, 0, 0.1, 0, 8));
-  group.add(cushioned(1.7, 0.24, 1.6, 0, 1.3, 0));
-  group.add(slab(0.14, 0.9, 0.1, 0, 1.5, 0.85));
-  group.add(cushioned(1.6, 1.3, 0.2, 0, 2.0, 0.85));
+  group.add(post(0.08, 0.86, frame, 0, 0.2, 0));
+  group.add(block(0.7, 0.14, 0.6, frame, 0, 1.04, 0));
+  group.add(piece(1.75, 0.34, 1.6, leather, 0, 1.18, 0));
+  // The bar that carries the back, then the back and its two buttons.
+  group.add(block(0.3, 0.85, 0.06, frame, 0, 1.3, 0.84));
+  group.add(piece(1.6, 1.25, 0.3, leather, 0, 1.98, 0.93));
+  for (const side of [
+    -1,
+    1,
+  ]) {
+    group.add(block(0.09, 0.09, 0.03, button, side * 0.36, 2.72, 0.765));
+    // An arm: a tube up from under the seat, and a pad on top of it.
+    group.add(block(0.06, 0.82, 0.06, frame, side * 0.96, 1.44, 0.3));
+    group.add(block(0.06, 0.06, 0.62, frame, side * 0.96, 2.2, 0.02));
+    group.add(piece(0.26, 0.13, 0.86, leather, side * 0.96, 2.26, -0.05));
+  }
   return {
     group,
-    radius: 1.0,
-    height: 3.3,
+    radius: 1.1,
+    height: 3.25,
   };
 }
 
@@ -1132,7 +1516,56 @@ function popcorn(): OfficeModel {
   };
 }
 
+/** A dome sitting on the desk: half a ball, stretched. */
+function dome(
+  across: number,
+  up: number,
+  along: number,
+  color: number,
+  x: number,
+  z: number,
+) {
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(1, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2),
+    flat(color),
+  );
+  mesh.scale.set(across, up, along);
+  mesh.position.set(x, 0, z);
+  return mesh;
+}
+
+// The mouse: graphite, tall under the palm, with a rest for the thumb and
+// a steel wheel. Its buttons are toward -z, away from the hand.
+function mouse(): OfficeModel {
+  const group = new THREE.Group();
+  const graphite = 0x3b3c41;
+  const rest = 0x2c2d31;
+  const steel = 0xc9ccd1;
+  group.add(dome(0.25, 0.27, 0.41, graphite, 0.04, 0));
+  group.add(dome(0.2, 0.11, 0.27, rest, -0.2, 0.09));
+  const wheel = post(0.055, 0.07, steel, 0, 0, 0);
+  wheel.rotation.z = Math.PI / 2;
+  wheel.position.set(0.04, 0.2, -0.2);
+  group.add(wheel);
+  const thumb = post(0.035, 0.1, steel, 0, 0, 0);
+  thumb.rotation.x = Math.PI / 2;
+  thumb.position.set(-0.22, 0.14, -0.04);
+  group.add(thumb);
+  group.add(block(0.035, 0.012, 0.035, 0x39e06a, 0.04, 0.245, -0.03));
+  return {
+    group,
+    radius: 0.4,
+    height: 0.28,
+  };
+}
+
 export const PROPS: readonly OfficeSpec<PropId>[] = [
+  {
+    id: "mouse",
+    name: "Mouse",
+    yaw: 0,
+    build: mouse,
+  },
   {
     id: "clapper",
     name: "Clapperboard",
@@ -1150,7 +1583,7 @@ export const PROPS: readonly OfficeSpec<PropId>[] = [
 export const FIXTURES: readonly OfficeSpec<FixtureId>[] = [
   {
     id: "computer",
-    name: "Computer",
+    name: "Display",
     yaw: 0,
     fixed: true,
     build: computer,

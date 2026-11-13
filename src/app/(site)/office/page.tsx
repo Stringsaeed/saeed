@@ -29,9 +29,11 @@ export const metadata: Metadata = {
 export default function OfficePage() {
   return (
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
-      {/* The scene fills the window behind the header, so the page itself
-          only has to be as tall as the window and let the pointer through. */}
-      <main className="pointer-events-none min-h-[calc(100dvh-5.5rem)] flex-1">
+      {/* The scene fills the window behind the header. The page is told to
+          be exactly one window tall (data-layout-fill), so the footer lies
+          over the scene's foot instead of adding a strip to scroll to, and
+          the main lets the pointer through to the scene. */}
+      <main className="pointer-events-none min-h-0 flex-1" data-layout-fill>
         <h1
           className="sr-only"
           data-analytics-view="Content Viewed"

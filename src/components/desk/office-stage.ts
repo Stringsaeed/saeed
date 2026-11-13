@@ -65,14 +65,13 @@ const EYE = {
   /** Where they start, and which way they face: a little down, at the desk. */
   start: {
     x: 0.4,
-    z: 7.4,
+    z: 7.0,
     yaw: 0,
     pitch: -0.1,
     /** On an upright screen, where the ceiling would otherwise take a fifth. */
     pitchNarrow: -0.24,
   },
-  /** How far the head turns either way, and up and down. */
-  turn: 1.25,
+  /** How far the head tips up and down. It turns all the way round. */
   up: 0.3,
   down: 0.45,
   /** Units a second on the keys. */
@@ -84,7 +83,8 @@ const WALK = {
   minX: ROOM.left + 1.4,
   maxX: ROOM.right - 1.4,
   minZ: 4.1,
-  maxZ: ROOM.front - 1.0,
+  // It stops short of the couch along the wall behind.
+  maxZ: ROOM.front - 1.9,
 };
 
 const KEYS: Record<
@@ -431,11 +431,7 @@ export function createOfficeStage(
       goal.x = THREE.MathUtils.clamp(goal.x, WALK.minX, WALK.maxX);
       goal.z = THREE.MathUtils.clamp(goal.z, WALK.minZ, WALK.maxZ);
     }
-    const yawTo = THREE.MathUtils.clamp(
-      want.yaw + sway.yaw,
-      -EYE.turn,
-      EYE.turn,
-    );
+    const yawTo = want.yaw + sway.yaw;
     const pitchTo = THREE.MathUtils.clamp(
       want.pitch + sway.pitch,
       -EYE.down,
@@ -624,6 +620,23 @@ export function createOfficeStage(
   canvas.addEventListener("keyup", onKeyUp);
   canvas.addEventListener("blur", onBlur);
 
+  // Space would scroll the page out from under the room. While the room is
+  // on screen it does nothing, unless it is pressing a button or a link.
+  const onSpace = (event: KeyboardEvent) => {
+    if (event.key !== " " || !inView) return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    const target = event.target;
+    if (
+      target instanceof Element &&
+      target !== canvas &&
+      target.closest("a, button, input, textarea, select, [contenteditable]")
+    ) {
+      return;
+    }
+    event.preventDefault();
+  };
+  window.addEventListener("keydown", onSpace);
+
   const resize = new ResizeObserver(() => fit());
   resize.observe(canvas);
   const sight = new IntersectionObserver(([entry]) => {
@@ -733,11 +746,7 @@ export function createOfficeStage(
       if (pan) {
         // The view follows the hand, as if the room were being dragged.
         const perPixel = THREE.MathUtils.degToRad(camera.fov) / height;
-        want.yaw = THREE.MathUtils.clamp(
-          pan.yaw + (clientX - pan.x) * perPixel,
-          -EYE.turn,
-          EYE.turn,
-        );
+        want.yaw = pan.yaw + (clientX - pan.x) * perPixel;
         want.pitch = THREE.MathUtils.clamp(
           pan.pitch + (clientY - pan.y) * perPixel,
           -EYE.down,
@@ -805,6 +814,7 @@ export function createOfficeStage(
       canvas.removeEventListener("keydown", onKeyDown);
       canvas.removeEventListener("keyup", onKeyUp);
       canvas.removeEventListener("blur", onBlur);
+      window.removeEventListener("keydown", onSpace);
       for (const body of bodies) {
         disposeMeshes(body.pivot);
         body.model.dispose?.();

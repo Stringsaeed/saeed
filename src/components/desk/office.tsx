@@ -35,8 +35,9 @@ const EXTRA_CAPTIONS: Record<FixtureId | PropId | CatId, string> = {
   projector: "Films are the other thing. Tap to roll one.",
   clapper: "Tap it and the film starts.",
   popcorn: "For the director.",
+  mouse: "Goes wherever the keyboard goes.",
   orange: "The orange one. Walks the room and loafs where he likes.",
-  tuxedo: "The tuxedo. Sleeps on the flower cushion, mostly.",
+  tuxedo: "The tuxedo. Sleeps on the flower cushion under the window, mostly.",
 };
 
 const EXTRAS = [
@@ -49,7 +50,6 @@ const EXTRAS = [
 const ORDER: ThingId[] = [
   "monstera",
   "bass",
-  "babylon",
   "keyboard",
   "pencil",
   "pyramids",

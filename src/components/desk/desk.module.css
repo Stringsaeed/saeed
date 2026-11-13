@@ -179,10 +179,11 @@
   pointer-events: none;
 }
 
-/* The caption is a plate at the foot of the scene. */
+/* The caption is a plate near the foot of the scene, clear of the site's
+   footer, which lies over the very bottom. */
 .scene .caption {
   position: absolute;
-  bottom: 1.25rem;
+  bottom: 4.5rem;
   left: 50%;
   width: max-content;
   max-width: min(44rem, calc(100vw - 2rem));

@@ -167,10 +167,32 @@ export function setPaperTheme(dark: boolean) {
   }
 }
 
+const drawn = new Map<number, THREE.MeshLambertMaterial>();
+
+/** Like `flat`, but a hair behind its own edges, for a coloured piece
+ *  whose edges are inked the way the furniture's are. */
+export function inkable(color: number) {
+  let material = drawn.get(color);
+  if (!material) {
+    material = new THREE.MeshLambertMaterial({
+      color,
+      flatShading: true,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1,
+    });
+    snapVertices(material);
+    drawn.set(color, material);
+  }
+  return material;
+}
+
 /** Releases the shared materials once no desk is using them. */
 export function disposeFlatMaterials() {
   for (const material of materials.values()) material.dispose();
   materials.clear();
+  for (const material of drawn.values()) material.dispose();
+  drawn.clear();
   glows.clear();
   if (paperKit) {
     for (const material of Object.values(paperKit)) material.dispose();

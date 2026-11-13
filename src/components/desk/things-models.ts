@@ -176,115 +176,365 @@ function burj(): ThingModel {
 
 // -------------------------------------------------------------------- bass
 
+/** A closed outline through points, with each corner rounded off. The
+ *  points go round once; the curve passes through the middle of each side. */
+function rounded(
+  points: ReadonlyArray<
+    readonly [
+      number,
+      number,
+    ]
+  >,
+) {
+  const shape = new THREE.Shape();
+  const mid = (i: number) => {
+    const [ax, ay] = points[i % points.length];
+    const [bx, by] = points[(i + 1) % points.length];
+    return [
+      (ax + bx) / 2,
+      (ay + by) / 2,
+    ] as const;
+  };
+  const [startX, startY] = mid(0);
+  shape.moveTo(startX, startY);
+  for (let i = 1; i <= points.length; i++) {
+    const [cx, cy] = points[i % points.length];
+    const [x, y] = mid(i);
+    shape.quadraticCurveTo(cx, cy, x, y);
+  }
+  return shape;
+}
+
+/** A flat piece cut to an outline, lying on its back: the outline's x is
+ *  across, its y runs up the neck (toward -z), and `y` is where it lies. */
+function slice(shape: THREE.Shape, thickness: number, color: number, y = 0) {
+  const mesh = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(shape, {
+      depth: thickness,
+      bevelEnabled: false,
+      curveSegments: 5,
+    }),
+    mat(color),
+  );
+  mesh.rotation.x = -Math.PI / 2;
+  mesh.position.y = y;
+  return mesh;
+}
+
+// My bass: a Precision in blue, white guard, maple neck. It lies on its
+// back with the neck running away from the body, toward -z. Along its
+// length, 0 is the strap button at the bottom and about 3.95 the tip of
+// the headstock; across, the long horn and the tuners are on the left.
 function bass(): ThingModel {
   const group = new THREE.Group();
-  const body = 0xc46b2a;
-  const maple = 0xdcc08a;
-  const guard = 0x1f1f24;
+  const blue = 0x3f97cd;
+  const white = 0xf4f3ee;
+  const maple = 0xe6c98f;
+  const black = 0x1f1f24;
   const chrome = 0xd6d6dc;
-  const s = 0.85;
-  const thick = 0.2 * s;
-  // The body: two bouts and two horns, lying flat.
-  const lower = cylinder(0.64 * s, 0.64 * s, thick, body, 12, 0, thick / 2, 0);
-  const upper = cylinder(
-    0.5 * s,
-    0.5 * s,
-    thick,
-    body,
-    12,
-    0,
-    thick / 2,
-    -0.72 * s,
+  const thick = 0.17;
+  /** Where the body's middle sits, so the whole thing turns about it. */
+  const centre = 0.6;
+  const parts = new THREE.Group();
+  parts.position.z = centre;
+
+  // The body: two horns, the long one on the bass side, and a waist.
+  parts.add(
+    slice(
+      rounded([
+        [
+          0,
+          -0.04,
+        ],
+        [
+          0.62,
+          0.02,
+        ],
+        [
+          0.6,
+          0.62,
+        ],
+        [
+          0.4,
+          0.86,
+        ],
+        [
+          0.56,
+          1.18,
+        ],
+        [
+          0.46,
+          1.46,
+        ],
+        [
+          0.2,
+          1.3,
+        ],
+        [
+          0.15,
+          1.1,
+        ],
+        [
+          -0.15,
+          1.14,
+        ],
+        [
+          -0.2,
+          1.42,
+        ],
+        [
+          -0.5,
+          1.84,
+        ],
+        [
+          -0.66,
+          1.3,
+        ],
+        [
+          -0.42,
+          0.84,
+        ],
+        [
+          -0.66,
+          0.5,
+        ],
+        [
+          -0.6,
+          0.0,
+        ],
+      ]),
+      thick,
+      blue,
+    ),
   );
-  const hornA = cylinder(
-    0.16 * s,
-    0.16 * s,
-    thick,
-    body,
-    8,
-    -0.5 * s,
-    thick / 2,
-    -1.15 * s,
+
+  // The guard: from beside the neck, under the strings, down to the knobs.
+  parts.add(
+    slice(
+      rounded([
+        [
+          -0.2,
+          1.32,
+        ],
+        [
+          -0.36,
+          1.5,
+        ],
+        [
+          -0.4,
+          1.12,
+        ],
+        [
+          -0.22,
+          0.78,
+        ],
+        [
+          -0.06,
+          0.52,
+        ],
+        [
+          0.26,
+          0.14,
+        ],
+        [
+          0.52,
+          0.1,
+        ],
+        [
+          0.52,
+          0.56,
+        ],
+        [
+          0.34,
+          0.86,
+        ],
+        [
+          0.46,
+          1.16,
+        ],
+        [
+          0.38,
+          1.3,
+        ],
+        [
+          0.2,
+          1.2,
+        ],
+      ]),
+      0.014,
+      white,
+      thick,
+    ),
   );
-  const hornB = cylinder(
-    0.14 * s,
-    0.14 * s,
-    thick,
-    body,
-    8,
-    0.42 * s,
-    thick / 2,
-    -1.02 * s,
-  );
-  const pickguard = cylinder(
-    0.44 * s,
-    0.44 * s,
-    0.02,
-    guard,
-    10,
-    0.08 * s,
-    thick + 0.01,
-    -0.1 * s,
-  );
-  const pickup = box(0.5 * s, 0.03, 0.14 * s, guard, 0, thick + 0.02, 0.1 * s);
-  const bridge = box(
-    0.32 * s,
-    0.05,
-    0.12 * s,
-    chrome,
-    0,
-    thick + 0.03,
-    0.5 * s,
-  );
-  group.add(lower, upper, hornA, hornB, pickguard, pickup, bridge);
-  // Neck and headstock run away from the body.
-  const neckLength = 2.3 * s;
-  const neck = box(
-    0.17 * s,
-    0.07 * s,
-    neckLength,
-    maple,
-    0,
-    thick / 2 + 0.02,
-    -1.1 * s - neckLength / 2,
-  );
-  const head = box(
-    0.3 * s,
-    0.05 * s,
-    0.5 * s,
-    maple,
-    0.04 * s,
-    thick / 2 + 0.02,
-    -1.1 * s - neckLength - 0.25 * s,
-  );
-  group.add(neck, head);
+
+  const top = thick + 0.014;
+  /** A box on the body: across, along the length, then size. */
+  const on = (
+    w: number,
+    h: number,
+    d: number,
+    color: number,
+    across: number,
+    along: number,
+    y = top,
+  ) => {
+    const piece = box(w, h, d, color, across, y + h / 2, -along);
+    parts.add(piece);
+    return piece;
+  };
+
+  // The split pickup: the half under the low strings sits nearer the neck.
+  on(0.2, 0.05, 0.1, black, -0.095, 0.86);
+  on(0.2, 0.05, 0.1, black, 0.095, 0.74);
+  // Bridge, with a saddle for each string.
+  on(0.36, 0.035, 0.22, chrome, 0, 0.27, thick);
   for (let i = 0; i < 4; i++) {
-    const peg = cylinder(
-      0.04 * s,
-      0.04 * s,
-      0.1,
-      chrome,
-      6,
-      0.2 * s,
-      thick / 2 + 0.08,
-      -1.1 * s - neckLength - 0.08 * s - i * 0.11 * s,
-    );
-    group.add(peg);
-    const string = box(
-      0.012,
-      0.012,
-      neckLength + 1.6 * s,
-      chrome,
-      (i - 1.5) * 0.035 * s,
-      thick + 0.05,
-      -1.1 * s - neckLength / 2 + 0.3 * s,
-    );
-    group.add(string);
+    on(0.05, 0.06, 0.09, chrome, (i - 1.5) * 0.075, 0.3, thick);
   }
+  // Two knobs and the jack, on the guard's lower corner.
+  for (const [across, along] of [
+    [
+      0.36,
+      0.5,
+    ],
+    [
+      0.42,
+      0.33,
+    ],
+  ]) {
+    parts.add(
+      cylinder(0.06, 0.06, 0.07, chrome, 10, across, top + 0.035, -along),
+    );
+  }
+  parts.add(cylinder(0.035, 0.035, 0.03, chrome, 8, 0.44, top + 0.015, -0.17));
+
+  // The neck: maple, dots and frets, from the body to the nut.
+  const heel = 1.08;
+  const nut = 3.28;
+  const neckY = thick - 0.02;
+  on(0.2, 0.08, nut - heel, maple, 0, (heel + nut) / 2, neckY);
+  const board = neckY + 0.08;
+  // Frets crowd together toward the body, as on the real thing.
+  const scale = nut - 0.3;
+  for (let fret = 1; fret <= 20; fret++) {
+    const along = nut - scale * (1 - 2 ** (-fret / 12));
+    if (along < heel + 0.04) break;
+    on(0.2, 0.012, 0.014, chrome, 0, along, board);
+    const dots: Record<number, number[]> = {
+      3: [
+        0,
+      ],
+      5: [
+        0,
+      ],
+      7: [
+        0,
+      ],
+      9: [
+        0,
+      ],
+      12: [
+        -0.05,
+        0.05,
+      ],
+      15: [
+        0,
+      ],
+      17: [
+        0,
+      ],
+    };
+    const before = nut - scale * (1 - 2 ** (-(fret - 1) / 12));
+    for (const across of dots[fret] ?? []) {
+      parts.add(
+        cylinder(
+          0.022,
+          0.022,
+          0.008,
+          black,
+          6,
+          across,
+          board + 0.004,
+          -(along + before) / 2,
+        ),
+      );
+    }
+  }
+  on(0.2, 0.02, 0.03, white, 0, nut, board);
+
+  // The headstock leans to the bass side, where the four tuners are.
+  parts.add(
+    slice(
+      rounded([
+        [
+          0.1,
+          nut - 0.02,
+        ],
+        [
+          0.11,
+          nut + 0.2,
+        ],
+        [
+          0.19,
+          nut + 0.36,
+        ],
+        [
+          0.12,
+          nut + 0.56,
+        ],
+        [
+          -0.08,
+          nut + 0.7,
+        ],
+        [
+          -0.26,
+          nut + 0.6,
+        ],
+        [
+          -0.25,
+          nut + 0.14,
+        ],
+        [
+          -0.1,
+          nut - 0.02,
+        ],
+      ]),
+      0.07,
+      maple,
+      neckY,
+    ),
+  );
+  const head = neckY + 0.07;
+  for (let i = 0; i < 4; i++) {
+    const along = nut + 0.14 + i * 0.135;
+    const across = -0.13 + i * 0.012;
+    // The post the string winds on, and the key that turns it.
+    parts.add(
+      cylinder(0.03, 0.03, 0.06, chrome, 8, across, head + 0.03, -along),
+    );
+    on(0.16, 0.025, 0.025, chrome, across - 0.16, along, head - 0.045);
+    on(0.07, 0.02, 0.12, chrome, across - 0.27, along, head - 0.045);
+    // And the string itself, from the bridge to the post by way of the nut.
+    const at = (i - 1.5) * 0.075;
+    const narrow = (i - 1.5) * 0.045;
+    const length = nut - 0.3;
+    const string = on(
+      0.012,
+      0.012,
+      length,
+      chrome,
+      (at + narrow) / 2,
+      0.3 + length / 2,
+      board + 0.02,
+    );
+    string.rotation.y = Math.atan2(at - narrow, length);
+  }
+
+  group.add(parts);
   return {
     group,
     radius: 1.9,
-    height: thick + 0.1,
+    height: thick + 0.12,
   };
 }
 
@@ -329,17 +579,20 @@ function keyboard(): ThingModel {
 
 // -------------------------------------------------------------- controller
 
+// The grey one, with the old console's four colours on its buttons.
 function controller(): ThingModel {
   const group = new THREE.Group();
-  const dark = 0x3a3a42;
-  const darker = 0x2a2a30;
+  const grey = 0x9b9eab;
+  const pad = 0xb3b6c1;
+  const dark = 0x55586a;
+  const darker = 0x33353f;
   const h = 0.26;
-  group.add(box(1.5, h, 0.56, dark));
+  group.add(box(1.5, h, 0.56, grey));
   for (const side of [
     -1,
     1,
   ]) {
-    const grip = box(0.36, h, 0.9, dark, side * 0.58, h / 2, 0.32);
+    const grip = box(0.36, h, 0.9, grey, side * 0.58, h / 2, 0.32);
     grip.rotation.y = -side * 0.22;
     group.add(grip);
     const stick = cylinder(
@@ -354,6 +607,9 @@ function controller(): ThingModel {
     );
     group.add(stick);
   }
+  // The touch pad in the middle, and the darker band between the sticks.
+  group.add(box(0.52, 0.03, 0.3, pad, 0, h + 0.015, -0.12));
+  group.add(box(0.7, 0.02, 0.2, dark, 0, h + 0.01, 0.16));
   // D-pad on the left, four buttons on the right.
   group.add(box(0.3, 0.05, 0.1, darker, -0.5, h + 0.025, -0.1));
   group.add(box(0.1, 0.05, 0.3, darker, -0.5, h + 0.025, -0.1));
@@ -493,42 +749,152 @@ function monstera(): ThingModel {
 
 // ------------------------------------------------------------------ pencil
 
+// My pencil: a silver mechanical one. It lies along x with the lead at +x
+// and the eraser cap at -x. From the cap: a clip on the upper barrel, a
+// chrome ring, a fatter lower barrel, a knurled grip with an orange dot,
+// then a stepped chrome cone down to the lead.
 function pencil(): ThingModel {
   const group = new THREE.Group();
-  const burgundy = 0x6a2a30;
-  const black = 0x1b1b1d;
-  const gold = 0xd0a84c;
-  const wood = 0xe6c99a;
-  const lead = 0x2b2b2e;
-  const r = 0.085;
-  const length = 2.5;
-  const barrel = cylinder(r, r, length, burgundy, 6);
-  barrel.rotation.z = Math.PI / 2;
-  barrel.position.set(0, r, 0);
-  group.add(barrel);
-  const band = cylinder(r * 1.02, r * 1.02, 0.08, gold, 6);
-  band.rotation.z = Math.PI / 2;
-  band.position.set(-length / 2 + 0.22, r, 0);
-  group.add(band);
-  const cap = cylinder(r * 1.02, r * 1.02, 0.18, black, 6);
-  cap.rotation.z = Math.PI / 2;
-  cap.position.set(-length / 2 + 0.09, r, 0);
-  group.add(cap);
-  const tip = new THREE.Mesh(new THREE.ConeGeometry(r, 0.36, 6), mat(wood));
-  tip.rotation.z = -Math.PI / 2;
-  tip.position.set(length / 2 + 0.18, r, 0);
-  group.add(tip);
-  const point = new THREE.Mesh(
-    new THREE.ConeGeometry(r * 0.32, 0.14, 6),
-    mat(lead),
+  const silver = 0xbfc4ca;
+  const knurl = 0xe1e3e5;
+  const groove = 0x9a9fa6;
+  const chrome = 0xd9dce0;
+  const steel = 0x3a3c40;
+  const cap = 0xeef0ef;
+  const orange = 0xe2573a;
+  const r = 0.09;
+  /** Every piece sits at this height, so the fattest one rests on the desk. */
+  const lie = 0.115;
+  // Each piece: radius at the cap end, radius at the lead end, length, colour.
+  const pieces: Array<
+    [
+      number,
+      number,
+      number,
+      number,
+    ]
+  > = [
+    [
+      0.115,
+      0.115,
+      0.2,
+      cap,
+    ],
+    [
+      0.06,
+      0.06,
+      0.08,
+      chrome,
+    ],
+    [
+      r,
+      r,
+      1.0,
+      silver,
+    ],
+    [
+      r + 0.008,
+      r + 0.008,
+      0.08,
+      chrome,
+    ],
+    [
+      r + 0.01,
+      r + 0.01,
+      0.5,
+      silver,
+    ],
+    // The grip: three knurled bands with a groove between each.
+    [
+      r + 0.01,
+      r + 0.01,
+      0.16,
+      knurl,
+    ],
+    [
+      r,
+      r,
+      0.02,
+      groove,
+    ],
+    [
+      r + 0.01,
+      r + 0.01,
+      0.16,
+      knurl,
+    ],
+    [
+      r,
+      r,
+      0.02,
+      groove,
+    ],
+    [
+      r + 0.01,
+      r + 0.01,
+      0.16,
+      knurl,
+    ],
+    [
+      r + 0.01,
+      r - 0.005,
+      0.06,
+      chrome,
+    ],
+    [
+      0.08,
+      0.05,
+      0.14,
+      chrome,
+    ],
+    [
+      0.045,
+      0.03,
+      0.1,
+      chrome,
+    ],
+    [
+      0.018,
+      0.018,
+      0.1,
+      steel,
+    ],
+    [
+      0.01,
+      0.004,
+      0.05,
+      steel,
+    ],
+  ];
+  const length = pieces.reduce((sum, piece) => sum + piece[2], 0);
+  let x = -length / 2;
+  /** Where the last knurled band is, for the dot. */
+  let dotAt = 0;
+  pieces.forEach(([towardCap, towardLead, long, color], index) => {
+    // A cylinder's top is turned to face +x, the lead end.
+    const piece = cylinder(towardLead, towardCap, long, color, 10);
+    piece.rotation.z = -Math.PI / 2;
+    piece.position.set(x + long / 2, lie, 0);
+    group.add(piece);
+    if (index === 9) dotAt = x + long / 2;
+    x += long;
+  });
+  // The orange dot on the grip, turned up so it can be seen.
+  group.add(
+    cylinder(0.032, 0.032, 0.012, orange, 8, dotAt, lie + r + 0.012, 0),
   );
-  point.rotation.z = -Math.PI / 2;
-  point.position.set(length / 2 + 0.36 + 0.06, r, 0);
-  group.add(point);
+  // The clip: a band round the barrel near the cap, and the flat spring.
+  const clipFrom = -length / 2 + 0.32;
+  const band = cylinder(r + 0.012, r + 0.012, 0.07, chrome, 10);
+  band.rotation.z = -Math.PI / 2;
+  band.position.set(clipFrom, lie, 0);
+  group.add(band);
+  group.add(box(0.62, 0.022, 0.07, silver, clipFrom + 0.3, lie + r + 0.035, 0));
+  group.add(box(0.05, 0.04, 0.07, silver, clipFrom, lie + r + 0.02, 0));
   return {
     group,
     radius: 1.45,
-    height: r * 2,
+    height: lie * 2,
   };
 }
 

@@ -53,12 +53,13 @@ const SPOTS: readonly Spot[] = [
     z: -1.0,
   },
   {
-    // Under the window.
-    x: -3.4,
-    z: -2.7,
+    // The flower cushion, under the window.
+    x: CUSHION.x,
+    z: CUSHION.z,
+    y: 0.17,
     rest: [
-      "loaf",
       "sleep",
+      "loaf",
     ],
   },
   {
@@ -110,12 +111,10 @@ const SPOTS: readonly Spot[] = [
     ],
   },
   {
-    // The flower cushion.
-    x: CUSHION.x,
-    z: CUSHION.z,
-    y: 0.17,
+    x: -2.6,
+    z: 3.3,
     rest: [
-      "sleep",
+      "sit",
       "loaf",
     ],
   },
@@ -124,8 +123,9 @@ const SPOTS: readonly Spot[] = [
     z: 3.9,
   },
   {
-    x: -10.6,
-    z: 3.5,
+    // Behind the couch, in the corner.
+    x: -10.9,
+    z: 4.9,
     rest: [
       "loaf",
     ],
@@ -216,8 +216,8 @@ const PATHS: ReadonlyArray<
     12,
   ],
   [
-    12,
     13,
+    14,
   ],
   [
     4,
@@ -737,7 +737,7 @@ export const CATS: readonly OfficeSpec<CatId>[] = [
         id: "orange",
         start: 7,
         asleep: false,
-        favourite: 3,
+        favourite: 5,
         reducedMotion: prefersStillness(),
       }),
   },
@@ -749,9 +749,9 @@ export const CATS: readonly OfficeSpec<CatId>[] = [
     build: () =>
       createCat({
         id: "tuxedo",
-        start: 11,
+        start: 3,
         asleep: true,
-        favourite: 11,
+        favourite: 3,
         reducedMotion: prefersStillness(),
       }),
   },

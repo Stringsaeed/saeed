@@ -1,13 +1,15 @@
 import { getAbsoluteUrl } from "@/lib/site";
 
-// Replaces robots.ts: Next's Robots type cannot emit the ARD Agentmap line.
+// Lighthouse's robots.txt audit rejects an Agentmap directive. Keep the
+// manifest URL as a comment; agents still find /.well-known/ard.json via
+// the well-known path and the rel="ard" link.
 export function GET() {
   const body = [
     "User-agent: *",
     "Allow: /",
     "",
     `Sitemap: ${getAbsoluteUrl("/sitemap.xml")}`,
-    `Agentmap: ${getAbsoluteUrl("/.well-known/ard.json")}`,
+    `# Agentmap: ${getAbsoluteUrl("/.well-known/ard.json")}`,
     "",
   ].join("\n");
 

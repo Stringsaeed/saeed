@@ -354,10 +354,13 @@ function StaffEngineersPathSpineArt() {
 // rounded spine strip by strip instead.
 export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
   const { spine } = book;
+  // The shelf button already names the book. The type drawn on the spine is
+  // the artwork, and it does not match that name word for word.
 
   if (spine.design === "stripe-press") {
     return (
       <span
+        aria-hidden="true"
         className="book-spine"
         style={{
           background: spine.background,
@@ -372,20 +375,20 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
   if (spine.design === "image") {
     return (
       <span
+        aria-hidden="true"
         className="book-spine"
         style={{
           background: spine.background,
         }}
       >
-        {/* Unoptimized so the shelf and the pulled book share one cached file. */}
+        {/* About 40px wide on the shelf. The full scan is ~180×1300. */}
         <Image
           alt=""
           className="book-spine-art"
           draggable={false}
           height={spine.height}
-          loading="eager"
+          sizes="64px"
           src={spine.src}
-          unoptimized
           width={spine.width}
         />
         {spine.texture ? (
@@ -397,7 +400,7 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
 
   if (spine.design === "everyday-things") {
     return (
-      <span className="book-spine">
+      <span aria-hidden="true" className="book-spine">
         <EverydayThingsSpineArt />
       </span>
     );
@@ -405,7 +408,7 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
 
   if (spine.design === "staff-engineers-path") {
     return (
-      <span className="book-spine">
+      <span aria-hidden="true" className="book-spine">
         <StaffEngineersPathSpineArt />
       </span>
     );
@@ -413,6 +416,7 @@ export function BookSpine({ book, unlit }: { book: Book; unlit?: boolean }) {
 
   return (
     <span
+      aria-hidden="true"
       className="book-spine"
       data-round={book.spineRound && !unlit ? "" : undefined}
       data-unlit={unlit ? "" : undefined}

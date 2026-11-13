@@ -47,6 +47,7 @@
     monospace
   );
   --font-heading: var(--font-atkinson);
+  --font-pixel: var(--font-silkscreen), "Courier New", monospace;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -1667,4 +1668,11 @@ html[data-blueprint-wipe] ::view-transition-new(root) {
    Pixelated keeps the Bayer cells hard instead of blurring them into gray. */
 [data-paper-shader] canvas {
   image-rendering: pixelated;
+}
+
+/* A page that asks for it gets a wider column: the home page, so that its
+   text, its lists and its shelf of cartridges share one pair of edges.
+   Unlayered, so it wins over the max-width utility on the layout itself. */
+.site-layout:has(> [data-layout-wide]) {
+  max-width: 63rem;
 }

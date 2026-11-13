@@ -1,0 +1,182 @@
+/* The shelf is as wide as the page's column; on the home page the column
+   is widened to suit it (see data-layout-wide in globals.css). */
+.shelf {
+  position: relative;
+  width: 100%;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+}
+
+@media (max-width: 820px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* One canvas over the whole grid. It draws; the buttons under it listen.
+   It reaches past the grid on every side, because a cartridge that is
+   turned over grows, and one in an outside column would be cut off. */
+.canvas {
+  --reach: 5rem;
+
+  position: absolute;
+  inset: calc(var(--reach) * -1);
+  z-index: 1;
+  width: calc(100% + var(--reach) * 2);
+  height: calc(100% + var(--reach) * 2);
+  max-width: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.shelf[data-ready] .canvas {
+  opacity: 1;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  padding: 0 0 0.75rem;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 1rem;
+  cursor: grab;
+  /* A finger moving up or down scrolls the page; sideways spins the thing. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cell:active {
+  cursor: grabbing;
+}
+
+.cell:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+/* A link over each sticker. The sticker itself is drawn in the canvas; this
+   is the part that can be pressed, placed and sized by the stage. Until the
+   stage has placed it, it is not there, and the links are in the panel. */
+.sticker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: block;
+  border-radius: 28%;
+  visibility: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* A little more to press than the sticker shows. */
+.sticker::after {
+  position: absolute;
+  inset: -3px;
+  content: "";
+}
+
+.shelf:not([data-ready]) .sticker {
+  display: none;
+}
+
+.sticker:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Where the cartridge is drawn. */
+.slot {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1.16;
+}
+
+.flat {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.9rem;
+  object-fit: cover;
+  transition: opacity 200ms ease;
+}
+
+.shelf[data-ready] .flat {
+  opacity: 0;
+}
+
+.name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 160ms ease;
+}
+
+.cell:hover .name,
+.cell:focus-visible .name,
+.cell[data-selected] .name {
+  color: var(--foreground);
+}
+
+/* A line of help under the shelf. If the cartridges could not be drawn, it
+   reads out the chosen app instead, since there is no back to turn to. */
+.hint {
+  max-width: 44rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--muted-foreground);
+}
+
+.hint strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.hint a {
+  margin-right: 0.75rem;
+  color: var(--foreground);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas,
+  .flat,
+  .name {
+    transition: none;
+  }
+}

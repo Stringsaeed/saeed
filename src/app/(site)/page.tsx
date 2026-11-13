@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { BookShelf } from "@/components/book-shelf";
-import { ProjectsSection } from "@/components/projects-section";
+import { ProjectsShelf } from "@/components/cartridges/projects-shelf";
 import { SaeedName } from "@/components/saeed-name";
-import { Things } from "@/components/things";
 import {
   Card,
   CardDescription,
@@ -67,13 +66,13 @@ export default async function Home() {
   const posts = await getPosts();
   return (
     <ViewTransition enter="page-enter" exit="page-exit" default="none">
-      <main className="pb-20 pt-10 sm:pt-14">
+      <main className="pb-20 pt-10 sm:pt-14" data-layout-wide>
         <div className="blueprint-hero-frame">
           <div aria-hidden="true" className="blueprint-dimension-bar mb-3">
             <span className="blueprint-dimension-tick" />
             <span className="blueprint-dimension-line" />
             <span className="px-2 font-mono text-[10px] tracking-wider text-muted-foreground uppercase tabular-nums">
-              COL MAX-W: 704PX (44REM) · SCALE 1:1
+              COL MAX-W: 1008PX (63REM) · SCALE 1:1
             </span>
             <span className="blueprint-dimension-line" />
             <span className="blueprint-dimension-tick" />
@@ -91,9 +90,19 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="mt-12">
-          <Things />
-        </div>
+        {/* The office has its own page now, where it has room. */}
+        <p className="mt-5">
+          <Link
+            className="text-link relative font-(family-name:--font-pixel) text-[11px] tracking-wide text-muted-foreground uppercase after:absolute after:-inset-3"
+            href="/office"
+            data-analytics-event="Navigation Clicked"
+            data-analytics-destination="Office"
+            data-analytics-location="Home"
+            data-sound="tap"
+          >
+            Step into my office →
+          </Link>
+        </p>
 
         <div
           className="mt-12"
@@ -168,16 +177,17 @@ export default async function Home() {
           </CardGroup>
         </div>
 
-        <div className="mt-12">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h2 className="list-heading backdrop-plate" data-bp-sec="03">
-              Projects
-            </h2>
-            <span aria-hidden="true" className="blueprint-redline">
-              ↙ stretched-link card matrix
-            </span>
+        <div
+          className="mt-12"
+          data-analytics-view="Content Viewed"
+          data-analytics-label="Projects"
+        >
+          <h2 className="list-heading backdrop-plate" data-bp-sec="03">
+            Projects
+          </h2>
+          <div className="mt-4">
+            <ProjectsShelf />
           </div>
-          <ProjectsSection />
         </div>
 
         <div

@@ -5,6 +5,7 @@ import { getAbsoluteUrl } from "@/lib/site";
 // Each page keeps its own date so <lastmod> stays accurate per entry.
 const homeUpdatedAt = new Date("2026-10-20T00:00:00.000Z");
 const linksUpdatedAt = new Date("2026-10-19T00:00:00.000Z");
+const officeUpdatedAt = new Date("2026-11-13T00:00:00.000Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getPosts();
@@ -34,6 +35,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: linksUpdatedAt,
       changeFrequency: "monthly",
       priority: 0.6,
+    },
+    {
+      url: getAbsoluteUrl("/office"),
+      lastModified: officeUpdatedAt,
+      changeFrequency: "monthly",
+      priority: 0.5,
     },
     ...postEntries,
   ];

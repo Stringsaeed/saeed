@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Atkinson_Hyperlegible_Next } from "next/font/google";
+import { Atkinson_Hyperlegible_Next, Silkscreen } from "next/font/google";
 import localFont from "next/font/local";
 import { DeferredFontClass } from "@/components/deferred-font";
 import { getSiteOrigin, siteDescription, siteName } from "@/lib/site";
@@ -18,6 +18,17 @@ const atkinson = Atkinson_Hyperlegible_Next({
   fallback: [
     "Atkinson Hyperlegible Next Fallback",
   ],
+});
+
+// Silkscreen (Jason Kottke, SIL OFL), the pixel face for the labels under
+// the things on the desk. Small text only, so it loads late.
+const silkscreen = Silkscreen({
+  weight: "400",
+  subsets: [
+    "latin",
+  ],
+  variable: "--font-silkscreen",
+  preload: false,
 });
 
 // Paper Mono (paper.design/mono, SIL OFL 1.1), one variable file. Only small
@@ -132,7 +143,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${atkinson.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} h-full antialiased`}
+      className={`${atkinson.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} ${silkscreen.variable} h-full antialiased`}
     >
       <body className="min-h-full">
         <DeferredFontClass name={paperMono.variable} />

@@ -497,7 +497,8 @@ export function BlueprintBookSpine({
           textAnchor="middle"
           fill="var(--muted-foreground)"
           style={{
-            fontFamily: "var(--font-paper-mono)",
+            fontFamily:
+              'var(--font-paper-mono, "Paper Mono Fallback", ui-monospace, monospace)',
             fontSize: `${Math.min(w * 0.42, headY * 0.48)}px`,
           }}
         >
@@ -511,7 +512,8 @@ export function BlueprintBookSpine({
             textAnchor="middle"
             fill="var(--foreground)"
             style={{
-              fontFamily: "var(--font-paper-mono)",
+              fontFamily:
+                'var(--font-paper-mono, "Paper Mono Fallback", ui-monospace, monospace)',
               fontSize: `${titleSize}px`,
               fontWeight: 500,
               letterSpacing: "0.05em",

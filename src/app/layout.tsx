@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Atkinson_Hyperlegible_Next } from "next/font/google";
 import localFont from "next/font/local";
+import { DeferredFontClass } from "@/components/deferred-font";
 import { getSiteOrigin, siteDescription, siteName } from "@/lib/site";
 import "./globals.css";
 
@@ -20,13 +21,18 @@ const atkinson = Atkinson_Hyperlegible_Next({
 });
 
 // Paper Mono (paper.design/mono, SIL OFL 1.1), one variable file. Only small
-// dates and labels use it; swapping in late beats competing with the first
-// paint for bandwidth.
+// dates and labels use it. The face stays out of the first paint: the
+// metric-matched fallback in globals.css holds the line, and DeferredFontClass
+// adds this variable once the page is idle so the file is not on the LCP path.
 const paperMono = localFont({
   src: "../fonts/paper-mono.woff2",
   weight: "100 800",
   variable: "--font-paper-mono",
   preload: false,
+  adjustFontFallback: false,
+  fallback: [
+    "Paper Mono Fallback",
+  ],
 });
 
 // Lavishly Yours is split in two faces of the same font. The core face covers
@@ -126,9 +132,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${atkinson.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} ${paperMono.variable} h-full antialiased`}
+      className={`${atkinson.variable} ${lavishlyYours.variable} ${lavishlyYoursExtended.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        <DeferredFontClass name={paperMono.variable} />
         {/* ARD discovery (agenticresourcediscovery.org/spec §5.1): consumers
             resolve /.well-known/ard.json, and this link points them there. */}
         <link rel="ard" href="/.well-known/ard.json" />

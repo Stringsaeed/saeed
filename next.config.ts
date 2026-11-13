@@ -48,6 +48,24 @@ const nextConfig: NextConfig = {
     ],
   },
   reactCompiler: true,
+  experimental: {
+    // Lighthouse 12 counts every script that finishes before first paint
+    // toward simulated LCP, then replays that set on six slow connections.
+    // The home page is the landing route, so merge its client chunks instead
+    // of paying a round trip per file. Other routes download more when opened.
+    turbopackChunking: {
+      priorityRoutes: [
+        /^\/$/,
+        /\(site\)/,
+      ],
+      firstPageLoadPriority: 1,
+      priorityBoost: 4,
+      requestCost: 1_000_000,
+      minChunkSize: 150_000,
+      maxChunkCountPerGroup: 4,
+      maxMergeChunkSize: 2_000_000,
+    },
+  },
   // PostHog's API paths end in a slash; redirecting them would drop events.
   skipTrailingSlashRedirect: true,
   // The avatar faces double as the favicon, which swaps every few seconds.

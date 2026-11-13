@@ -874,6 +874,7 @@ function CardMedia({
               alt={logoAlt ?? ""}
               width={size}
               height={size}
+              fetchPriority="low"
               className={cn("object-contain", shape.bg)}
               style={{
                 width: size,

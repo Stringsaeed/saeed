@@ -138,7 +138,12 @@
   border-radius: 2px;
   border-style: dashed;
   border-color: var(--bp-line);
-  font-family: var(--font-paper-mono);
+  font-family: var(
+    --font-paper-mono,
+    "Paper Mono Fallback",
+    ui-monospace,
+    monospace
+  );
   font-size: 0.875em;
 }
 

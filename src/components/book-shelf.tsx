@@ -15,6 +15,7 @@ import { useBlueprint } from "@/lib/blueprint";
 import { pulledBookSize } from "@/lib/book-geometry";
 import type { BookLibrary } from "@/lib/books-3d/viewer";
 import { onIdle } from "@/lib/idle";
+import { TURN, takeTurn } from "@/lib/load-turns";
 import { playSound } from "@/lib/sound";
 import { BlueprintBookSpine, BookSpine } from "./book-spine";
 import type { PulledState } from "./pulled-book-dialog";
@@ -85,9 +86,8 @@ export function BookShelf() {
     const shelf = shelfRef.current;
     if (!shelf || constrainedConnection()) return;
     let cancelled = false;
-    let idle: number | undefined;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const warm = () => {
+    let cancelTurn: (() => void) | undefined;
+    const warm = (done: () => void) => {
       void getLibrary()
         .then((instance) => {
           if (cancelled) return;
@@ -101,22 +101,21 @@ export function BookShelf() {
         })
         .catch(() => {
           /* The shelf and dialog retain their accessible fallbacks. */
-        });
+        })
+        .finally(done);
     };
     // The snapshots are a WebGL render plus a synchronous readback of every
     // book. Doing that at load kept the main thread busy long after first
     // paint. Two viewports of lead time is enough for a normal scroll to
     // finish the swap before the shelf arrives; a fast fling can still meet
-    // the drawn spines for a moment, since they do not crossfade.
+    // the drawn spines for a moment, since they do not crossfade. On the home
+    // page it takes its turn after the cartridges have come in, so the two
+    // never share frames.
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
-        if ("requestIdleCallback" in window)
-          idle = window.requestIdleCallback(warm, {
-            timeout: 1500,
-          });
-        else timer = setTimeout(warm, 100);
+        cancelTurn = takeTurn(TURN.books, warm, 4000);
       },
       {
         rootMargin: "200% 0px",
@@ -126,8 +125,7 @@ export function BookShelf() {
     return () => {
       cancelled = true;
       observer.disconnect();
-      if (idle !== undefined) window.cancelIdleCallback(idle);
-      if (timer !== undefined) clearTimeout(timer);
+      cancelTurn?.();
       const pending = library.current;
       library.current = null;
       void pending?.then((instance) => instance.dispose()).catch(() => {});

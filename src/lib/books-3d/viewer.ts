@@ -122,9 +122,17 @@ export function createBookLibrary(specs: readonly BookModel[]) {
         if (disposed) return;
         // A failed title keeps its fallback; other books can still warm successfully.
       }
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => resolve()),
-      );
+      // The next book waits for an idle moment, not the next frame, so a
+      // preview is never drawn at the start of one.
+      await new Promise<void>((resolve) => {
+        if (typeof window.requestIdleCallback === "function") {
+          window.requestIdleCallback(() => resolve(), {
+            timeout: 500,
+          });
+        } else {
+          setTimeout(resolve, 16);
+        }
+      });
     }
   }
 

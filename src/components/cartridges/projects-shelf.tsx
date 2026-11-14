@@ -14,7 +14,7 @@ import {
 import type { ProjectLinkType } from "@/data/projects";
 import { useBlueprint } from "@/lib/blueprint";
 import { blueprintMeshPalette } from "@/lib/blueprint-palette";
-import { onIdle } from "@/lib/idle";
+import { TURN, takeTurn } from "@/lib/load-turns";
 import { playHoverSound, playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 import type { CartridgeStage } from "./cartridge-stage";
@@ -82,17 +82,18 @@ export function ProjectsShelf({
     if (!grid || !canvas) return;
     let cancelled = false;
     let stage: CartridgeStage | null = null;
-    let cancelIdle: (() => void) | undefined;
+    let cancelTurn: (() => void) | undefined;
     const near = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return;
         near.disconnect();
-        // Building sixteen cartridges is real work, so it waits its turn
-        // behind the first paint.
-        cancelIdle = onIdle(() =>
+        // Building sixteen cartridges is real work, so it waits for the
+        // first paint, then takes the first turn among the page's heavy
+        // work, and holds it until they have come in.
+        cancelTurn = takeTurn(TURN.cartridges, (done) =>
           import("./cartridge-stage")
             .then(({ createCartridgeStage }) => {
-              if (cancelled) return;
+              if (cancelled) return done();
               const slots = new Map<string, HTMLElement>();
               for (const slot of grid.querySelectorAll<HTMLElement>(
                 "[data-slot]",
@@ -120,11 +121,13 @@ export function ProjectsShelf({
                   ),
                 links,
                 blueprint: paletteRef.current,
+                onSettled: done,
               });
               stageRef.current = stage;
             })
             .catch(() => {
               // Without WebGL the flat icons stay, and everything still works.
+              done();
             }),
         );
       },
@@ -136,7 +139,7 @@ export function ProjectsShelf({
     return () => {
       cancelled = true;
       near.disconnect();
-      cancelIdle?.();
+      cancelTurn?.();
       stageRef.current = null;
       stage?.dispose();
       setReady(false);

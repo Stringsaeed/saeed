@@ -15,6 +15,9 @@ import { STICKER_ICONS } from "./sticker-icons";
 export type CartridgeStageOptions = {
   reducedMotion: boolean;
   onReady: () => void;
+  /** They have come in and stopped, or are off screen and will come in
+   *  when seen: either way the stage is quiet, and other work can start. */
+  onSettled?: () => void;
   /** A drag left a cartridge showing its back, or its front again. */
   onFlip: (id: string, back: boolean) => void;
   /** The link elements for each cartridge, in the order of its links. The
@@ -547,6 +550,10 @@ export function createCartridgeStage(
   let last = 0;
   let ready = false;
   let arrived = options.reducedMotion;
+  // Cartridges still to start coming in, and whether the stage has said
+  // it is quiet.
+  let arriving = 0;
+  let settled = false;
   let disposed = false;
   let font = "monospace";
   let textFont = "sans-serif";
@@ -1044,9 +1051,16 @@ export function createCartridgeStage(
     }
     if (still) {
       running = false;
+      if (arrived && arriving === 0) settle();
       return;
     }
     frame = requestAnimationFrame(loop);
+  }
+
+  function settle() {
+    if (settled || disposed) return;
+    settled = true;
+    options.onSettled?.();
   }
 
   const point = new THREE.Vector3();
@@ -1095,12 +1109,20 @@ export function createCartridgeStage(
   const timers: number[] = [];
   const sight = new IntersectionObserver(
     ([entry]) => {
-      if (!entry?.isIntersecting || arrived) return;
+      if (!entry) return;
+      // Off screen they come in later, when seen, on their own.
+      if (!entry.isIntersecting) {
+        settle();
+        return;
+      }
+      if (arrived) return;
       arrived = true;
+      arriving = items.size;
       let order = 0;
       for (const item of items.values()) {
         timers.push(
           window.setTimeout(() => {
+            arriving--;
             aimFor(item);
             wake();
           }, order * 45),

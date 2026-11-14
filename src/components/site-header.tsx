@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type RemixiconComponentType,
   RiArticleLine,
   RiAtLine,
   RiBlueskyFill,
@@ -33,6 +34,30 @@ import { SoundToggle } from "./sound-toggle";
 import { ThemeSwitcher } from "./theme-switcher-trigger";
 import { Button } from "./ui/button";
 
+// Remix Icon has no Letterboxd glyph. This follows the same 24px
+// currentColor icon contract as the other social icons.
+const LetterboxdIcon: RemixiconComponentType = ({
+  color = "currentColor",
+  size = 24,
+  className,
+  ...props
+}) => (
+  <svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+    width={size}
+    height={size}
+    fill={color}
+    className={className}
+    aria-hidden="true"
+  >
+    <circle cx="4.45" cy="12" r="4.444" />
+    <circle cx="12" cy="12" r="4.444" />
+    <circle cx="19.55" cy="12" r="4.444" />
+  </svg>
+);
+
 const socialLinks = [
   {
     label: "Email",
@@ -63,6 +88,11 @@ const socialLinks = [
     label: "Bluesky",
     href: "https://bsky.app/profile/saeed.guru",
     icon: RiBlueskyFill,
+  },
+  {
+    label: "Letterboxd",
+    href: "https://letterboxd.com/stringsaeed/",
+    icon: LetterboxdIcon,
   },
 ];
 
@@ -281,12 +311,12 @@ export function SiteSocialLinks() {
     <footer className="mt-auto flex justify-end pb-6">
       {/* Touch screens have no hover to unfold the dock, so they get every
           link up front at a 44px tap size. CSS picks the layout, so there is
-          no collapsed flash before hydration. Seven of them need 332px; on
+          no collapsed flash before hydration. Eight of them need 380px; on
           narrower phones the row is capped at four, so it breaks four over
-          three instead of leaving the CV link alone on a second line. */}
+          four instead of leaving the CV link alone on a second line. */}
       <ul
         aria-label="Contact links"
-        className="hidden flex-wrap justify-end gap-1 pointer-coarse:flex max-[379px]:max-w-[11.75rem]"
+        className="hidden flex-wrap justify-end gap-1 pointer-coarse:flex max-[427px]:max-w-[11.75rem]"
       >
         {dockLinks.map((item) => (
           <li key={item.label}>

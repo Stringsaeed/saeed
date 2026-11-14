@@ -9,6 +9,7 @@ export const socialProfiles = [
 	"https://linkedin.com/in/stringsaeed",
 	"https://x.com/stringsaeed",
 	"https://bsky.app/profile/saeed.guru",
+	"https://letterboxd.com/stringsaeed/",
 ];
 
 function parseOrigin(value: string, source: string) {

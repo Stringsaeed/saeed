@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type RemixiconComponentType,
   RiArticleLine,
   RiAtLine,
   RiBlueskyFill,
@@ -33,6 +34,40 @@ import { SoundToggle } from "./sound-toggle";
 import { ThemeSwitcher } from "./theme-switcher-trigger";
 import { Button } from "./ui/button";
 
+// Simple Icons Letterboxd mark (CC0). The package ships the whole set, so
+// the three brand dots are copied here: orange, green, blue.
+const LetterboxdIcon: RemixiconComponentType = ({
+  color: _color,
+  size = 24,
+  className,
+  ...props
+}) => (
+  <svg
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+    width={size}
+    height={size}
+    fill="none"
+    stroke="none"
+    className={className}
+    aria-hidden="true"
+  >
+    <path
+      fill="#FF8000"
+      d="M8.224 14.352a4.447 4.447 0 0 1-3.775 2.092C1.992 16.444 0 14.454 0 12s1.992-4.444 4.45-4.444c1.592 0 2.988.836 3.774 2.092-.427.682-.673 1.488-.673 2.352s.246 1.67.673 2.352z"
+    />
+    <path
+      fill="#00E054"
+      d="M15.101 12c0-.864.247-1.67.674-2.352-.786-1.256-2.183-2.092-3.775-2.092s-2.989.836-3.775 2.092c.427.682.674 1.488.674 2.352s-.247 1.67-.674 2.352c.786 1.256 2.183 2.092 3.775 2.092s2.989-.836 3.775-2.092A4.42 4.42 0 0 1 15.1 12z"
+    />
+    <path
+      fill="#40BCF4"
+      d="M19.551 7.556a4.447 4.447 0 0 0-3.775 2.092c.427.682.673 1.488.673 2.352s-.246 1.67-.673 2.352a4.447 4.447 0 0 0 3.775 2.092C22.008 16.444 24 14.454 24 12s-1.992-4.444-4.45-4.444z"
+    />
+  </svg>
+);
+
 const socialLinks = [
   {
     label: "Email",
@@ -63,6 +98,11 @@ const socialLinks = [
     label: "Bluesky",
     href: "https://bsky.app/profile/saeed.guru",
     icon: RiBlueskyFill,
+  },
+  {
+    label: "Letterboxd",
+    href: "https://letterboxd.com/stringsaeed/",
+    icon: LetterboxdIcon,
   },
 ];
 
@@ -281,12 +321,12 @@ export function SiteSocialLinks() {
     <footer className="mt-auto flex justify-end pb-6">
       {/* Touch screens have no hover to unfold the dock, so they get every
           link up front at a 44px tap size. CSS picks the layout, so there is
-          no collapsed flash before hydration. Seven of them need 332px; on
+          no collapsed flash before hydration. Eight of them need 380px; on
           narrower phones the row is capped at four, so it breaks four over
-          three instead of leaving the CV link alone on a second line. */}
+          four instead of leaving the CV link alone on a second line. */}
       <ul
         aria-label="Contact links"
-        className="hidden flex-wrap justify-end gap-1 pointer-coarse:flex max-[379px]:max-w-[11.75rem]"
+        className="hidden flex-wrap justify-end gap-1 pointer-coarse:flex max-[427px]:max-w-[11.75rem]"
       >
         {dockLinks.map((item) => (
           <li key={item.label}>

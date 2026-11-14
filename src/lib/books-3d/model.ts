@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import type { BlueprintMeshPalette } from "@/lib/blueprint-palette";
 import { createSpineGeometry } from "./bound-geometry";
 import type { BookModel } from "./types";
 
@@ -299,11 +300,7 @@ export async function createBook(
   return group;
 }
 
-export type BlueprintMeshPalette = {
-  core: number;
-  edge: number;
-  facet: number;
-};
+export type { BlueprintMeshPalette } from "@/lib/blueprint-palette";
 
 type BlueprintRig = {
   root: THREE.Group;

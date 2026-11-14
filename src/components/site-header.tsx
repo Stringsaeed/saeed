@@ -198,6 +198,38 @@ const dockLinks = [
   },
 ];
 
+/** The same links as words in a row, for the home page's intro, where they
+ *  stand in for the dock. Each one's target reaches 44px tall for a finger. */
+export function SiteContactLinks({ className }: { className?: string }) {
+  return (
+    <ul
+      aria-label="Contact links"
+      className={cn("flex flex-wrap gap-x-3 gap-y-2 text-sm", className)}
+    >
+      {dockLinks.map((item) => {
+        const external = item.href.startsWith("http");
+        return (
+          <li key={item.label}>
+            <a
+              href={item.href}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noreferrer" : undefined}
+              download={item.download || undefined}
+              className="text-link relative text-muted-foreground underline decoration-foreground/25 underline-offset-4 after:absolute after:-inset-x-1.5 after:-inset-y-3 hover:decoration-foreground/60"
+              {...item.analytics}
+              data-analytics-location="Home"
+              data-sound={item.sound}
+              data-sound-hover="hover"
+            >
+              {item.download ? "CV" : item.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function DockLink({
   className,
   item,

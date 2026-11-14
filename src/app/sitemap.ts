@@ -3,7 +3,7 @@ import { getPosts } from "@/lib/content";
 import { getAbsoluteUrl } from "@/lib/site";
 
 // Each page keeps its own date so <lastmod> stays accurate per entry.
-const homeUpdatedAt = new Date("2026-10-20T00:00:00.000Z");
+const homeUpdatedAt = new Date("2026-11-15T00:00:00.000Z");
 const linksUpdatedAt = new Date("2026-10-19T00:00:00.000Z");
 const officeUpdatedAt = new Date("2026-11-13T00:00:00.000Z");
 

@@ -1,17 +1,22 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import {
   Fragment,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import type { ProjectLinkType } from "@/data/projects";
-import { onIdle } from "@/lib/idle";
+import { useBlueprint } from "@/lib/blueprint";
+import { blueprintMeshPalette } from "@/lib/blueprint-palette";
+import { TURN, takeTurn } from "@/lib/load-turns";
 import { playHoverSound, playSound } from "@/lib/sound";
+import { cn } from "@/lib/utils";
 import type { CartridgeStage } from "./cartridge-stage";
 import { CARTRIDGES, MAX_STICKERS } from "./cartridges";
 import styles from "./shelf.module.css";
@@ -47,13 +52,28 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-export function ProjectsShelf() {
+export function ProjectsShelf({
+  fit = false,
+  className,
+}: {
+  /** Beside the intro on a page that fits one window: the cartridges size to
+   *  the panel's height too, and come out small, so the chosen one's line is
+   *  written out under the shelf as well as on its back. */
+  fit?: boolean;
+  className?: string;
+}) {
   const reduced = usePrefersReducedMotion();
   const gridRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<CartridgeStage | null>(null);
   const [ready, setReady] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  // In blueprint mode the cartridges are drawn as drawings too, in the
+  // sheet's palette for the theme.
+  const blueprint = useBlueprint();
+  const { resolvedTheme } = useTheme();
+  const palette = blueprintMeshPalette(blueprint, resolvedTheme);
+  const paletteRef = useRef(palette);
 
   // three.js is fetched when the shelf is nearly in view, not before.
   useEffect(() => {
@@ -62,17 +82,18 @@ export function ProjectsShelf() {
     if (!grid || !canvas) return;
     let cancelled = false;
     let stage: CartridgeStage | null = null;
-    let cancelIdle: (() => void) | undefined;
+    let cancelTurn: (() => void) | undefined;
     const near = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return;
         near.disconnect();
-        // Building sixteen cartridges is real work, so it waits its turn
-        // behind the first paint.
-        cancelIdle = onIdle(() =>
+        // Building sixteen cartridges is real work, so it waits for the
+        // first paint, then takes the first turn among the page's heavy
+        // work, and holds it until they have come in.
+        cancelTurn = takeTurn(TURN.cartridges, (done) =>
           import("./cartridge-stage")
             .then(({ createCartridgeStage }) => {
-              if (cancelled) return;
+              if (cancelled) return done();
               const slots = new Map<string, HTMLElement>();
               for (const slot of grid.querySelectorAll<HTMLElement>(
                 "[data-slot]",
@@ -99,11 +120,14 @@ export function ProjectsShelf() {
                     back ? id : current === id ? null : current,
                   ),
                 links,
+                blueprint: paletteRef.current,
+                onSettled: done,
               });
               stageRef.current = stage;
             })
             .catch(() => {
               // Without WebGL the flat icons stay, and everything still works.
+              done();
             }),
         );
       },
@@ -115,13 +139,22 @@ export function ProjectsShelf() {
     return () => {
       cancelled = true;
       near.disconnect();
-      cancelIdle?.();
+      cancelTurn?.();
       stageRef.current = null;
       stage?.dispose();
       setReady(false);
     };
   }, [
     reduced,
+  ]);
+
+  // A layout effect, so the cartridges change inside the same commit as the
+  // rest of the page, under the blueprint wipe rather than a frame after it.
+  useLayoutEffect(() => {
+    paletteRef.current = palette;
+    stageRef.current?.setBlueprint(palette);
+  }, [
+    palette,
   ]);
 
   // Which cartridge the stage shows turned over follows what React has
@@ -309,14 +342,14 @@ export function ProjectsShelf() {
 
   // Without the canvas there is no back to read and there are no stickers
   // to press, so the chosen app's description and links are written out
-  // under the grid instead.
-  const fallback = ready
-    ? undefined
-    : CARTRIDGES.find((cartridge) => cartridge.id === selected);
+  // under the grid instead. Beside the intro the cartridges are small, and
+  // so are their stickers, so the line under the grid does the same there.
+  const chosen = CARTRIDGES.find((cartridge) => cartridge.id === selected);
+  const caption = !ready || fit ? chosen : undefined;
 
   return (
     <section
-      className={styles.shelf}
+      className={cn(styles.shelf, fit && styles.fit, className)}
       aria-label="Apps and side projects"
       data-ready={ready || undefined}
     >
@@ -389,10 +422,10 @@ export function ProjectsShelf() {
         ))}
       </div>
       <p className={styles.hint} aria-live="polite">
-        {fallback ? (
+        {caption ? (
           <>
-            <strong>{fallback.name}.</strong> {fallback.description}{" "}
-            {fallback.links.map((link) => (
+            <strong>{caption.name}.</strong> {caption.description}{" "}
+            {caption.links.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
@@ -401,7 +434,7 @@ export function ProjectsShelf() {
                 aria-label={link.ariaLabel}
                 data-sound="tap"
                 data-analytics-event="Project Link Clicked"
-                data-analytics-project={fallback.name}
+                data-analytics-project={caption.name}
                 data-analytics-location="Home"
               >
                 {LINK_LABELS[link.type]}

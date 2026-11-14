@@ -34,10 +34,10 @@ import { SoundToggle } from "./sound-toggle";
 import { ThemeSwitcher } from "./theme-switcher-trigger";
 import { Button } from "./ui/button";
 
-// Remix Icon has no Letterboxd glyph. This follows the same 24px
-// currentColor icon contract as the other social icons.
+// Simple Icons Letterboxd mark (CC0). The package ships the whole set, so
+// the three brand dots are copied here: orange, green, blue.
 const LetterboxdIcon: RemixiconComponentType = ({
-  color = "currentColor",
+  color: _color,
   size = 24,
   className,
   ...props
@@ -48,13 +48,23 @@ const LetterboxdIcon: RemixiconComponentType = ({
     {...props}
     width={size}
     height={size}
-    fill={color}
+    fill="none"
+    stroke="none"
     className={className}
     aria-hidden="true"
   >
-    <circle cx="4.45" cy="12" r="4.444" />
-    <circle cx="12" cy="12" r="4.444" />
-    <circle cx="19.55" cy="12" r="4.444" />
+    <path
+      fill="#FF8000"
+      d="M8.224 14.352a4.447 4.447 0 0 1-3.775 2.092C1.992 16.444 0 14.454 0 12s1.992-4.444 4.45-4.444c1.592 0 2.988.836 3.774 2.092-.427.682-.673 1.488-.673 2.352s.246 1.67.673 2.352z"
+    />
+    <path
+      fill="#00E054"
+      d="M15.101 12c0-.864.247-1.67.674-2.352-.786-1.256-2.183-2.092-3.775-2.092s-2.989.836-3.775 2.092c.427.682.674 1.488.674 2.352s-.247 1.67-.674 2.352c.786 1.256 2.183 2.092 3.775 2.092s2.989-.836 3.775-2.092A4.42 4.42 0 0 1 15.1 12z"
+    />
+    <path
+      fill="#40BCF4"
+      d="M19.551 7.556a4.447 4.447 0 0 0-3.775 2.092c.427.682.673 1.488.673 2.352s-.246 1.67-.673 2.352a4.447 4.447 0 0 0 3.775 2.092C22.008 16.444 24 14.454 24 12s-1.992-4.444-4.45-4.444z"
+    />
   </svg>
 );
 

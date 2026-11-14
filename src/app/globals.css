@@ -5,6 +5,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* A window big enough for the home page to fit in it without scrolling:
+   the intro beside the shelf. Smaller windows stack and scroll. Blueprint
+   mode adds a title block and frames, so it needs a taller window to leave
+   the books room under the intro. Keep in step with the home page's
+   height rule at the end of this file. */
+@custom-variant fit {
+  @media (min-width: 64rem) and (min-height: 38.5rem) {
+    &:where(:root:not([data-blueprint]) *) {
+      @slot;
+    }
+  }
+  @media (min-width: 64rem) and (min-height: 58rem) {
+    &:where(:root[data-blueprint] *) {
+      @slot;
+    }
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -937,6 +955,25 @@
     position: relative;
   }
 
+  /* On the home page, the shelf sits in what height the intro column has
+     left (a size container named home-books), so the unit follows it: the
+     tallest spine (212 units, in data/books.ts) and the board fill the
+     height, never larger than the shelf's own size. */
+  @container home-books (min-height: 0) {
+    .bookshelf {
+      --shelf-unit: clamp(0.4px, calc((100cqh - 0.5rem) / 212), 1.5px);
+    }
+  }
+
+  /* Too little height to stand books in: none, rather than books spilling
+     over the links below. The fit variant's heights are chosen so this
+     does not happen; it is the last guard. */
+  @container home-books (height < 6rem) {
+    .bookshelf {
+      display: none;
+    }
+  }
+
   .bookshelf-row {
     display: flex;
     align-items: flex-end;
@@ -1670,9 +1707,29 @@ html[data-blueprint-wipe] ::view-transition-new(root) {
   image-rendering: pixelated;
 }
 
-/* A page that asks for it gets a wider column: the home page, so that its
-   text, its lists and its shelf of cartridges share one pair of edges.
-   Unlayered, so it wins over the max-width utility on the layout itself. */
-.site-layout:has(> [data-layout-wide]) {
-  max-width: 63rem;
+/* The home page is two columns, the intro and the shelf, so it gets a wide
+   page. Where the window can hold it (the fit variant), the page is exactly
+   one window tall and nothing scrolls. Its contact links sit in the intro,
+   so the layout's dock is not repeated under it. Unlayered, so it wins over
+   the max-width utility on the layout itself. */
+.site-layout:has(> [data-layout-home]) {
+  max-width: 86rem;
+}
+
+.site-layout:has(> [data-layout-home]) > footer {
+  display: none;
+}
+
+@media (min-width: 64rem) and (min-height: 38.5rem) {
+  :root:not([data-blueprint]) .site-layout:has(> [data-layout-home]) {
+    height: 100dvh;
+    min-height: 0;
+  }
+}
+
+@media (min-width: 64rem) and (min-height: 58rem) {
+  .site-layout:has(> [data-layout-home]) {
+    height: 100dvh;
+    min-height: 0;
+  }
 }

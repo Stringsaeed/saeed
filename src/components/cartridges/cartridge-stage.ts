@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import type { ProjectLinkType } from "@/data/projects";
+import type { BlueprintMeshPalette } from "@/lib/blueprint-palette";
 import { type Cartridge, MAX_STICKERS } from "./cartridges";
 import { STICKER_ICONS } from "./sticker-icons";
 
@@ -19,6 +20,8 @@ export type CartridgeStageOptions = {
   /** The link elements for each cartridge, in the order of its links. The
    *  stage keeps each one over the sticker that is drawn for it. */
   links: ReadonlyMap<string, readonly HTMLElement[]>;
+  /** Blueprint mode's palette, when it is on as the stage is made. */
+  blueprint?: BlueprintMeshPalette | null;
 };
 
 type Spring = {
@@ -48,8 +51,10 @@ type Item = {
   turnedAt: number;
   /** Pointer position over the slot, -1 to 1 each way. */
   aim: THREE.Vector2;
-  /** Draws the label again: when its icon or its typeface arrives. */
-  paint: () => void;
+  /** Draws the label and the back again: when its icon or its typeface
+   *  arrives, or the style changes. A quick paint draws only what shows,
+   *  and leaves the traced icon and a hidden back for a full one. */
+  paint: (quick?: boolean) => void;
   /** One per link: the drawn sticker, its link element, and how far it
    *  has popped up under the pointer. */
   stickers: Array<{
@@ -57,10 +62,129 @@ type Item = {
     link: HTMLElement;
     pop: Spring;
   }>;
+  /** Every mesh on it, with the material it has in each style. Blueprint
+   *  mode swaps the material on the same mesh, so the stickers the links
+   *  follow are still the ones drawn. */
+  parts: Part[];
   disposables: Array<{
     dispose: () => void;
   }>;
 };
+
+type Part = {
+  mesh: THREE.Mesh;
+  photo: THREE.Material;
+  blueprint: () => THREE.Material;
+  /** Lines along its edges, made the first time blueprint mode needs them. */
+  lined: boolean;
+  lines?: THREE.LineSegments;
+};
+
+/** The colours a label, a back or a sticker is printed in. */
+type Print = {
+  /** Behind the card: the app's colour on the label. */
+  ground: string;
+  card: string;
+  ink: string;
+  soft: string;
+  body: string;
+  rule: string;
+  /** Printed as a drawing: an outlined card and a traced icon. */
+  drawing: boolean;
+};
+
+const hex = (value: number) => `#${value.toString(16).padStart(6, "0")}`;
+
+function photoPrint(cartridge: Cartridge): Print {
+  return {
+    ground: cartridge.brand,
+    card: "#f6f0e1",
+    ink: "#1b1b1f",
+    soft: "#8a8474",
+    body: "#26262b",
+    rule: cartridge.brand,
+    drawing: false,
+  };
+}
+
+function blueprintPrint(palette: BlueprintMeshPalette): Print {
+  return {
+    ground: hex(palette.core),
+    card: hex(palette.core),
+    ink: hex(palette.edge),
+    soft: hex(palette.facet),
+    body: hex(palette.edge),
+    rule: hex(palette.facet),
+    drawing: true,
+  };
+}
+
+/** The icon traced as lines in `ink`, the way a draughtsman would copy it:
+ *  a Sobel pass over its brightness. Null when it cannot be read, or when a
+ *  pale icon leaves almost nothing to trace. */
+function traceIcon(icon: HTMLImageElement, size: number, ink: string) {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d", {
+    willReadFrequently: true,
+  });
+  if (!context) return null;
+  let pixels: Uint8ClampedArray;
+  try {
+    context.drawImage(icon, 0, 0, size, size);
+    pixels = context.getImageData(0, 0, size, size).data;
+  } catch {
+    return null;
+  }
+  // Brightness over white, so a transparent icon traces its outline.
+  const light = new Float32Array(size * size);
+  for (let i = 0; i < size * size; i++) {
+    const alpha = pixels[i * 4 + 3] / 255;
+    const over = (channel: number) => channel * alpha + 255 * (1 - alpha);
+    light[i] =
+      (0.2126 * over(pixels[i * 4]) +
+        0.7152 * over(pixels[i * 4 + 1]) +
+        0.0722 * over(pixels[i * 4 + 2])) /
+      255;
+  }
+  const color = new THREE.Color(ink);
+  const out = context.createImageData(size, size);
+  const at = (x: number, y: number) => light[y * size + x];
+  let drawn = 0;
+  for (let y = 1; y < size - 1; y++) {
+    for (let x = 1; x < size - 1; x++) {
+      const gx =
+        at(x + 1, y - 1) +
+        2 * at(x + 1, y) +
+        at(x + 1, y + 1) -
+        at(x - 1, y - 1) -
+        2 * at(x - 1, y) -
+        at(x - 1, y + 1);
+      const gy =
+        at(x - 1, y + 1) +
+        2 * at(x, y + 1) +
+        at(x + 1, y + 1) -
+        at(x - 1, y - 1) -
+        2 * at(x, y - 1) -
+        at(x + 1, y - 1);
+      const strength = Math.min(
+        1,
+        Math.max(0, (Math.hypot(gx, gy) - 0.25) * 2.5),
+      );
+      if (strength <= 0) continue;
+      const i = (y * size + x) * 4;
+      out.data[i] = color.r * 255;
+      out.data[i + 1] = color.g * 255;
+      out.data[i + 2] = color.b * 255;
+      out.data[i + 3] = strength * 255;
+      if (strength > 0.5) drawn++;
+    }
+  }
+  if (drawn < size * size * 0.004) return null;
+  context.putImageData(out, 0, 0);
+  return canvas;
+}
 
 const FOV = 16;
 /** How much larger one is while it is out and turned over to be read. */
@@ -144,24 +268,59 @@ function roundRect(
   context.closePath();
 }
 
-/** The label: the app's icon and name on a cream card, like a title screen. */
+/** The label: the app's icon and name on a cream card, like a title screen.
+ *  As a drawing, the card is outlined and the icon traced, or boxed and
+ *  crossed out where there is nothing to trace, as a drawing marks a place
+ *  for a picture. */
 function drawLabel(
   context: CanvasRenderingContext2D,
   cartridge: Cartridge,
   icon: HTMLImageElement | null,
   font: string,
+  print: Print,
+  trace: HTMLCanvasElement | null,
 ) {
   const { px, py } = LABEL;
-  context.fillStyle = cartridge.brand;
+  context.fillStyle = print.ground;
   context.fillRect(0, 0, px, py);
-  context.fillStyle = "#f6f0e1";
+  context.fillStyle = print.card;
   roundRect(context, 12, 12, px - 24, py - 24, 18);
   context.fill();
 
   const size = 236;
   const left = (px - size) / 2;
   const top = 50;
-  if (icon) {
+  if (print.drawing) {
+    context.strokeStyle = print.ink;
+    context.lineWidth = 4;
+    roundRect(context, 12, 12, px - 24, py - 24, 18);
+    context.stroke();
+    context.save();
+    context.lineWidth = 3;
+    context.setLineDash([
+      12,
+      9,
+    ]);
+    roundRect(context, left, top, size, size, 52);
+    context.stroke();
+    context.restore();
+    if (trace) {
+      context.save();
+      roundRect(context, left, top, size, size, 52);
+      context.clip();
+      context.drawImage(trace, left, top, size, size);
+      context.restore();
+    } else {
+      context.strokeStyle = print.soft;
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(left + 30, top + 30);
+      context.lineTo(left + size - 30, top + size - 30);
+      context.moveTo(left + size - 30, top + 30);
+      context.lineTo(left + 30, top + size - 30);
+      context.stroke();
+    }
+  } else if (icon) {
     context.save();
     context.shadowColor = "rgba(0, 0, 0, 0.22)";
     context.shadowBlur = 18;
@@ -179,7 +338,7 @@ function drawLabel(
 
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillStyle = "#1b1b1f";
+  context.fillStyle = print.ink;
   let type = 46;
   context.font = `${type}px ${font}`;
   const name = cartridge.name.toUpperCase();
@@ -188,7 +347,7 @@ function drawLabel(
     context.font = `${type}px ${font}`;
   }
   context.fillText(name, px / 2, 368);
-  context.fillStyle = "#8a8474";
+  context.fillStyle = print.soft;
   context.font = `22px ${font}`;
   context.fillText(
     cartridge.kind === "shipped" ? "SHIPPED" : "SIDE PROJECT",
@@ -221,16 +380,22 @@ function drawBack(
   number: string,
   pixel: string,
   text: string,
+  print: Print,
 ) {
   const { px, py } = BACK;
   const margin = 44;
   const inner = px - margin * 2;
-  context.fillStyle = "#f6f0e1";
+  context.fillStyle = print.card;
   context.fillRect(0, 0, px, py);
+  if (print.drawing) {
+    context.strokeStyle = print.ink;
+    context.lineWidth = 4;
+    context.strokeRect(14, 14, px - 28, py - 28);
+  }
   context.textAlign = "left";
   context.textBaseline = "alphabetic";
 
-  context.fillStyle = "#1b1b1f";
+  context.fillStyle = print.ink;
   let title = 42;
   const name = cartridge.name.toUpperCase();
   context.font = `${title}px ${pixel}`;
@@ -240,9 +405,9 @@ function drawBack(
   }
   context.fillText(name, margin, 92);
   // A rule in the app's own colour.
-  context.fillStyle = cartridge.brand;
-  context.fillRect(margin, 114, inner, 8);
-  context.fillStyle = "#8a8474";
+  context.fillStyle = print.rule;
+  context.fillRect(margin, 114, inner, print.drawing ? 3 : 8);
+  context.fillStyle = print.soft;
   context.font = `21px ${pixel}`;
   context.fillText(
     `${cartridge.kind === "shipped" ? "SHIPPED" : "SIDE PROJECT"}  /  NO. ${number}`,
@@ -260,13 +425,13 @@ function drawBack(
     lines = wrap(context, cartridge.description, inner);
     if ((lines.length - 1) * size * 1.28 + size <= room) break;
   }
-  context.fillStyle = "#26262b";
+  context.fillStyle = print.body;
   lines.forEach((line, index) => {
     context.fillText(line, margin, top + size * 0.8 + index * size * 1.28);
   });
 
   // Bars from the letters of the name: no scanner will read it.
-  context.fillStyle = "#1b1b1f";
+  context.fillStyle = print.ink;
   let x = margin;
   let seed = 7;
   for (const char of `${cartridge.id}${cartridge.id}`) {
@@ -277,7 +442,7 @@ function drawBack(
     x += bar + 3 + (seed % 3) * 2;
   }
   context.textAlign = "right";
-  context.fillStyle = "#8a8474";
+  context.fillStyle = print.soft;
   context.font = `21px ${pixel}`;
   context.fillText(
     `${number} / ${String(TOTAL.count).padStart(2, "0")}`,
@@ -313,21 +478,26 @@ function shadowTexture() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** A sticker: a white rounded square with one icon on it. */
-function stickerTexture(type: ProjectLinkType, anisotropy: number) {
+/** A sticker: a white rounded square with one icon on it, or, as a
+ *  drawing, an outlined one. */
+function stickerTexture(
+  type: ProjectLinkType,
+  anisotropy: number,
+  palette: BlueprintMeshPalette | null = null,
+) {
   const size = 160;
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
   const context = canvas.getContext("2d");
   if (context) {
-    context.fillStyle = "#fffdf7";
+    context.fillStyle = palette ? hex(palette.core) : "#fffdf7";
     roundRect(context, 6, 6, size - 12, size - 12, 40);
     context.fill();
-    context.strokeStyle = "rgba(0, 0, 0, 0.14)";
-    context.lineWidth = 3;
+    context.strokeStyle = palette ? hex(palette.edge) : "rgba(0, 0, 0, 0.14)";
+    context.lineWidth = palette ? 7 : 3;
     context.stroke();
-    context.fillStyle = "#1b1b1f";
+    context.fillStyle = palette ? hex(palette.edge) : "#1b1b1f";
     context.translate(size / 2 - 46, size / 2 - 46);
     context.scale(92 / 24, 92 / 24);
     context.fill(new Path2D(STICKER_ICONS[type]), "evenodd");
@@ -380,6 +550,7 @@ export function createCartridgeStage(
   let disposed = false;
   let font = "monospace";
   let textFont = "sans-serif";
+  let palette = options.blueprint ?? null;
   TOTAL.count = cartridges.length;
 
   // ---------------------------------------------------------- the model
@@ -410,6 +581,15 @@ export function createCartridgeStage(
     info: new THREE.PlaneGeometry(BACK.width, BACK.height),
     shadow: new THREE.PlaneGeometry(1.25, 0.3),
   };
+  const LINED = new Set<THREE.BufferGeometry>([
+    geometry.shell,
+    geometry.bezel,
+    geometry.plate,
+    geometry.button,
+    geometry.play,
+    geometry.trough,
+    geometry.back,
+  ]);
   const shadowMap = shadowTexture();
   const shadowMaterial = new THREE.MeshBasicMaterial({
     map: shadowMap,
@@ -440,6 +620,76 @@ export function createCartridgeStage(
       stickerKinds.set(type, material);
     }
     return material;
+  }
+
+  // ------------------------------------------------- blueprint mode
+
+  // As a drawing: flat faces in the sheet's colour, lines along the edges.
+  // Unlit and not tone mapped, so the palette comes out as it is written.
+  const face = new THREE.MeshBasicMaterial({
+    toneMapped: false,
+    // Behind its own lines, so they are not lost in the face.
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+  const edge = new THREE.LineBasicMaterial({
+    toneMapped: false,
+  });
+  const blueprintStickers = new Map<ProjectLinkType, THREE.MeshBasicMaterial>();
+  function blueprintStickerFor(type: ProjectLinkType) {
+    let material = blueprintStickers.get(type);
+    if (!material) {
+      material = new THREE.MeshBasicMaterial({
+        map: stickerTexture(type, anisotropy, palette),
+        transparent: true,
+        alphaTest: 0.5,
+        toneMapped: false,
+      });
+      blueprintStickers.set(type, material);
+    }
+    return material;
+  }
+  /** Sets the shared colours, and drops stickers drawn in old ones. */
+  function tint(next: BlueprintMeshPalette) {
+    face.color.setHex(next.core);
+    edge.color.setHex(next.edge);
+    for (const material of blueprintStickers.values()) {
+      material.map?.dispose();
+      material.dispose();
+    }
+    blueprintStickers.clear();
+  }
+  if (palette) tint(palette);
+
+  // The parts whose edges are drawn. A rounded corner is drawn as the steps
+  // it is made of, which at this size reads as one firm line. The ridges
+  // and dashes are too small to take lines, and the planes print their own.
+  const outlines = new Map<THREE.BufferGeometry, THREE.EdgesGeometry>();
+  function outlineOf(shape: THREE.BufferGeometry) {
+    let outline = outlines.get(shape);
+    if (!outline) {
+      outline = new THREE.EdgesGeometry(shape, 8);
+      outlines.set(shape, outline);
+    }
+    return outline;
+  }
+
+  function dress(item: Item) {
+    const drawing = palette !== null;
+    for (const part of item.parts) {
+      part.mesh.material = drawing ? part.blueprint() : part.photo;
+      if (!part.lined) continue;
+      if (drawing && !part.lines) {
+        part.lines = new THREE.LineSegments(
+          outlineOf(part.mesh.geometry),
+          edge,
+        );
+        part.mesh.add(part.lines);
+      }
+      if (part.lines) part.lines.visible = drawing;
+    }
+    item.shadow.visible = !drawing;
   }
 
   function build(
@@ -475,17 +725,49 @@ export function createCartridgeStage(
     const backTexture = new THREE.CanvasTexture(backCanvas);
     backTexture.colorSpace = THREE.SRGBColorSpace;
     backTexture.anisotropy = anisotropy;
-    const print = new THREE.MeshStandardMaterial({
+    const printed = new THREE.MeshStandardMaterial({
       map: backTexture,
       roughness: 0.7,
     });
+    // As a drawing, the same two canvases, printed in the sheet's colours
+    // and shown unlit.
+    const artDrawn = new THREE.MeshBasicMaterial({
+      map: texture,
+      toneMapped: false,
+    });
+    const printedDrawn = new THREE.MeshBasicMaterial({
+      map: backTexture,
+      toneMapped: false,
+    });
     let icon: HTMLImageElement | null = null;
-    const paint = () => {
+    // The icon traced, made the first time it is drawn as a drawing, and
+    // again only if the ink changes.
+    let trace: {
+      ink: string;
+      canvas: HTMLCanvasElement | null;
+    } | null = null;
+    const paint = (quick = false) => {
       if (!context || !backContext || disposed) return;
-      drawLabel(context, cartridge, icon, font);
+      const style = palette ? blueprintPrint(palette) : photoPrint(cartridge);
+      if (!quick && style.drawing && icon && trace?.ink !== style.ink) {
+        trace = {
+          ink: style.ink,
+          canvas: traceIcon(icon, 236, style.ink),
+        };
+      }
+      drawLabel(
+        context,
+        cartridge,
+        icon,
+        font,
+        style,
+        style.drawing && trace?.ink === style.ink ? trace.canvas : null,
+      );
       texture.needsUpdate = true;
-      drawBack(backContext, cartridge, number, font, textFont);
-      backTexture.needsUpdate = true;
+      if (!quick || selected === cartridge.id) {
+        drawBack(backContext, cartridge, number, font, textFont, style);
+        backTexture.needsUpdate = true;
+      }
       wake();
     };
     paint();
@@ -498,23 +780,31 @@ export function createCartridgeStage(
     image.src = cartridge.logo;
 
     const body = new THREE.Group();
+    const parts: Part[] = [];
     const add = (
       shape: THREE.BufferGeometry,
       material: THREE.Material,
       x: number,
       y: number,
       z: number,
+      drawn: () => THREE.Material = () => face,
     ) => {
       const mesh = new THREE.Mesh(shape, material);
       mesh.position.set(x, y, z);
       body.add(mesh);
+      parts.push({
+        mesh,
+        photo: material,
+        blueprint: drawn,
+        lined: LINED.has(shape),
+      });
       return mesh;
     };
     add(geometry.shell, plastic, 0, 0, 0);
     // The label sits in a darker recess, on a cream plate.
     add(geometry.bezel, recess, 0, LABEL.y, front - 0.008);
     add(geometry.plate, cream, 0, LABEL.y, front + 0.006);
-    add(geometry.art, art, 0, LABEL.y, front + 0.0135);
+    add(geometry.art, art, 0, LABEL.y, front + 0.0135, () => artDrawn);
     for (const x of [
       0.2,
       0.29,
@@ -536,6 +826,7 @@ export function createCartridgeStage(
           -0.35 + index * 0.176,
           -0.381,
           front + 0.004 + index * 0.0004,
+          () => blueprintStickerFor(link.type),
         );
         mesh.rotation.z =
           ((index * 37 + cartridge.name.length * 11) % 21) / 100 - 0.1;
@@ -559,7 +850,14 @@ export function createCartridgeStage(
     }
     // The back: a recess, and the printed side turned to face out of it.
     add(geometry.back, recess, 0, 0, -front + 0.004);
-    add(geometry.info, print, 0, 0, -front - 0.0075).rotation.y = Math.PI;
+    add(
+      geometry.info,
+      printed,
+      0,
+      0,
+      -front - 0.0075,
+      () => printedDrawn,
+    ).rotation.y = Math.PI;
 
     const shadow = new THREE.Mesh(geometry.shadow, shadowMaterial);
     shadow.position.set(0, -SHELL.height / 2 - 0.08, -0.4);
@@ -567,7 +865,7 @@ export function createCartridgeStage(
     holder.add(body, shadow);
     scene.add(holder);
 
-    return {
+    const item: Item = {
       cartridge,
       slot,
       holder,
@@ -586,15 +884,20 @@ export function createCartridgeStage(
       aim: new THREE.Vector2(),
       paint,
       stickers,
+      parts,
       disposables: [
         plastic,
         recess,
         art,
         texture,
-        print,
+        printed,
         backTexture,
+        artDrawn,
+        printedDrawn,
       ],
     };
+    dress(item);
+    return item;
   }
 
   const items = new Map<string, Item>();
@@ -813,6 +1116,32 @@ export function createCartridgeStage(
 
   layout();
 
+  // Full paints, one cartridge per idle moment.
+  let finishing = 0;
+  const canIdle = typeof window.requestIdleCallback === "function";
+  const idle = (callback: () => void) =>
+    canIdle
+      ? window.requestIdleCallback(callback, {
+          timeout: 500,
+        })
+      : window.setTimeout(callback, 32);
+  const cancelIdle = (handle: number) =>
+    canIdle ? window.cancelIdleCallback(handle) : window.clearTimeout(handle);
+  function finishLater() {
+    if (finishing) cancelIdle(finishing);
+    const queue = [
+      ...items.values(),
+    ];
+    const next = () => {
+      finishing = 0;
+      const item = queue.shift();
+      if (!item || disposed) return;
+      item.paint();
+      finishing = idle(next);
+    };
+    finishing = idle(next);
+  }
+
   return {
     /** The pointer is over a cartridge: `x` and `y` run -1 to 1 across it. */
     point(id: string, x: number, y: number) {
@@ -887,9 +1216,30 @@ export function createCartridgeStage(
       }
       wake();
     },
+    /** Blueprint mode was turned on or off, or its palette changed with
+     *  the theme. Draws the change at once, so it lands with the page's. */
+    setBlueprint(next: BlueprintMeshPalette | null) {
+      if (next === palette) return;
+      palette = next;
+      if (next) tint(next);
+      // Only what shows changes now, under the page's wipe: the faces and
+      // the labels, with each icon boxed. The traced icons and the backs
+      // follow one cartridge at a time while the page is idle.
+      for (const item of items.values()) {
+        dress(item);
+        item.paint(true);
+      }
+      if (ready) {
+        renderer.render(scene, camera);
+        placeLinks();
+      }
+      wake();
+      finishLater();
+    },
     dispose() {
       disposed = true;
       cancelAnimationFrame(frame);
+      if (finishing) cancelIdle(finishing);
       for (const timer of timers) window.clearTimeout(timer);
       resize.disconnect();
       sight.disconnect();
@@ -898,10 +1248,16 @@ export function createCartridgeStage(
       }
       for (const shape of Object.values(geometry)) shape.dispose();
       stickerShape.dispose();
-      for (const material of stickerKinds.values()) {
+      for (const material of [
+        ...stickerKinds.values(),
+        ...blueprintStickers.values(),
+      ]) {
         material.map?.dispose();
         material.dispose();
       }
+      for (const outline of outlines.values()) outline.dispose();
+      face.dispose();
+      edge.dispose();
       shadowMap.dispose();
       shadowMaterial.dispose();
       cream.dispose();

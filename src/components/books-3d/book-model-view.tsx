@@ -4,7 +4,10 @@ import { type MotionValue, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useBlueprint } from "@/lib/blueprint";
-import type { BlueprintMeshPalette } from "@/lib/books-3d/model";
+import {
+  type BlueprintMeshPalette,
+  blueprintMeshPalette,
+} from "@/lib/blueprint-palette";
 import type { BookModel } from "@/lib/books-3d/types";
 import type { BookLibrary } from "@/lib/books-3d/viewer";
 
@@ -21,18 +24,6 @@ type Props = {
   onReady: () => void;
 };
 
-const DARK_CYANOTYPE_PALETTE: BlueprintMeshPalette = {
-  core: 0x0b223e,
-  edge: 0xe2f1ff,
-  facet: 0x56a8f5,
-};
-
-const LIGHT_VELLUM_PALETTE: BlueprintMeshPalette = {
-  core: 0xf6f4ec,
-  edge: 0x1d4ed8,
-  facet: 0x60a5fa,
-};
-
 export function BookModelView({
   model,
   getLibrary,
@@ -47,10 +38,7 @@ export function BookModelView({
   const blueprint = useBlueprint();
   const { resolvedTheme } = useTheme();
   const palette = useMemo<BlueprintMeshPalette | null>(() => {
-    if (!blueprint) return null;
-    return resolvedTheme === "light"
-      ? LIGHT_VELLUM_PALETTE
-      : DARK_CYANOTYPE_PALETTE;
+    return blueprintMeshPalette(blueprint, resolvedTheme);
   }, [
     blueprint,
     resolvedTheme,

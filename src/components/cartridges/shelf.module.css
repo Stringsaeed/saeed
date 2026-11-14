@@ -1,5 +1,4 @@
-/* The shelf is as wide as the page's column; on the home page the column
-   is widened to suit it (see data-layout-wide in globals.css). */
+/* The shelf is as wide as the column it is put in. */
 .shelf {
   position: relative;
   width: 100%;
@@ -171,6 +170,58 @@
   text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
   text-underline-offset: 3px;
   white-space: nowrap;
+}
+
+/* Beside the intro on a page one window tall, the page makes the shelf's
+   panel a size container named shelf-panel (the fit variant in globals.css
+   decides when). There the grid is as wide as it can be while every row,
+   and the line under it, still fits the panel's height. A row is a cell
+   (1.16 times its width, from .slot) plus 2rem for the name and padding;
+   the line under the grid gets 3.75rem. A panel about as wide as it is
+   tall, or wider, gets six columns in three rows, which leaves bigger
+   cartridges than four rows of four would. */
+@container shelf-panel (min-width: 0) {
+  /* The grid and the line under it share one width, set on the right. */
+  .fit > * {
+    --rows: 4;
+    --cols: 4;
+    --row-extra: 2rem;
+    --under: 3.75rem;
+
+    /* Each row's share of the height, less its name, is a slot; a slot is
+       1.16 times as tall as it is wide. */
+    --row: calc(
+      (100cqh - var(--under) - (var(--rows) - 1) * 0.25rem) /
+      var(--rows)
+    );
+    --cell: calc((var(--row) - var(--row-extra)) / 1.16);
+
+    width: min(
+      100cqw,
+      calc(var(--cell) * var(--cols) + (var(--cols) - 1) * 0.75rem)
+    );
+    margin-inline-start: auto;
+  }
+
+  .fit .grid {
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  }
+
+  /* A cartridge this size grows only a little when it is turned over. */
+  .fit .canvas {
+    --reach: 2.5rem;
+  }
+
+  .fit .hint {
+    max-width: none;
+  }
+}
+
+@container shelf-panel (aspect-ratio > 0.95) {
+  .fit > * {
+    --rows: 3;
+    --cols: 6;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

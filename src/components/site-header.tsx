@@ -31,6 +31,7 @@ import { AnimatedAvatar } from "./animated-avatar";
 import { BlueprintToggle } from "./blueprint-toggle";
 import { SaeedName } from "./saeed-name";
 import { SoundToggle } from "./sound-toggle";
+import { TerminalSwitch } from "./terminal-switch";
 import { ThemeSwitcher } from "./theme-switcher-trigger";
 import { Button } from "./ui/button";
 
@@ -106,14 +107,16 @@ const socialLinks = [
   },
 ];
 
-// The header needs about 454px for the labelled Blog and Links buttons plus
-// the three mode toggles, so below 464px they collapse to icon-only squares
-// (the label stays in the DOM for screen readers), and below 370px the icon
-// squares tighten from 36px to 32px so 320px phones keep breathing room.
+// The header needs about 496px for the labelled Blog and Links buttons, the
+// switch to the terminal version and the three mode toggles, so below 508px
+// the two links collapse to icon-only squares (the label stays in the DOM
+// for screen readers), and below 420px the squares tighten from 36px to
+// 32px. Below 368px there is no room left beside six squares, so the name
+// steps aside and the avatar alone is the way home.
 const NAV_LINK_CLASS =
-  "max-[463px]:w-9 max-[463px]:gap-0 max-[463px]:px-0 max-[369px]:size-8";
-const NAV_ICON_CLASS = "max-[369px]:size-8";
-const NAV_LABEL_CLASS = "max-[463px]:sr-only";
+  "max-[507px]:w-9 max-[507px]:gap-0 max-[507px]:px-0 max-[419px]:size-8";
+const NAV_ICON_CLASS = "max-[419px]:size-8";
+const NAV_LABEL_CLASS = "max-[507px]:sr-only";
 
 export function SiteHeader() {
   return (
@@ -127,11 +130,11 @@ export function SiteHeader() {
         data-sound="tap"
       >
         <AnimatedAvatar />
-        <SaeedName className="signature-name" />
+        <SaeedName className="signature-name max-[368px]:sr-only" />
       </Link>
 
       <nav
-        className="ml-auto flex items-center gap-1.5 max-[369px]:gap-1 sm:gap-2"
+        className="ml-auto flex items-center gap-1.5 max-[419px]:gap-1 sm:gap-2"
         aria-label="Site links"
       >
         <Button
@@ -168,6 +171,7 @@ export function SiteHeader() {
             <span className={NAV_LABEL_CLASS}>Links</span>
           </Link>
         </Button>
+        <TerminalSwitch className={NAV_ICON_CLASS} />
         <BlueprintToggle className={NAV_ICON_CLASS} />
         <ThemeSwitcher className={NAV_ICON_CLASS} />
         <SoundToggle className={NAV_ICON_CLASS} />

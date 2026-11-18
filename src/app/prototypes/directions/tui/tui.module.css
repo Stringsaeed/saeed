@@ -1,0 +1,330 @@
+.root {
+  --bg: #0f0f11;
+  --fg: #d6d2c6;
+  --dim: #7d7a72;
+  --line: #36363b;
+  --green: #a6d977;
+  --amber: #e9c46a;
+  --cyan: #84cbd9;
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 14px 16px 70px;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.root button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.root :focus-visible {
+  outline: 1px solid var(--green);
+  outline-offset: 1px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--dim);
+}
+
+.top b {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.top i {
+  color: var(--cyan);
+  font-style: normal;
+}
+
+.topRight {
+  font-variant-numeric: tabular-nums;
+}
+
+.main {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(260px, 34%) minmax(0, 1fr);
+  gap: 16px 14px;
+}
+
+.side {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* A box with its title set into the top border. */
+.pane {
+  position: relative;
+  display: flex;
+  min-height: 80px;
+  flex: 1 1 0;
+  flex-direction: column;
+  padding: 10px 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+
+.pane[data-focused] {
+  min-height: 0;
+  flex: 0 1 auto;
+  border-color: var(--green);
+}
+
+.paneTitle {
+  position: absolute;
+  top: -11px;
+  right: 10px;
+  left: 10px;
+  display: flex;
+  margin: 0;
+  justify-content: space-between;
+  font-size: inherit;
+  font-weight: 400;
+  pointer-events: none;
+}
+
+.root .paneTitle > * {
+  padding: 0 6px;
+  background: var(--bg);
+  color: var(--dim);
+  pointer-events: auto;
+}
+
+.pane[data-focused] .paneTitle button {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.list {
+  flex: 1;
+  overflow: hidden;
+}
+
+.pane[data-focused] .list {
+  flex: 0 1 auto;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.line {
+  display: flex;
+  width: 100%;
+  padding: 0 8px;
+  justify-content: space-between;
+  gap: 14px;
+  border-radius: 2px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.line span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line span + span {
+  flex: none;
+  color: var(--dim);
+}
+
+.line:hover {
+  background: #1b1b1f;
+}
+
+.line[data-selected] {
+  color: #fff;
+  font-weight: 600;
+}
+
+.pane[data-focused] .line[data-selected] {
+  background: var(--green);
+  color: var(--bg);
+}
+
+.pane[data-focused] .line[data-selected] span + span {
+  color: #2c3d1c;
+}
+
+/* Detail */
+
+.detail {
+  flex: auto;
+  border-color: var(--line);
+}
+
+.detailBody {
+  overflow: auto;
+  padding: clamp(14px, 3vw, 36px);
+  animation: paint 140ms steps(3);
+}
+
+@keyframes paint {
+  from {
+    opacity: 0;
+  }
+}
+
+.big {
+  margin: 0 0 14px;
+  color: var(--amber);
+  font-family: var(--font-sans);
+  font-size: clamp(24px, 3vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.text {
+  max-width: 58ch;
+  margin: 0 0 18px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.fields {
+  display: grid;
+  max-width: 64ch;
+  margin: 0 0 18px;
+  gap: 2px;
+}
+
+.fields div {
+  display: grid;
+  grid-template-columns: 12ch minmax(0, 1fr);
+  gap: 2ch;
+}
+
+.fields dt {
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fields dd {
+  margin: 0;
+}
+
+.links {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+  list-style: none;
+}
+
+.links a {
+  display: inline-flex;
+  gap: 1.5ch;
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.root kbd {
+  padding: 0 6px;
+  border-radius: 3px;
+  background: #26262b;
+  color: var(--fg);
+  font: inherit;
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  color: var(--dim);
+}
+
+.touchHint {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detailBody {
+    animation: none;
+  }
+}
+
+/* A phone: the panes fold to their titles, the open one shows its list,
+   and the detail sits under it. */
+@media (max-width: 799px) {
+  .root {
+    display: block;
+    overflow: auto;
+    padding: 12px 12px 84px;
+  }
+
+  .top {
+    margin-bottom: 18px;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .side {
+    gap: 14px;
+  }
+
+  .pane:not([data-focused]):not(.detail) {
+    padding: 6px 0 0;
+    border-width: 1px 0 0;
+    border-radius: 0;
+  }
+
+  .pane:not([data-focused]) .list {
+    display: none;
+  }
+
+  .pane {
+    min-height: 0;
+    flex: none;
+  }
+
+  .pane[data-focused] .list {
+    max-height: 30vh;
+    flex: none;
+  }
+
+  .line {
+    line-height: 30px;
+  }
+
+  .paneTitle button {
+    line-height: 22px;
+  }
+
+  .keys span:not(.touchHint) {
+    display: none;
+  }
+
+  .touchHint {
+    display: inline;
+    margin-top: 14px;
+  }
+}

@@ -1,0 +1,970 @@
+/* Everything here is Paper Mono: lists, the intro, post prose, the shell. */
+.root {
+  --bg: #0f0f11;
+  --fg: #d6d2c6;
+  --dim: #7d7a72;
+  --line: #36363b;
+  --green: #a6d977;
+  --amber: #e9c46a;
+  --cyan: #84cbd9;
+  /* The two branches, lightened from the light page so they hold on black. */
+  --main: #9c9bff;
+  --writing: #f0a03c;
+  --row: 26px;
+  /* The site's own colour tokens, set to the terminal's, so anything a
+     page brings with it (a post's body, its figures, the office's labels)
+     is drawn in the same colours. */
+  --background: var(--bg);
+  --foreground: #f1efe6;
+  --card: #151518;
+  --card-foreground: #f1efe6;
+  --muted: #1b1b1f;
+  --muted-foreground: #b3afa3;
+  --border: var(--line);
+  --primary: var(--cyan);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 12px 16px 14px;
+  background: var(--bg);
+  color: var(--fg);
+  /* The terminal's own preloaded face (see app/terminal/layout.tsx). The
+     site's mono tokens are pointed at it too, so anything a page brings
+     along that asks for mono gets the same face from the first paint. */
+  --font-mono: var(--font-terminal), ui-monospace, monospace;
+  --font-paper-mono: var(--font-terminal);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.root button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.root :focus-visible {
+  outline: 1px solid var(--green);
+  outline-offset: 1px;
+}
+
+/* The regions that take focus when a tab comes to the front are not
+   controls, so they draw no ring. */
+.root [data-region]:focus {
+  outline: none;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.dim {
+  color: var(--dim);
+}
+
+/* Top line: who and where, the tabs, the clock */
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px 18px;
+  color: var(--dim);
+}
+
+.root a.who {
+  flex: none;
+  color: inherit;
+  text-decoration: none;
+}
+
+.who b {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.who i {
+  color: var(--cyan);
+  font-style: normal;
+}
+
+.who em {
+  color: var(--main);
+  font-style: normal;
+}
+
+.topRight {
+  display: flex;
+  flex: none;
+  gap: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.root a.exit {
+  padding: 0 8px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.root a.exit:hover {
+  box-shadow: inset 0 0 0 1px var(--fg);
+}
+
+.tabs {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  border-radius: 4px;
+  background: #1b1b1f;
+  white-space: nowrap;
+}
+
+.root .tab > a {
+  padding: 1px 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.tab > .tabClose {
+  padding: 1px 8px 1px 0;
+  opacity: 0.6;
+}
+
+.tab > .tabClose:hover {
+  opacity: 1;
+}
+
+.tab:hover {
+  color: var(--fg);
+}
+
+.tab[data-active] {
+  background: var(--green);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+/* The tabs' contents, stacked; only the one in front shows. A hidden one
+   keeps its size, so the shell does not reflow when it comes back. */
+
+.body {
+  position: relative;
+  min-height: 0;
+}
+
+.main,
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.main[data-hidden],
+.layer[data-hidden] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.main {
+  display: grid;
+  grid-template-columns:
+    minmax(230px, 21%) minmax(0, 1.15fr)
+    minmax(0, 1fr);
+  grid-template-areas: "side log detail";
+  gap: 16px 14px;
+  /* Room for the titles that sit on the panes' top borders. */
+  padding-top: 11px;
+}
+
+.side {
+  display: flex;
+  min-height: 0;
+  grid-area: side;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* A box with its title set into the top border. */
+.pane {
+  position: relative;
+  display: flex;
+  min-height: 80px;
+  flex: 1 1 0;
+  flex-direction: column;
+  padding: 10px 4px 4px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+
+.pane[data-focused] {
+  border-color: var(--green);
+}
+
+/* Each side pane's height follows how many lines it holds, and never
+   changes: focus recolours a pane, it does not resize or move it. */
+.side .pane {
+  flex: var(--lines, 1) 1 0;
+}
+
+.paneTitle {
+  position: absolute;
+  top: -11px;
+  right: 10px;
+  left: 10px;
+  display: flex;
+  margin: 0;
+  justify-content: space-between;
+  font-size: inherit;
+  font-weight: 400;
+  pointer-events: none;
+}
+
+.root .paneTitle > * {
+  padding: 0 6px;
+  background: var(--bg);
+  color: var(--dim);
+  pointer-events: auto;
+}
+
+.root .pane[data-focused] .paneTitle > :first-child {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.list {
+  flex: 1;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.line {
+  display: flex;
+  width: 100%;
+  padding: 0 8px;
+  justify-content: space-between;
+  gap: 14px;
+  border-radius: 2px;
+  text-align: left;
+  white-space: pre;
+}
+
+.line span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line span + span {
+  flex: none;
+  max-width: 55%;
+  overflow: hidden;
+  color: var(--dim);
+  text-overflow: ellipsis;
+}
+
+.line:hover {
+  background: #1b1b1f;
+}
+
+.line[data-selected] {
+  color: #fff;
+  font-weight: 600;
+}
+
+.pane[data-focused] .line[data-selected] {
+  background: var(--green);
+  color: var(--bg);
+}
+
+.pane[data-focused] .line[data-selected] span + span {
+  color: #2c3d1c;
+}
+
+/* The log: the graph on the left of every row, never under the cursor bar */
+
+.log {
+  grid-area: log;
+  flex: none;
+}
+
+.commit {
+  display: flex;
+  width: 100%;
+  height: var(--row);
+  padding: 0;
+  align-items: stretch;
+  line-height: var(--row);
+  text-align: left;
+  transition: opacity 160ms ease-out;
+}
+
+.graph {
+  flex: none;
+  width: 40px;
+  height: var(--row);
+  overflow: visible;
+}
+
+.graph path {
+  fill: none;
+  stroke-width: 2;
+}
+
+.graph path.main {
+  stroke: var(--main);
+}
+
+.graph path.writing {
+  stroke: var(--writing);
+}
+
+.graph circle {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.graph circle.main {
+  fill: var(--main);
+}
+
+.graph circle.writing {
+  fill: var(--writing);
+}
+
+.text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  padding: 0 8px 0 4px;
+  gap: 12px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.hash,
+.date {
+  flex: none;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.message {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.commit[data-lane="main"] .message {
+  color: #fff;
+}
+
+.type {
+  color: var(--dim);
+}
+
+.refs {
+  color: var(--cyan);
+}
+
+.tagged {
+  color: var(--amber);
+}
+
+.commit:hover .text {
+  background: #1b1b1f;
+}
+
+.commit[data-selected] .text {
+  background: #24242a;
+  font-weight: 600;
+}
+
+.log[data-focused] .commit[data-selected] .text {
+  background: var(--green);
+}
+
+.log[data-focused] .commit[data-selected] .text * {
+  color: var(--bg);
+}
+
+/* Pointing at a branch leaves only its commits lit; a tag lights its one. */
+.log[data-shown="main"] .commit[data-lane="writing"],
+.log[data-shown="writing"] .commit[data-lane="main"]:not([data-head]) {
+  opacity: 0.25;
+}
+
+.commit[data-marked] .text {
+  box-shadow: inset 0 0 0 1px var(--amber);
+}
+
+/* Detail: what `git show` would print for the selected thing */
+
+.detail {
+  grid-area: detail;
+  flex: none;
+}
+
+.show {
+  overflow: auto;
+  padding: clamp(12px, 2vw, 26px);
+  animation: paint 140ms steps(3);
+}
+
+@keyframes paint {
+  from {
+    opacity: 0;
+  }
+}
+
+.kicker {
+  margin: 0;
+  color: var(--amber);
+}
+
+.kicker b {
+  font-weight: 400;
+}
+
+.fields {
+  display: grid;
+  margin: 0;
+}
+
+.fields div {
+  display: grid;
+  grid-template-columns: 8ch minmax(0, 1fr);
+}
+
+.fields dt {
+  color: var(--dim);
+}
+
+.fields dd {
+  margin: 0;
+}
+
+.big {
+  margin: 18px 0 14px;
+  color: #fff;
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.big[data-head] {
+  color: var(--amber);
+  font-size: clamp(24px, 2.5vw, 34px);
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.diff {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--green);
+  background: rgb(166 217 119 / 0.07);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+
+.diff p {
+  position: relative;
+  max-width: 64ch;
+  margin: 0;
+  padding: 3px 0 3px 20px;
+}
+
+.diff p::before {
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  content: "+";
+}
+
+.trailers {
+  display: grid;
+  margin: 0 0 16px;
+  color: var(--dim);
+}
+
+.links {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+  list-style: none;
+}
+
+.links a {
+  display: inline-flex;
+  gap: 1.5ch;
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.root kbd {
+  padding: 0 6px;
+  border-radius: 3px;
+  background: #26262b;
+  color: var(--fg);
+  font: inherit;
+}
+
+/* A tab that reads: a post, or the links archive */
+
+.reader {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--green);
+  border-radius: 5px;
+}
+
+.page {
+  flex: 1;
+  overflow: auto;
+  padding: clamp(16px, 3vw, 40px);
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.prose {
+  max-width: 76ch;
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.prose .big {
+  margin: 14px 0 22px;
+  color: var(--amber);
+  font-size: clamp(22px, 2.3vw, 30px);
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+
+.sheet {
+  font-size: 13px;
+}
+
+.prose .big,
+.sheet .big {
+  margin: 14px 0 12px;
+  color: var(--amber);
+  font-size: clamp(22px, 2.3vw, 30px);
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+
+.prose .fields {
+  margin-top: 14px;
+}
+
+.lede {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--muted-foreground);
+}
+
+.end {
+  margin: 40px 0 0;
+  color: var(--dim);
+}
+
+.end a,
+.sheet a {
+  color: var(--cyan);
+  text-underline-offset: 3px;
+}
+
+/* A post's body is the site's own renderer (the `article-body` rules in
+   globals.css, which sit in a layer, so these win). It keeps its structure
+   and its highlighted code; the type and the frame are the terminal's. */
+.article {
+  max-width: none;
+  margin-top: 30px;
+  color: var(--fg);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.article :is(h2, h3) {
+  color: #fff;
+  font-size: 15px;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
+.article h2::before {
+  color: var(--dim);
+  content: "## ";
+}
+
+.article h3::before {
+  color: var(--dim);
+  content: "### ";
+}
+
+.article pre:not(figure[data-interactive] pre) {
+  border-radius: 4px;
+  background: var(--card);
+  font-size: 12.5px;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.article :not(pre) > code:not(figure[data-interactive] code) {
+  background: #26262b;
+  color: var(--amber);
+}
+
+/* Figures keep to the reading column: there is no page margin to bleed
+   into inside a pane. */
+.article figure {
+  margin-inline: 0;
+}
+
+.posts {
+  max-width: 96ch;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.posts li {
+  display: grid;
+  padding: 9px 0;
+  grid-template-columns: 13ch minmax(0, 1fr);
+  gap: 2ch;
+  border-top: 1px solid var(--line);
+}
+
+.posts time {
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.posts h2 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: 600;
+}
+
+.posts h2 a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.posts h2 a:hover {
+  color: var(--cyan);
+  text-decoration: underline;
+}
+
+.posts p {
+  max-width: 76ch;
+  margin: 2px 0 0;
+  color: var(--muted-foreground);
+}
+
+.archive {
+  margin: 22px 0 0;
+  padding: 0;
+  columns: 3 280px;
+  column-gap: 36px;
+  list-style: none;
+}
+
+.archive li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  break-inside: avoid;
+}
+
+.archive a {
+  overflow: hidden;
+  color: var(--fg);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive a:hover {
+  color: var(--cyan);
+}
+
+.archive span {
+  flex: none;
+  color: var(--dim);
+}
+
+/* The office: the room fills the pane, edge to edge. Its own styles size
+   it to the window and put it behind the page; in a tab it is the page. */
+.reader[data-bare] .page {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.room > section {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  z-index: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  translate: none;
+}
+
+/* The shell tab: buttons for the scripts, then the terminal */
+
+.shell {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scripts {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.scriptsLabel {
+  margin-right: 4px;
+  color: var(--cyan);
+}
+
+.root .scripts button {
+  padding: 1px 10px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--green);
+}
+
+.root .scripts button:hover {
+  background: #1b1b1f;
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+.root .scripts button:disabled {
+  color: var(--dim);
+  cursor: default;
+}
+
+.shell :global(.wterm) {
+  --term-bg: var(--bg);
+  --term-fg: var(--fg);
+  --term-cursor: var(--green);
+  --term-color-2: var(--green);
+  --term-color-3: var(--amber);
+  --term-color-6: var(--cyan);
+  --term-color-8: var(--dim);
+  --term-font-family: var(--font-mono);
+  --term-font-size: 13px;
+  --term-line-height: 1.55;
+  --term-row-height: 20px;
+  min-height: 0;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--green);
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+/* Links the scripts print are real anchors; show that they are. */
+.shell :global(.term-link) > span {
+  text-decoration: underline;
+  text-decoration-color: rgb(132 203 217 / 0.4);
+  text-underline-offset: 0.2em;
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  color: var(--dim);
+}
+
+.touchHint {
+  display: none;
+  margin: 0;
+  color: var(--dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .show {
+    animation: none;
+  }
+}
+
+/* A narrower window: the detail drops under the log. */
+@media (max-width: 1099px) and (min-width: 800px) {
+  .main {
+    grid-template-columns: minmax(220px, 26%) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "side log"
+      "side detail";
+  }
+}
+
+/* A phone: the tabs move under the name; in the git tab the log leads, the
+   other panes fold to their titles, and the detail sits under them. */
+@media (max-width: 799px) {
+  .root {
+    display: block;
+    overflow: auto;
+    padding: 12px 12px 28px;
+  }
+
+  .top {
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .tabs {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  /* There is room for the name and the way out, not the clock as well. */
+  .topRight time {
+    display: none;
+  }
+
+  .root a.exit {
+    padding: 4px 10px;
+  }
+
+  .root .tab > a {
+    padding: 4px 10px;
+  }
+
+  .main,
+  .layer {
+    position: static;
+  }
+
+  .main[data-hidden],
+  .layer[data-hidden] {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .side {
+    gap: 14px;
+  }
+
+  .pane,
+  .side .pane {
+    min-height: 0;
+    flex: none;
+  }
+
+  .pane:not([data-focused]):not(.detail) .list {
+    display: none;
+  }
+
+  .pane[data-focused] .list {
+    max-height: 34vh;
+    flex: none;
+  }
+
+  .commit,
+  .graph {
+    --row: 32px;
+  }
+
+  .hash {
+    display: none;
+  }
+
+  .line {
+    line-height: 30px;
+  }
+
+  .show {
+    padding: 14px 12px;
+  }
+
+  .reader {
+    border-width: 1px 0 0;
+    border-radius: 0;
+  }
+
+  .page {
+    overflow: visible;
+    padding: 16px 2px;
+  }
+
+  .shell {
+    height: calc(100dvh - 190px);
+    min-height: 320px;
+  }
+
+  .root .scripts button {
+    padding: 4px 10px;
+  }
+
+  .keys {
+    margin-top: 14px;
+  }
+
+  .keys span:not(.always) {
+    display: none;
+  }
+
+  .touchHint {
+    display: block;
+  }
+
+  .reader[data-bare] .page {
+    height: calc(100dvh - 150px);
+    min-height: 420px;
+    flex: none;
+  }
+
+  .posts li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}

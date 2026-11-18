@@ -1,0 +1,419 @@
+.root {
+  --ink: #1b1b1f;
+  --soft: #6b6b73;
+  --rule: #e4e2dc;
+  --paper: #faf9f6;
+  --main: #4f46e5;
+  --writing: #e08a00;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  padding: clamp(18px, 4vh, 44px) clamp(14px, 4vw, 48px) 96px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.root a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.root button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.root :focus-visible {
+  outline: 2px solid var(--main);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.page {
+  display: grid;
+  max-width: 1240px;
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 32px 56px;
+  align-items: start;
+}
+
+.prompt {
+  margin: 0 0 10px;
+  color: var(--soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.prompt span {
+  color: var(--main);
+}
+
+/* The graph */
+
+.commits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commit {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  transition: opacity 200ms ease-out;
+}
+
+.graph {
+  display: flex;
+  flex-direction: column;
+}
+
+.joint {
+  display: block;
+  flex: none;
+  width: 56px;
+  height: 44px;
+  overflow: visible;
+}
+
+.joint path {
+  fill: none;
+  stroke-width: 2;
+}
+
+.joint path.main {
+  stroke: var(--main);
+}
+
+.joint path.writing {
+  stroke: var(--writing);
+}
+
+.joint circle {
+  stroke: var(--paper);
+  stroke-width: 2;
+}
+
+.joint circle.main {
+  fill: var(--main);
+}
+
+.joint circle.writing {
+  fill: var(--writing);
+}
+
+.tail {
+  position: relative;
+  flex: 1;
+}
+
+.tail i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+
+.tail i.main {
+  left: 13px;
+  background: var(--main);
+}
+
+.tail i.writing {
+  left: 39px;
+  background: var(--writing);
+}
+
+/* A commit's line */
+
+.entry {
+  min-width: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.line {
+  display: grid;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 6px 6px 4px;
+  grid-template-columns: 7ch minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  border-radius: 6px;
+  text-align: left;
+}
+
+.line:hover {
+  background: rgb(27 27 31 / 0.045);
+}
+
+.hash,
+.date {
+  color: var(--soft);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.what {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.what > img {
+  border-radius: 4px;
+}
+
+.message {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.type {
+  color: var(--soft);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 400;
+}
+
+.commit[data-lane="writing"] .message {
+  font-weight: 500;
+}
+
+.commit[data-head] .line {
+  min-height: 44px;
+  padding-bottom: 12px;
+  align-items: start;
+}
+
+.commit[data-head] .hash,
+.commit[data-head] .date {
+  padding-top: 7px;
+}
+
+.commit[data-head] .message {
+  flex-basis: 100%;
+  font-size: clamp(26px, 3.2vw, 40px);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.ref,
+.tag {
+  display: inline-flex;
+  padding: 1px 8px;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.ref {
+  margin-top: 5px;
+  background: var(--main);
+  color: #fff;
+}
+
+.tag {
+  box-shadow: inset 0 0 0 1px var(--rule);
+  background: #fff;
+}
+
+.tag img {
+  border-radius: 3px;
+}
+
+.diff {
+  margin: 0 6px 12px calc(7ch + 18px);
+  padding: 10px 14px;
+  border-left: 3px solid #2da44e;
+  border-radius: 0 6px 6px 0;
+  background: #ecf8ee;
+  font-size: 13.5px;
+  animation: open 180ms ease-out;
+}
+
+@keyframes open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.diff p {
+  position: relative;
+  max-width: 68ch;
+  margin: 0;
+  padding: 2px 0 2px 18px;
+}
+
+.diff p::before {
+  position: absolute;
+  left: 0;
+  color: #2da44e;
+  font-family: var(--font-mono);
+  content: "+";
+}
+
+.diff a {
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.go {
+  font-weight: 600;
+}
+
+/* Checking out a branch dims the other one. */
+.root[data-branch="main"] .commit[data-lane="writing"],
+.root[data-branch="writing"] .commit[data-lane="main"]:not([data-head]) {
+  opacity: 0.28;
+}
+
+/* Sidebar */
+
+.side {
+  display: grid;
+  gap: 26px;
+  font-size: 13px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  display: grid;
+  padding: 4px 0;
+  grid-template-columns: minmax(0, 11.5em) minmax(0, 1fr);
+  gap: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.list li > :first-child {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list li > :last-child {
+  overflow: hidden;
+  color: var(--soft);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch {
+  display: inline-flex;
+  padding: 0;
+  align-items: center;
+  gap: 7px;
+  text-align: left;
+}
+
+.branch i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.branch i.main {
+  background: var(--main);
+}
+
+.branch i.writing {
+  background: var(--writing);
+}
+
+.branch[aria-pressed="true"] {
+  font-weight: 700;
+}
+
+.branch[aria-pressed="true"]::after {
+  content: "*";
+}
+
+.branch img {
+  border-radius: 3px;
+}
+
+.book {
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+}
+
+.trailer {
+  display: grid;
+  margin: 0;
+  color: var(--soft);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diff {
+    animation: none;
+  }
+}
+
+@media (max-width: 899px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* A phone: the hash goes, the date drops under the message. */
+@media (max-width: 599px) {
+  .commit {
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+
+  .line {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding-left: 0;
+  }
+
+  .hash {
+    display: none;
+  }
+
+  .commit[data-head] .date {
+    padding-top: 0;
+  }
+
+  .diff {
+    margin-left: 0;
+  }
+
+  .list li {
+    grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr);
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
